@@ -73,6 +73,8 @@ import org.hibernate.engine.ResultSetMappingDefinition;
 import org.hibernate.engine.spi.FilterDefinition;
 import org.hibernate.engine.spi.NamedQueryDefinition;
 import org.hibernate.engine.spi.NamedSQLQueryDefinition;
+import org.hibernate.envers.boot.internal.AuditMetadataBuilderImpl;
+import org.hibernate.envers.boot.spi.AuditMetadataBuilderImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.id.factory.IdentifierGeneratorFactory;
 import org.hibernate.id.factory.spi.MutableIdentifierGeneratorFactory;
@@ -157,6 +159,8 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 	private Map<Table, List<UniqueConstraintHolder>> uniqueConstraintHoldersByTable;
 	private Map<Table, List<JPAIndexHolder>> jpaIndexHoldersByTable;
 
+	private AuditMetadataBuilderImpl auditMetadataBuilder;
+
 	public InFlightMetadataCollectorImpl(
 			MetadataBuildingOptions options,
 			TypeResolver typeResolver) {
@@ -179,6 +183,7 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 			getDatabase().addAuxiliaryDatabaseObject( auxiliaryDatabaseObject );
 		}
 
+		this.auditMetadataBuilder = new AuditMetadataBuilderImpl( this );
 	}
 
 	@Override
@@ -223,6 +228,11 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 	@Override
 	public Set<MappedSuperclass> getMappedSuperclassMappingsCopy() {
 		return new HashSet<MappedSuperclass>( mappedSuperClasses.values() );
+	}
+
+	@Override
+	public AuditMetadataBuilderImplementor getAuditMetadataBuilder() {
+		return auditMetadataBuilder;
 	}
 
 	@Override
@@ -1229,7 +1239,7 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 		);
 
 		int keyNameBase = determineCurrentNumberOfUniqueConstraintHolders( table );
-		for ( String[] columns : ( List<String[]> ) uniqueConstraints ) {
+		for ( String[] columns : (List<String[]>) uniqueConstraints ) {
 			final String keyName = "key" + keyNameBase++;
 			constraintHolders.add(
 					new UniqueConstraintHolder().setName( keyName ).setColumns( columns )
@@ -2064,10 +2074,10 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 			sb.setLength( sb.length() - 2 );
 			sb.append( ") on table " ).append( table.getName() ).append( ": database column " );
 			for ( Column column : unbound ) {
-				sb.append("'").append( column.getName() ).append( "', " );
+				sb.append( "'" ).append( column.getName() ).append( "', " );
 			}
 			for ( Column column : unboundNoLogical ) {
-				sb.append("'").append( column.getName() ).append( "', " );
+				sb.append( "'" ).append( column.getName() ).append( "', " );
 			}
 			sb.setLength( sb.length() - 2 );
 			sb.append( " not found. Make sure that you use the correct column name which depends on the naming strategy in use (it may not be the same as the property name in the entity, especially for relational types)" );
@@ -2197,7 +2207,8 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 					sqlResultSetMappingMap,
 					namedEntityGraphMap,
 					sqlFunctionMap,
-					getDatabase()
+					getDatabase(),
+					auditMetadataBuilder
 			);
 		}
 		finally {

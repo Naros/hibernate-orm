@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.exception.AuditException;
 import org.hibernate.envers.internal.entities.PropertyData;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
@@ -99,7 +98,6 @@ public class ComponentPropertyMapper implements PropertyMapper, CompositeMapperB
 
 	@Override
 	public void mapToEntityFromMap(
-			EnversService enversService,
 			Object obj,
 			Map data,
 			Object primaryKey,
@@ -112,7 +110,7 @@ public class ComponentPropertyMapper implements PropertyMapper, CompositeMapperB
 		if ( propertyData.getBeanName() == null ) {
 			// If properties are not encapsulated in a component but placed directly in a class
 			// (e.g. by applying <properties> tag).
-			delegate.mapToEntityFromMap( enversService, obj, data, primaryKey, versionsReader, revision );
+			delegate.mapToEntityFromMap( obj, data, primaryKey, versionsReader, revision );
 			return;
 		}
 
@@ -143,7 +141,7 @@ public class ComponentPropertyMapper implements PropertyMapper, CompositeMapperB
 			try {
 				final Object subObj = ReflectHelper.getDefaultConstructor( componentClass ).newInstance();
 				setter.set( obj, subObj, null );
-				delegate.mapToEntityFromMap( enversService, subObj, data, primaryKey, versionsReader, revision );
+				delegate.mapToEntityFromMap( subObj, data, primaryKey, versionsReader, revision );
 			}
 			catch ( Exception e ) {
 				throw new AuditException( e );

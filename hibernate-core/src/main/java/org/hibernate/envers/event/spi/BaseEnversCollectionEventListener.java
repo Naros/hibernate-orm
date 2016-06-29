@@ -13,7 +13,7 @@ import java.util.Set;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CollectionEntry;
 import org.hibernate.envers.RevisionType;
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.envers.internal.entities.EntityConfiguration;
 import org.hibernate.envers.internal.entities.RelationDescription;
 import org.hibernate.envers.internal.entities.RelationType;
@@ -38,8 +38,8 @@ import org.hibernate.persister.collection.AbstractCollectionPersister;
  * @author Chris Cranford
  */
 public abstract class BaseEnversCollectionEventListener extends BaseEnversEventListener {
-	protected BaseEnversCollectionEventListener(EnversService enversService) {
-		super( enversService );
+	protected BaseEnversCollectionEventListener(AuditService auditService) {
+		super( auditService );
 	}
 
 	protected final CollectionEntry getCollectionEntry(AbstractCollectionEvent event) {
@@ -54,7 +54,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 		if ( shouldGenerateRevision( event ) ) {
 			checkIfTransactionInProgress( event.getSession() );
 
-			final AuditProcess auditProcess = getEnversService().getAuditProcessManager().get( event.getSession() );
+			final AuditProcess auditProcess = getAuditService().getAuditProcess( event.getSession() );
 
 			final String entityName = event.getAffectedOwnerEntityName();
 			final String ownerEntityName = ( (AbstractCollectionPersister) collectionEntry.getLoadedPersister() ).getOwnerEntityName();
@@ -78,7 +78,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 				final PersistentCollectionChangeWorkUnit workUnit = new PersistentCollectionChangeWorkUnit(
 						event.getSession(),
 						entityName,
-						getEnversService(),
+						getAuditService(),
 						newColl,
 						collectionEntry,
 						oldColl,
@@ -94,7 +94,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 									event.getSession(),
 									event.getAffectedOwnerEntityName(),
 									referencingPropertyName,
-									getEnversService(),
+									getAuditService(),
 									event.getAffectedOwnerIdOrNull(),
 									event.getAffectedOwnerOrNull()
 							)
@@ -146,8 +146,8 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 	 */
 	protected boolean shouldGenerateRevision(AbstractCollectionEvent event) {
 		final String entityName = event.getAffectedOwnerEntityName();
-		return getEnversService().getGlobalConfiguration().isGenerateRevisionsForCollections()
-				&& getEnversService().getEntitiesConfigurations().isVersioned( entityName );
+		return getAuditService().getOptions().isRevisionOnCollectionChangeEnabled()
+				&& getAuditService().getEntityBindings().isVersioned( entityName );
 	}
 
 	/**
@@ -161,7 +161,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 	 *         be found.
 	 */
 	private RelationDescription searchForRelationDescription(String entityName, String referencingPropertyName) {
-		final EntityConfiguration configuration = getEnversService().getEntitiesConfigurations().get( entityName );
+		final EntityConfiguration configuration = getAuditService().getEntityBindings().get( entityName );
 		final String propertyName = sanitizeReferencingPropertyName( referencingPropertyName );
 		final RelationDescription rd = configuration.getRelationDescription( propertyName );
 		if ( rd == null && configuration.getParentEntityName() != null ) {
@@ -187,8 +187,8 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 			AbstractCollectionEvent event,
 			RelationDescription rd) {
 		// First computing the relation changes
-		final List<PersistentCollectionChangeData> collectionChanges = getEnversService()
-				.getEntitiesConfigurations()
+		final List<PersistentCollectionChangeData> collectionChanges = getAuditService()
+				.getEntityBindings()
 				.get( collectionEntityName )
 				.getPropertyMapper()
 				.mapCollectionChanges(
@@ -202,14 +202,14 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 		// Getting the id mapper for the related entity, as the work units generated will correspond to the related
 		// entities.
 		final String relatedEntityName = rd.getToEntityName();
-		final IdMapper relatedIdMapper = getEnversService().getEntitiesConfigurations().get( relatedEntityName ).getIdMapper();
+		final IdMapper relatedIdMapper = getAuditService().getEntityBindings().get( relatedEntityName ).getIdMapper();
 
 		// For each collection change, generating the bidirectional work unit.
 		for ( PersistentCollectionChangeData changeData : collectionChanges ) {
 			final Object relatedObj = changeData.getChangedElement();
 			final Serializable relatedId = (Serializable) relatedIdMapper.mapToIdFromEntity( relatedObj );
 			final RevisionType revType = (RevisionType) changeData.getData().get(
-					getEnversService().getAuditEntitiesConfiguration().getRevisionTypePropName()
+					getAuditService().getOptions().getRevisionTypePropName()
 			);
 
 			// This can be different from relatedEntityName, in case of inheritance (the real entity may be a subclass
@@ -221,7 +221,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 					event.getSession(),
 					realRelatedEntityName,
 					rd.getMappedByPropertyName(),
-					getEnversService(),
+					getAuditService(),
 					relatedId,
 					relatedObj
 			);
@@ -230,7 +230,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 					new FakeBidirectionalRelationWorkUnit(
 							event.getSession(),
 							realRelatedEntityName,
-							getEnversService(),
+							getAuditService(),
 							relatedId,
 							referencingPropertyName,
 							event.getAffectedOwnerOrNull(),
@@ -248,7 +248,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 						event.getSession(),
 						collectionEntityName,
 						referencingPropertyName,
-						getEnversService(),
+						getAuditService(),
 						event.getAffectedOwnerIdOrNull(),
 						event.getAffectedOwnerOrNull()
 				)
@@ -261,7 +261,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 			PersistentCollectionChangeWorkUnit workUnit,
 			RelationDescription rd) {
 		// Checking if this is enabled in configuration ...
-		if ( !getEnversService().getGlobalConfiguration().isGenerateRevisionsForCollections() ) {
+		if ( !getAuditService().getOptions().isRevisionOnCollectionChangeEnabled() ) {
 			return;
 		}
 
@@ -270,13 +270,17 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 		// relDesc can be null if this is a collection of simple values (not a relation).
 		if ( rd != null && rd.isBidirectional() ) {
 			final String relatedEntityName = rd.getToEntityName();
-			final IdMapper relatedIdMapper = getEnversService().getEntitiesConfigurations().get( relatedEntityName ).getIdMapper();
+			final IdMapper relatedIdMapper = getAuditService().getEntityBindings()
+					.get( relatedEntityName )
+					.getIdMapper();
 
-			final Set<String> toPropertyNames = getEnversService().getEntitiesConfigurations().getToPropertyNames(
-					event.getAffectedOwnerEntityName(),
-					rd.getFromPropertyName(),
-					relatedEntityName
-			);
+			final Set<String> toPropertyNames = getAuditService().getEntityBindings()
+					.getToPropertyNames(
+							event.getAffectedOwnerEntityName(),
+							rd.getFromPropertyName(),
+							relatedEntityName
+					);
+
 			final String toPropertyName = toPropertyNames.iterator().next();
 
 			for ( PersistentCollectionChangeData changeData : workUnit.getCollectionChanges() ) {
@@ -288,7 +292,7 @@ public abstract class BaseEnversCollectionEventListener extends BaseEnversEventL
 								event.getSession(),
 								event.getSession().bestGuessEntityName( relatedObj ),
 								toPropertyName,
-								getEnversService(),
+								getAuditService(),
 								relatedId,
 								relatedObj
 						)

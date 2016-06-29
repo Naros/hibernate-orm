@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.internal.entities.PropertyData;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 
@@ -77,14 +76,13 @@ public class SubclassPropertyMapper implements ExtendedPropertyMapper {
 
 	@Override
 	public void mapToEntityFromMap(
-			EnversService enversService,
 			Object obj,
 			Map data,
 			Object primaryKey,
 			AuditReaderImplementor versionsReader,
 			Number revision) {
-		parentMapper.mapToEntityFromMap( enversService, obj, data, primaryKey, versionsReader, revision );
-		main.mapToEntityFromMap( enversService, obj, data, primaryKey, versionsReader, revision );
+		parentMapper.mapToEntityFromMap( obj, data, primaryKey, versionsReader, revision );
+		main.mapToEntityFromMap( obj, data, primaryKey, versionsReader, revision );
 	}
 
 	@Override

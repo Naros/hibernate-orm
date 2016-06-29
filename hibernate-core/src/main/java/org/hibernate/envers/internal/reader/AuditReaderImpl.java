@@ -20,16 +20,15 @@ import org.hibernate.NonUniqueResultException;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.envers.CrossTypeRevisionChangesReader;
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.envers.exception.AuditException;
 import org.hibernate.envers.exception.NotAuditedException;
 import org.hibernate.envers.exception.RevisionDoesNotExistException;
-import org.hibernate.envers.internal.synchronization.AuditProcess;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQueryCreator;
-import org.hibernate.event.spi.EventSource;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.query.Query;
+import org.hibernate.service.ServiceRegistry;
 
 import static org.hibernate.envers.internal.tools.ArgumentsTools.checkNotNull;
 import static org.hibernate.envers.internal.tools.ArgumentsTools.checkPositive;
@@ -42,22 +41,22 @@ import static org.hibernate.envers.internal.tools.EntityTools.getTargetClassIfPr
  * @author Chris Cranford
  */
 public class AuditReaderImpl implements AuditReaderImplementor {
-	private final EnversService enversService;
+
+	private final AuditService auditService;
 	private final SessionImplementor sessionImplementor;
 	private final Session session;
 	private final FirstLevelCache firstLevelCache;
 	private final CrossTypeRevisionChangesReader crossTypeRevisionChangesReader;
 
-	public AuditReaderImpl(
-			EnversService enversService,
-			Session session,
-			SessionImplementor sessionImplementor) {
-		this.enversService = enversService;
-		this.sessionImplementor = sessionImplementor;
+	public AuditReaderImpl(Session session) {
 		this.session = session;
+		this.sessionImplementor = (SessionImplementor) session;
+
+		final ServiceRegistry serviceRegistry = this.sessionImplementor.getSessionFactory().getServiceRegistry();
+		this.auditService = serviceRegistry.getService( AuditService.class );
 
 		firstLevelCache = new FirstLevelCache();
-		crossTypeRevisionChangesReader = new CrossTypeRevisionChangesReaderImpl( this, enversService );
+		crossTypeRevisionChangesReader = new CrossTypeRevisionChangesReaderImpl( this );
 	}
 
 	private void checkSession() {
@@ -79,6 +78,11 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 	@Override
 	public FirstLevelCache getFirstLevelCache() {
 		return firstLevelCache;
+	}
+
+	@Override
+	public AuditService getAuditService() {
+		return auditService;
 	}
 
 	@Override
@@ -168,7 +172,7 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 		checkPositive( revision, "Entity revision" );
 		checkSession();
 
-		final Query<?> query = enversService.getRevisionInfoQueryCreator().getRevisionDateQuery( session, revision );
+		final Query<?> query = auditService.getRevisionInfoQueryCreator().getRevisionDateQuery( session, revision );
 
 		try {
 			final Object timestampObject = query.uniqueResult();
@@ -189,7 +193,7 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 		checkNotNull( date, "Date of revision" );
 		checkSession();
 
-		final Query<?> query = enversService.getRevisionInfoQueryCreator().getRevisionNumberForDateQuery( session, date );
+		final Query<?> query = auditService.getRevisionInfoQueryCreator().getRevisionNumberForDateQuery( session, date );
 
 		try {
 			final Number res = (Number) query.uniqueResult();
@@ -215,7 +219,7 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 
 		final Set<Number> revisions = new HashSet<>( 1 );
 		revisions.add( revision );
-		final Query<?> query = enversService.getRevisionInfoQueryCreator().getRevisionsQuery( session, revisions );
+		final Query<?> query = auditService.getRevisionInfoQueryCreator().getRevisionsQuery( session, revisions );
 
 		try {
 			final T revisionData = (T) query.uniqueResult();
@@ -245,12 +249,12 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 		}
 		checkSession();
 
-		final Query<?> query = enversService.getRevisionInfoQueryCreator().getRevisionsQuery( session, revisions );
+		final Query<?> query = auditService.getRevisionInfoQueryCreator().getRevisionsQuery( session, revisions );
 
 		try {
 			final List<?> revisionList = query.getResultList();
 			for ( Object revision : revisionList ) {
-				final Number revNo = enversService.getRevisionInfoNumberReader().getRevisionNumber( revision );
+				final Number revNo = auditService.getRevisionInfoNumberReader().getRevisionNumber( revision );
 				result.put( revNo, (T) revision );
 			}
 
@@ -263,7 +267,7 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 
 	@Override
 	public CrossTypeRevisionChangesReader getCrossTypeRevisionChangesReader() throws AuditException {
-		if ( !enversService.getGlobalConfiguration().isTrackEntitiesChangedInRevision() ) {
+		if ( !auditService.getOptions().isTrackEntitiesChangedInRevisionEnabled() ) {
 			throw new AuditException(
 					"This API is designed for Envers default mechanism of tracking entities modified in a given revision."
 							+ " Extend DefaultTrackingModifiedEntitiesRevisionEntity, utilize @ModifiedEntityNames annotation or set "
@@ -274,23 +278,8 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked"})
-	public <T> T getCurrentRevision(Class<T> revisionEntityClass, boolean persist) {
-		revisionEntityClass = getTargetClassIfProxied( revisionEntityClass );
-		if ( !(session instanceof EventSource) ) {
-			throw new IllegalArgumentException( "The provided session is not an EventSource!" );
-		}
-
-		// Obtaining the current audit sync
-		final AuditProcess auditProcess = enversService.getAuditProcessManager().get( (EventSource) session );
-
-		// And getting the current revision data
-		return (T) auditProcess.getCurrentRevisionData( session, persist );
-	}
-
-	@Override
 	public AuditQueryCreator createQuery() {
-		return new AuditQueryCreator( enversService, this );
+		return new AuditQueryCreator( this );
 	}
 
 	@Override
@@ -304,7 +293,7 @@ public class AuditReaderImpl implements AuditReaderImplementor {
 	public boolean isEntityNameAudited(String entityName) {
 		checkNotNull( entityName, "Entity name" );
 		checkSession();
-		return enversService.getEntitiesConfigurations().isVersioned( entityName );
+		return auditService.getEntityBindings().isVersioned( entityName );
 	}
 
 	@Override

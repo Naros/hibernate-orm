@@ -7,7 +7,7 @@
 package org.hibernate.envers.event.spi;
 
 import org.hibernate.engine.spi.CollectionEntry;
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.event.spi.PostCollectionRecreateEvent;
 import org.hibernate.event.spi.PostCollectionRecreateEventListener;
 
@@ -23,8 +23,8 @@ public class EnversPostCollectionRecreateEventListenerImpl
 		extends BaseEnversCollectionEventListener
 		implements PostCollectionRecreateEventListener {
 
-	public EnversPostCollectionRecreateEventListenerImpl(EnversService enversService) {
-		super( enversService );
+	public EnversPostCollectionRecreateEventListenerImpl(AuditService auditService) {
+		super( auditService );
 	}
 
 	@Override

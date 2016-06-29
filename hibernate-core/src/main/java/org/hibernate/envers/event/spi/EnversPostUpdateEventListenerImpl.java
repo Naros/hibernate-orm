@@ -6,7 +6,7 @@
  */
 package org.hibernate.envers.event.spi;
 
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.envers.internal.synchronization.AuditProcess;
 import org.hibernate.envers.internal.synchronization.work.AuditWorkUnit;
 import org.hibernate.envers.internal.synchronization.work.ModWorkUnit;
@@ -23,25 +23,25 @@ import org.hibernate.persister.entity.EntityPersister;
  * @author Chris Cranford
  */
 public class EnversPostUpdateEventListenerImpl extends BaseEnversUpdateEventListener implements PostUpdateEventListener {
-	public EnversPostUpdateEventListenerImpl(EnversService enversService) {
-		super( enversService );
+	public EnversPostUpdateEventListenerImpl(AuditService auditService) {
+		super( auditService );
 	}
 
 	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
 		final String entityName = event.getPersister().getEntityName();
 
-		if ( getEnversService().getEntitiesConfigurations().isVersioned( entityName ) ) {
+		if ( getAuditService().getEntityBindings().isVersioned( entityName ) ) {
 			checkIfTransactionInProgress( event.getSession() );
 
-			final AuditProcess auditProcess = getEnversService().getAuditProcessManager().get( event.getSession() );
+			final AuditProcess auditProcess = getAuditService().getAuditProcess( event.getSession() );
 
 			Object[] oldState = getOldDBState( auditProcess, entityName, event );
 			final Object[] newDbState = postUpdateDBState( event );
 			final AuditWorkUnit workUnit = new ModWorkUnit(
 					event.getSession(),
 					event.getPersister().getEntityName(),
-					getEnversService(),
+					getAuditService(),
 					event.getId(),
 					event.getPersister(),
 					newDbState,
@@ -86,6 +86,6 @@ public class EnversPostUpdateEventListenerImpl extends BaseEnversUpdateEventList
 
 	@Override
 	public boolean requiresPostCommitHanding(EntityPersister persister) {
-		return getEnversService().getEntitiesConfigurations().isVersioned( persister.getEntityName() );
+		return getAuditService().getEntityBindings().isVersioned( persister.getEntityName() );
 	}
 }
