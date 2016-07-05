@@ -6,6 +6,7 @@
  */
 package org.hibernate.envers.query;
 
+import org.hibernate.Incubating;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.exception.NotAuditedException;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
@@ -177,7 +178,8 @@ public class AuditQueryCreator {
 				auditReaderImplementor,
 				c,
 				selectEntitiesOnly,
-				selectDeletedEntities
+				selectDeletedEntities,
+				false
 		);
 	}
 
@@ -216,7 +218,8 @@ public class AuditQueryCreator {
 				c,
 				entityName,
 				selectEntitiesOnly,
-				selectDeletedEntities
+				selectDeletedEntities,
+				false
 		);
 	}
 
@@ -228,4 +231,55 @@ public class AuditQueryCreator {
 			);
 		}
 	}
+
+	/**
+	 * Creates a query that selects the revision entities associated with the specified entity.  You may also
+	 * specify whether the revision entities list should include those for deletions of the entity class.
+	 *
+	 * @param clazz Class of the entities for which to query.
+	 * @param selectDeletedEntities If true, the result will include revision entities where deletions occurred.
+	 *
+	 * @return A query of revision entities based on the specified entity class.  The results of the query will
+	 * 		   be stored in ascending order by the revision number unless an order is specified.
+	 *
+	 * @since 6.0
+	 */
+	@Incubating
+	public AuditQuery forRevisionsOfEntity(Class<?> clazz, boolean selectDeletedEntities) {
+		clazz = getTargetClassIfProxied( clazz );
+		return new RevisionsOfEntityQuery(
+				auditReaderImplementor,
+				clazz,
+				false,
+				selectDeletedEntities,
+				true
+		);
+	}
+
+	/**
+	 * Creates a query that selects the revision entities associated with the specified entity.  You may also
+	 * specify whether the revision entities list should include those for deletions of the entity class.
+	 *
+	 * @param clazz Class of the entities for which to query.
+	 * @param entityName Name of the entity (for cases where it cannot be guessed based on class clazz).
+	 * @param selectDeletedEntities If true, the result will include revision entities where deletions occurred.
+	 *
+	 * @return A query of revision entities based on the specified entity class.  The results of the query will
+	 * 		   be stored in ascending order by the revision number unless an order is specified.
+	 *
+	 * @since 6.0
+	 */
+	@Incubating
+	public AuditQuery forRevisionsOfEntity(Class<?> clazz, String entityName, boolean selectDeletedEntities) {
+		clazz = getTargetClassIfProxied( clazz );
+		return new RevisionsOfEntityQuery(
+				auditReaderImplementor,
+				clazz,
+				entityName,
+				false,
+				selectDeletedEntities,
+				true
+		);
+	}
+
 }
