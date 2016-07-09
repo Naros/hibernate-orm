@@ -70,22 +70,22 @@ public class AuditedPropertiesReader {
 	);
 
 	protected final ModificationStore defaultStore;
-	private final PersistentPropertiesSource persistentPropertiesSource;
-	private final AuditedPropertiesHolder auditedPropertiesHolder;
-	private final AuditMetadataBuildingOptions options;
-	private final ReflectionManager reflectionManager;
-	private final String propertyNamePrefix;
+	protected final PersistentPropertiesSource persistentPropertiesSource;
+	protected final AuditedPropertiesHolder auditedPropertiesHolder;
+	protected final AuditMetadataBuildingOptions options;
+	protected final ReflectionManager reflectionManager;
+	protected final String propertyNamePrefix;
 
-	private final Set<String> propertyAccessedPersistentProperties;
-	private final Set<String> fieldAccessedPersistentProperties;
+	protected final Set<String> propertyAccessedPersistentProperties;
+	protected final Set<String> fieldAccessedPersistentProperties;
 	// Mapping class field to corresponding <properties> element.
-	private final Map<String, String> propertiesGroupMapping;
+	protected final Map<String, String> propertiesGroupMapping;
 
-	private final Set<XProperty> overriddenAuditedProperties;
-	private final Set<XProperty> overriddenNotAuditedProperties;
+	protected final Set<XProperty> overriddenAuditedProperties;
+	protected final Set<XProperty> overriddenNotAuditedProperties;
 
-	private final Set<XClass> overriddenAuditedClasses;
-	private final Set<XClass> overriddenNotAuditedClasses;
+	protected final Set<XClass> overriddenAuditedClasses;
+	protected final Set<XClass> overriddenNotAuditedClasses;
 
 	public AuditedPropertiesReader(
 			ModificationStore defaultStore,
@@ -176,6 +176,7 @@ public class AuditedPropertiesReader {
 				}
 			}
 		}
+
 		final XClass superclass = clazz.getSuperclass();
 		if ( !clazz.isInterface() && !Object.class.getName().equals( superclass.getName() ) ) {
 			readAuditOverrides( superclass );
@@ -279,7 +280,7 @@ public class AuditedPropertiesReader {
 	 *         {@code null}. If processed type exists in {@link AuditedPropertiesReader#overriddenNotAuditedClasses}
 	 *         collection, the result is also {@code null}.
 	 */
-	private Audited computeAuditConfiguration(XClass clazz) {
+	protected Audited computeAuditConfiguration(XClass clazz) {
 		Audited allClassAudited = clazz.getAnnotation( Audited.class );
 		// If processed class is not explicitly marked with @Audited annotation, check whether auditing is
 		// forced by any of its child entities configuration (@AuditedOverride.forClass).
@@ -333,7 +334,7 @@ public class AuditedPropertiesReader {
 	 *
 	 * @param clazz Currently processed class.
 	 */
-	private void addPropertiesFromClass(XClass clazz) {
+	protected void addPropertiesFromClass(XClass clazz) {
 		final Audited allClassAudited = computeAuditConfiguration( clazz );
 
 		//look in the class
@@ -358,7 +359,7 @@ public class AuditedPropertiesReader {
 		}
 	}
 
-	private void addFromProperties(
+	protected void addFromProperties(
 			Iterable<XProperty> properties,
 			String accessType,
 			Set<String> persistentProperties,
