@@ -11,7 +11,6 @@ import org.hibernate.annotations.common.reflection.XProperty;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.configuration.internal.GlobalConfiguration;
-import org.hibernate.envers.configuration.internal.metadata.MetadataTools;
 
 /**
  * Reads the audited properties for components.
@@ -44,14 +43,13 @@ public class ComponentAuditedPropertiesReader extends AuditedPropertiesReader {
 			propertyData.setStore( aud.modStore() );
 			propertyData.setRelationTargetAuditMode( aud.targetAuditMode() );
 			propertyData.setUsingModifiedFlag( checkUsingModifiedFlag( aud ) );
-			if( aud.modifiedColumnName() != null && !"".equals( aud.modifiedColumnName() ) ) {
-				propertyData.setModifiedFlagName( aud.modifiedColumnName() );
-			}
-			else {
-				propertyData.setModifiedFlagName(
-						MetadataTools.getModifiedFlagPropertyName( propertyName, modifiedFlagSuffix )
-				);
-			}
+			propertyData.setModifiedFlagName(
+					getModifiedFlagColumnName(
+							aud,
+							property,
+							propertyName
+					)
+			);
 		}
 		else {
 			propertyData.setStore( ModificationStore.FULL );

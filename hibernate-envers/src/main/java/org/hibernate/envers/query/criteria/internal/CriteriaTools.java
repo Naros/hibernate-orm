@@ -13,10 +13,13 @@ import java.util.List;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.exception.AuditException;
+import org.hibernate.envers.internal.entities.EntityConfiguration;
+import org.hibernate.envers.internal.entities.PropertyData;
 import org.hibernate.envers.internal.entities.RelationDescription;
 import org.hibernate.envers.internal.entities.RelationType;
 import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.query.criteria.AuditId;
+import org.hibernate.envers.query.internal.property.ModifiedFlagPropertyName;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
 import org.hibernate.type.EmbeddedComponentType;
 import org.hibernate.type.Type;
@@ -62,7 +65,24 @@ public abstract class CriteriaTools {
 			AuditReaderImplementor versionsReader,
 			String entityName,
 			PropertyNameGetter propertyNameGetter) {
-		return determinePropertyName( enversService, versionsReader, entityName, propertyNameGetter.get( enversService ) );
+		final String propertyName;
+		if ( propertyNameGetter instanceof ModifiedFlagPropertyName ) {
+			// HHH-10398 - Will now resolve modified property names here.
+			propertyName = getModifiedFlagPropertyName(
+					enversService,
+					entityName,
+					propertyNameGetter.get( enversService )
+			);
+		}
+		else {
+			propertyName = propertyNameGetter.get( enversService );
+		}
+		return determinePropertyName(
+				enversService,
+				versionsReader,
+				entityName,
+				propertyName
+		);
 	}
 
 	/**
@@ -113,5 +133,25 @@ public abstract class CriteriaTools {
 			return Arrays.asList( embeddedComponentType.getPropertyNames() );
 		}
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Get the modified flag property name.
+	 *
+	 * @param enversService The EnversService.
+	 * @param entityName Entity name.
+	 * @param propertyName Property name.
+	 * @return the modified flag property name.
+	 */
+	private static String getModifiedFlagPropertyName(EnversService enversService, String entityName, String propertyName) {
+		String modifiedFlagPropertyName = propertyName;
+		final EntityConfiguration entityConfiguration = enversService.getEntitiesConfigurations().get( entityName );
+		for ( PropertyData propertyData : entityConfiguration.getPropertyMapper().getProperties().keySet() ) {
+			if ( propertyData.getName().equals( propertyName ) ) {
+				modifiedFlagPropertyName = propertyData.getModifiedFlagPropertyName();
+				break;
+			}
+		}
+		return modifiedFlagPropertyName;
 	}
 }

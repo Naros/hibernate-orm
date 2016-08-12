@@ -84,21 +84,6 @@ public final class MetadataTools {
 		return addProperty( parent, name, type, insertable, false, key );
 	}
 
-	public static Element addModifiedFlagProperty(Element parent, String propertyName, String suffix, String modifiedFlagName) {
-		return addProperty(
-				parent,
-				(modifiedFlagName != null) ? modifiedFlagName : getModifiedFlagPropertyName( propertyName, suffix ),
-				"boolean",
-				true,
-				false,
-				false
-		);
-	}
-
-	public static String getModifiedFlagPropertyName(String propertyName, String suffix) {
-		return propertyName + suffix;
-	}
-
 	private static void addOrModifyAttribute(Element parent, String name, String value) {
 		final Attribute attribute = parent.attribute( name );
 		if ( attribute == null ) {

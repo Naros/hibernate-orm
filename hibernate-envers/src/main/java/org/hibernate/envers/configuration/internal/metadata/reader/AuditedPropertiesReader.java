@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
@@ -34,7 +35,7 @@ import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.envers.configuration.internal.GlobalConfiguration;
-import org.hibernate.envers.configuration.internal.metadata.MetadataTools;
+import org.hibernate.envers.configuration.naming.ModifiedFlagNamingStrategy;
 import org.hibernate.envers.internal.tools.MappingTools;
 import org.hibernate.envers.internal.tools.ReflectionTools;
 import org.hibernate.envers.internal.tools.StringTools;
@@ -544,14 +545,13 @@ public class AuditedPropertiesReader {
 			propertyData.setStore( aud.modStore() );
 			propertyData.setRelationTargetAuditMode( aud.targetAuditMode() );
 			propertyData.setUsingModifiedFlag( checkUsingModifiedFlag( aud ) );
-			if( aud.modifiedColumnName() != null && !"".equals( aud.modifiedColumnName() ) ) {
-				propertyData.setModifiedFlagName( aud.modifiedColumnName() );
-			}
-			else {
-				propertyData.setModifiedFlagName(
-						MetadataTools.getModifiedFlagPropertyName( propertyName, modifiedFlagSuffix )
-				);
-			}
+			propertyData.setModifiedFlagName(
+					getModifiedFlagColumnName(
+							aud,
+							property,
+							propertyName
+					)
+			);
 			return true;
 		}
 		else {
@@ -571,6 +571,25 @@ public class AuditedPropertiesReader {
 		}
 		// no global setting enabled, use the annotation's value only.
 		return aud.withModifiedFlag();
+	}
+
+	protected String getModifiedFlagColumnName(Audited audited, XProperty property, String propertyName) {
+		String columnJoinColumnName = null;
+		final Column column = property.getAnnotation( Column.class );
+		final JoinColumn joinColumn = property.getAnnotation( JoinColumn.class );
+		if ( column != null && !StringTools.isEmpty( column.name() ) ) {
+			columnJoinColumnName = column.name();
+		}
+		else if ( joinColumn != null && !StringTools.isEmpty( joinColumn.name() ) ) {
+			columnJoinColumnName = joinColumn.name();
+		}
+		final ModifiedFlagNamingStrategy strategy = globalCfg.getModifiedFlagNamingStrategy();
+		return strategy.propertyToModifiedFlagColumnName(
+				audited.modifiedColumnName(),
+				propertyName,
+				globalCfg.getModifiedFlagSuffix(),
+				columnJoinColumnName
+		);
 	}
 
 	private void setPropertyRelationMappedBy(XProperty property, PropertyAuditingData propertyData) {

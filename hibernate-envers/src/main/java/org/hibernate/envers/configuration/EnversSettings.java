@@ -114,4 +114,13 @@ public interface EnversSettings {
 	 * Exactly one row with {@code null} end date exists for each identifier.
 	 */
 	String ALLOW_IDENTIFIER_REUSE = "org.hibernate.envers.allow_identifier_reuse";
+
+	/**
+	 * The strategy that should be used when determining the modified flag column names.
+	 * Defaults to {@link org.hibernate.envers.configuration.naming.DefaultModifiedFlagNamingStrategy}.
+	 * <br/>
+	 * For new implementations, it's recommended to use:
+	 * {@link org.hibernate.envers.configuration.naming.ImprovedModifiedFlagNamingStrategy}.
+	 */
+	String MODIFIED_FLAG_NAMING_STRATEGY = "org.hibernate.envers.modified_flag_naming_strategy";
 }

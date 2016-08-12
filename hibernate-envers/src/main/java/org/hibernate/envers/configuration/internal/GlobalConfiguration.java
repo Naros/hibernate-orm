@@ -15,6 +15,8 @@ import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.envers.RevisionListener;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.configuration.EnversSettings;
+import org.hibernate.envers.configuration.naming.DefaultModifiedFlagNamingStrategy;
+import org.hibernate.envers.configuration.naming.ModifiedFlagNamingStrategy;
 import org.hibernate.envers.internal.tools.ReflectionTools;
 import org.hibernate.internal.util.config.ConfigurationHelper;
 
@@ -65,6 +67,9 @@ public class GlobalConfiguration {
 
 	// Support reused identifiers of previously deleted entities
 	private final boolean allowIdentifierReuse;
+
+	// Support for modified flag naming strategy
+	private ModifiedFlagNamingStrategy modifiedFlagNamingStrategy;
 
 	/*
 		 Which operator to use in correlated subqueries (when we want a property to be equal to the result of
@@ -133,6 +138,25 @@ public class GlobalConfiguration {
 				properties,
 				"_MOD"
 		);
+
+		String modifiedFlagNamingStrategyName = ConfigurationHelper.getString(
+				EnversSettings.MODIFIED_FLAG_NAMING_STRATEGY,
+				properties,
+				DefaultModifiedFlagNamingStrategy.class.getName()
+		);
+		try {
+			Class<? extends ModifiedFlagNamingStrategy> modifiedFlagNamingStrategyClass = ReflectionTools.loadClass(
+					modifiedFlagNamingStrategyName,
+					enversService.getClassLoaderService()
+			);
+			modifiedFlagNamingStrategy = modifiedFlagNamingStrategyClass.newInstance();
+		}
+		catch ( InstantiationException | ClassLoadingException | IllegalAccessException e ) {
+			throw new MappingException(
+					"Failed to locate modified flag naming strategy: " + modifiedFlagNamingStrategyName,
+					e
+			);
+		}
 
 		final String revisionListenerClassName = (String) properties.get( EnversSettings.REVISION_LISTENER );
 		if ( revisionListenerClassName != null ) {
@@ -220,5 +244,9 @@ public class GlobalConfiguration {
 
 	public boolean isAllowIdentifierReuse() {
 		return allowIdentifierReuse;
+	}
+
+	public ModifiedFlagNamingStrategy getModifiedFlagNamingStrategy() {
+		return modifiedFlagNamingStrategy;
 	}
 }

@@ -7,7 +7,6 @@
 package org.hibernate.envers.query.internal.property;
 
 import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.configuration.internal.metadata.MetadataTools;
 
 /**
  * PropertyNameGetter for modified flags
@@ -22,9 +21,7 @@ public class ModifiedFlagPropertyName implements PropertyNameGetter {
 	}
 
 	public String get(EnversService enversService) {
-		return MetadataTools.getModifiedFlagPropertyName(
-				propertyNameGetter.get( enversService ),
-				enversService.getGlobalConfiguration().getModifiedFlagSuffix()
-		);
+		// HHH-10398 - will be lazily determined during criteria property resolution.
+		return propertyNameGetter.get( enversService );
 	}
 }

@@ -331,11 +331,13 @@ public final class AuditMetadataGenerator {
 			PropertyAuditingData propertyAuditingData,
 			boolean processModifiedFlag) {
 		if ( processModifiedFlag && propertyAuditingData.isUsingModifiedFlag() ) {
-			MetadataTools.addModifiedFlagProperty(
+			MetadataTools.addProperty(
 					parent,
-					propertyAuditingData.getName(),
-					globalCfg.getModifiedFlagSuffix(),
-					propertyAuditingData.getModifiedFlagName()
+					propertyAuditingData.getModifiedFlagName(),
+					"boolean",
+					true,
+					false,
+					false
 			);
 		}
 	}
