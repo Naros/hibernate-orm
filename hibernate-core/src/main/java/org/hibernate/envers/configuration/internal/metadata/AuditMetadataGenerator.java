@@ -179,11 +179,16 @@ public final class AuditMetadataGenerator {
 
 			anyMapping.add( endRevMapping );
 
+			addEndRevisionTimestamp( anyMapping );
+		}
+	}
+
+	private void addEndRevisionTimestamp(Element mapping) {
+		if ( options.getAuditStrategy() instanceof ValidityAuditStrategy ) {
 			if ( options.isRevisionEndTimestampEnabled() ) {
-				// add a column for the timestamp of the end revision
 				final String revisionInfoTimestampSqlType = TimestampType.INSTANCE.getName();
-				final Element timestampProperty = MetadataTools.addProperty(
-						anyMapping,
+				final Element property = MetadataTools.addProperty(
+						mapping,
 						options.getRevisionEndTimestampFieldName(),
 						revisionInfoTimestampSqlType,
 						true,
@@ -191,7 +196,7 @@ public final class AuditMetadataGenerator {
 						false
 				);
 				MetadataTools.addColumn(
-						timestampProperty,
+						property,
 						options.getRevisionEndTimestampFieldName(),
 						null,
 						null,
@@ -661,6 +666,9 @@ public final class AuditMetadataGenerator {
 
 				// ... and the revision number column, read from the revision info relation mapping.
 				keyMapping.add( (Element) cloneAndSetupRevisionInfoRelationMapping().element( "column" ).clone() );
+
+				// HHH-9062 - Add revision end timestamp to mapping, if applicable.
+				addEndRevisionTimestamp( mappingData.getFirst() );
 				break;
 
 			case TABLE_PER_CLASS:
