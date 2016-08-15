@@ -667,8 +667,10 @@ public final class AuditMetadataGenerator {
 				// ... and the revision number column, read from the revision info relation mapping.
 				keyMapping.add( (Element) cloneAndSetupRevisionInfoRelationMapping().element( "column" ).clone() );
 
-				// HHH-9062 - Add revision end timestamp to mapping, if applicable.
-				addEndRevisionTimestamp( mappingData.getFirst() );
+				if ( !options.isRevisionEndTimestampLegacyBehaviorEnabled() ) {
+					// HHH-9062 - Add revision end timestamp to mapping, if applicable.
+					addEndRevisionTimestamp( mappingData.getFirst() );
+				}
 				break;
 
 			case TABLE_PER_CLASS:

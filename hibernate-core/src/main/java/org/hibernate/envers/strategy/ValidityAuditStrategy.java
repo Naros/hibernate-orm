@@ -375,19 +375,37 @@ public class ValidityAuditStrategy implements AuditStrategy {
 			Object revision) {
 		Queryable entityQueryable = getQueryable( entityName, session );
 		// HHH-9062 - update inherited
-		if ( auditService.getOptions().isRevisionEndTimestampEnabled() ) {
+		final AuditServiceOptions options = auditService.getOptions();
+		if ( options.isRevisionEndTimestampEnabled() && !options.isRevisionEndTimestampLegacyBehaviorEnabled() ) {
 			if ( entityQueryable instanceof JoinedSubclassEntityPersister ) {
-
 				List<UpdateContext> contexts = new ArrayList<>();
 				// iterate subclasses from farther descendant up the hierarchy, excluding root
 				while ( entityQueryable.getMappedSuperclass() != null ) {
-					contexts.add( getNonRootUpdateContext( entityName, auditedEntityName, session, auditService, id, revision ) );
+					contexts.add(
+							getNonRootUpdateContext(
+									entityName,
+									auditedEntityName,
+									session,
+									auditService,
+									id,
+									revision
+							)
+					);
 					entityName = entityQueryable.getMappedSuperclass();
 					auditedEntityName = auditService.getAuditEntityName( entityName );
 					entityQueryable = getQueryable( entityName, session );
 				}
 				// process root entity
-				contexts.add( getUpdateContext( entityName, auditedEntityName, session, auditService, id, revision ) );
+				contexts.add(
+						getUpdateContext(
+								entityName,
+								auditedEntityName,
+								session,
+								auditService,
+								id,
+								revision
+						)
+				);
 				return contexts;
 			}
 		}

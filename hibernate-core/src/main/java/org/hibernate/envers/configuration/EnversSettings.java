@@ -122,4 +122,11 @@ public interface EnversSettings {
 	 * Defaults to {@code false}.
 	 */
 	String CASCADE_DELETE_REVISION = "org.hibernate.envers.cascade_delete_revision";
+
+	/**
+	 * Whether to use legacy validity audit strategy revision end timestamp behavior where the field
+	 * is not included as a part of the joined entity inheritance subclass audit tables.
+	 * Defaults to {@code false}.
+	 */
+	String AUDIT_STRATEGY_VALIDITY_LEGACY_REVEND_TIMESTAMP = "org.hibernate.envers.audit_strategy_validity_legacy_revend_timestamp";
 }
