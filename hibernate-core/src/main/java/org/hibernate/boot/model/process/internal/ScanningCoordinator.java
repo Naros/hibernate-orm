@@ -30,6 +30,7 @@ import org.hibernate.boot.internal.ClassLoaderAccessImpl;
 import org.hibernate.boot.jaxb.Origin;
 import org.hibernate.boot.jaxb.SourceType;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.boot.spi.ClassLoaderAccess;
 import org.hibernate.boot.spi.MetadataBuildingOptions;
 import org.hibernate.boot.spi.XmlMappingBinderAccess;
@@ -56,37 +57,40 @@ public class ScanningCoordinator {
 	}
 
 	public void coordinateScan(
-			ManagedResourcesImpl managedResources,
-			MetadataBuildingOptions options,
-			XmlMappingBinderAccess xmlMappingBinderAccess) {
-		if ( options.getScanEnvironment() == null ) {
+			final ManagedResourcesImpl managedResources,
+			final MetadataBuildingOptions options,
+			final XmlMappingBinderAccess xmlMappingBinderAccess,
+			final BootstrapContext bootstrapContext) {
+		if ( bootstrapContext.getScanEnvironment() == null ) {
 			return;
 		}
 
 		final ClassLoaderService classLoaderService = options.getServiceRegistry().getService( ClassLoaderService.class );
 		final ClassLoaderAccess classLoaderAccess = new ClassLoaderAccessImpl(
-				options.getTempClassLoader(),
+				bootstrapContext.getJpaTempClassLoader(),
 				classLoaderService
 		);
 
 		// NOTE : the idea with JandexInitializer/JandexInitManager was to allow adding classes
 		// to the index as we discovered them via scanning and .  Currently
-		final Scanner scanner = buildScanner( options, classLoaderAccess );
+		final Scanner scanner = buildScanner( bootstrapContext, classLoaderAccess );
 		final ScanResult scanResult = scanner.scan(
-				options.getScanEnvironment(),
-				options.getScanOptions(),
+				bootstrapContext.getScanEnvironment(),
+				bootstrapContext.getScanOptions(),
 				StandardScanParameters.INSTANCE
 		);
 
-		applyScanResultsToManagedResources( managedResources, scanResult, options, xmlMappingBinderAccess );
+		applyScanResultsToManagedResources( managedResources, scanResult, xmlMappingBinderAccess, bootstrapContext );
 	}
 
 	private static final Class[] SINGLE_ARG = new Class[] { ArchiveDescriptorFactory.class };
 
 	@SuppressWarnings("unchecked")
-	private static Scanner buildScanner(MetadataBuildingOptions options, ClassLoaderAccess classLoaderAccess) {
-		final Object scannerSetting = options.getScanner();
-		final ArchiveDescriptorFactory archiveDescriptorFactory = options.getArchiveDescriptorFactory();
+	private static Scanner buildScanner(
+			final BootstrapContext bootstrapContext,
+			final ClassLoaderAccess classLoaderAccess) {
+		final Object scannerSetting = bootstrapContext.getScanner();
+		final ArchiveDescriptorFactory archiveDescriptorFactory = bootstrapContext.getArchiveDescriptorFactory();
 
 		if ( scannerSetting == null ) {
 			// No custom Scanner specified, use the StandardScanner
@@ -184,13 +188,13 @@ public class ScanningCoordinator {
 	}
 
 	public void applyScanResultsToManagedResources(
-			ManagedResourcesImpl managedResources,
-			ScanResult scanResult,
-			MetadataBuildingOptions options,
-			XmlMappingBinderAccess xmlMappingBinderAccess) {
+			final ManagedResourcesImpl managedResources,
+			final ScanResult scanResult,
+			final XmlMappingBinderAccess xmlMappingBinderAccess,
+			final BootstrapContext bootstrapContext) {
 
-		final ScanEnvironment scanEnvironment = options.getScanEnvironment();
-		final ServiceRegistry serviceRegistry = options.getServiceRegistry();
+		final ScanEnvironment scanEnvironment = bootstrapContext.getScanEnvironment();
+		final ServiceRegistry serviceRegistry = bootstrapContext.getServiceRegistry();
 		final ClassLoaderService classLoaderService = serviceRegistry.getService( ClassLoaderService.class );
 
 
@@ -232,7 +236,8 @@ public class ScanningCoordinator {
 				// and notice we use the ClassLoaderService specifically, not the temp ClassLoader (if any)
 				managedResources.addAttributeConverterDefinition(
 						AttributeConverterDefinition.from(
-								classLoaderService.<AttributeConverter>classForName( classDescriptor.getName() )
+								bootstrapContext.getClassmateContext(),
+								classLoaderService.classForName( classDescriptor.getName() )
 						)
 				);
 			}

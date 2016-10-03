@@ -233,7 +233,7 @@ public class JavaTypeDescriptorRegistry implements JavaTypeDescriptorBaseline.Ba
 		while ( superType != null && !Object.class.equals( superType ) ) {
 			final XClass superTypeXClass = typeConfiguration.getTypeConfiguration()
 					.getMetadataBuildingContext()
-					.getBuildingOptions()
+					.getBootstrapContext()
 					.getReflectionManager()
 					.toXClass( superType );
 
@@ -247,7 +247,7 @@ public class JavaTypeDescriptorRegistry implements JavaTypeDescriptorBaseline.Ba
 				return (MappedSuperclassTypeDescriptor) getMappedSuperclassDescriptor(
 						typeConfiguration.getTypeConfiguration()
 								.getMetadataBuildingContext()
-								.getBuildingOptions()
+								.getBootstrapContext()
 								.getReflectionManager()
 								.toClass( superTypeXClass )
 				);
