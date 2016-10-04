@@ -48,7 +48,6 @@ import org.hibernate.boot.model.relational.Namespace;
 import org.hibernate.boot.model.source.internal.ImplicitColumnNamingSecondPass;
 import org.hibernate.boot.model.source.spi.LocalMetadataBuildingContext;
 import org.hibernate.boot.model.type.spi.BasicTypeProducer;
-import org.hibernate.boot.model.type.spi.BasicTypeProducerRegistry;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.spi.AttributeConverterAutoApplyHandler;
 import org.hibernate.boot.spi.BootstrapContext;
@@ -2246,12 +2245,11 @@ public class InFlightMetadataCollectorImpl implements InFlightMetadataCollector 
 			return new MetadataImpl(
 					uuid,
 					options,
-					getBootstrapContext().getTypeConfiguration(),
+					getBootstrapContext(),
 					identifierGeneratorFactory,
 					entityBindingMap,
 					mappedSuperClasses,
 					collectionBindingMap,
-					null,
 					filterDefinitionMap,
 					fetchProfileMap,
 					imports,

@@ -25,6 +25,7 @@ import org.hibernate.boot.model.TypeDefinition;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.Namespace;
 import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.boot.spi.MetadataBuildingOptions;
 import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.boot.spi.SessionFactoryBuilderFactory;
@@ -62,14 +63,13 @@ public class MetadataImpl implements MetadataImplementor, Serializable {
 	private final UUID uuid;
 	private final MetadataBuildingOptions metadataBuildingOptions;
 
-	private final TypeConfiguration typeConfiguration;
+	private final BootstrapContext bootstrapContext;
 
 	private final IdentifierGeneratorFactory identifierGeneratorFactory;
 
 	private final Map<String,PersistentClass> entityBindingMap;
 	private final Map<Class, MappedSuperclass> mappedSuperclassMap;
 	private final Map<String,Collection> collectionBindingMap;
-	private final Map<String, TypeDefinition> typeDefinitionMap;
 	private final Map<String, FilterDefinition> filterDefinitionMap;
 	private final Map<String, FetchProfile> fetchProfileMap;
 	private final Map<String, String> imports;
@@ -86,12 +86,11 @@ public class MetadataImpl implements MetadataImplementor, Serializable {
 	public MetadataImpl(
 			UUID uuid,
 			MetadataBuildingOptions metadataBuildingOptions,
-			TypeConfiguration typeConfiguration,
+			BootstrapContext bootstrapContext,
 			MutableIdentifierGeneratorFactory identifierGeneratorFactory,
 			Map<String, PersistentClass> entityBindingMap,
 			Map<Class, MappedSuperclass> mappedSuperclassMap,
 			Map<String, Collection> collectionBindingMap,
-			Map<String, TypeDefinition> typeDefinitionMap,
 			Map<String, FilterDefinition> filterDefinitionMap,
 			Map<String, FetchProfile> fetchProfileMap,
 			Map<String, String> imports,
@@ -106,12 +105,11 @@ public class MetadataImpl implements MetadataImplementor, Serializable {
 			AuditMetadataBuilderImplementor auditMetadataBuilder) {
 		this.uuid = uuid;
 		this.metadataBuildingOptions = metadataBuildingOptions;
-		this.typeConfiguration = typeConfiguration;
+		this.bootstrapContext = bootstrapContext;
 		this.identifierGeneratorFactory = identifierGeneratorFactory;
 		this.entityBindingMap = entityBindingMap;
 		this.mappedSuperclassMap = mappedSuperclassMap;
 		this.collectionBindingMap = collectionBindingMap;
-		this.typeDefinitionMap = typeDefinitionMap;
 		this.filterDefinitionMap = filterDefinitionMap;
 		this.fetchProfileMap = fetchProfileMap;
 		this.imports = imports;
@@ -133,12 +131,12 @@ public class MetadataImpl implements MetadataImplementor, Serializable {
 
 	@Override
 	public TypeConfiguration getTypeConfiguration() {
-		return typeConfiguration;
+		return bootstrapContext.getTypeConfiguration();
 	}
 
 	@Override
 	public SessionFactoryBuilder getSessionFactoryBuilder() {
-		final SessionFactoryBuilderImpl defaultBuilder = new SessionFactoryBuilderImpl( this );
+		final SessionFactoryBuilderImpl defaultBuilder = new SessionFactoryBuilderImpl( this, bootstrapContext );
 
 		final ClassLoaderService cls = metadataBuildingOptions.getServiceRegistry().getService( ClassLoaderService.class );
 		final java.util.Collection<SessionFactoryBuilderFactory> discoveredBuilderFactories = cls.loadJavaServices( SessionFactoryBuilderFactory.class );
