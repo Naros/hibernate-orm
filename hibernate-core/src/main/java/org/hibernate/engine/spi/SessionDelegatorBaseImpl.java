@@ -22,7 +22,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Metamodel;
 
 import org.hibernate.CacheMode;
@@ -141,25 +140,6 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	@Override
 	public boolean isTransactionInProgress() {
 		return delegate.isTransactionInProgress();
-	}
-
-	@Override
-	public LockOptions getLockRequest(LockModeType lockModeType, Map<String, Object> properties) {
-		return delegate.getLockRequest( lockModeType, properties );
-	}
-
-	@Override
-	public LockOptions buildLockOptions(LockModeType lockModeType, Map<String, Object> properties) {
-		return delegate.buildLockOptions( lockModeType, properties );
-	}
-
-	@Override
-	public <T> QueryImplementor<T> createQuery(
-			String jpaqlString,
-			Class<T> resultClass,
-			Selection selection,
-			QueryOptions queryOptions) {
-		return delegate.createQuery( jpaqlString,resultClass, selection, queryOptions );
 	}
 
 	@Override
@@ -315,6 +295,11 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	@Override
 	public void checkOpen(boolean markForRollbackIfClosed) {
 		delegate.checkOpen( markForRollbackIfClosed );
+	}
+
+	@Override
+	public void prepareForQueryExecution(boolean requiresTxn) {
+		delegate.prepareForQueryExecution( requiresTxn );
 	}
 
 	@Override
@@ -508,11 +493,6 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	}
 
 	@Override
-	public NativeQueryImplementor getNamedSQLQuery(String name) {
-		return delegate.getNamedSQLQuery( name );
-	}
-
-	@Override
 	public NativeQueryImplementor getNamedNativeQuery(String name) {
 		return delegate.getNamedNativeQuery( name );
 	}
@@ -605,11 +585,6 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	@Override
 	public Object getDelegate() {
 		return delegate;
-	}
-
-	@Override
-	public NativeQueryImplementor createSQLQuery(String queryString) {
-		return delegate.createSQLQuery( queryString );
 	}
 
 	@Override
@@ -1088,11 +1063,6 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	}
 
 	@Override
-	public boolean isFlushBeforeCompletionEnabled() {
-		return delegate.isFlushBeforeCompletionEnabled();
-	}
-
-	@Override
 	public ActionQueue getActionQueue() {
 		return delegate.getActionQueue();
 	}
@@ -1135,11 +1105,6 @@ public class SessionDelegatorBaseImpl implements SessionImplementor {
 	@Override
 	public void removeOrphanBeforeUpdates(String entityName, Object child) {
 		delegate.removeOrphanBeforeUpdates( entityName, child );
-	}
-
-	@Override
-	public SessionImplementor getSession() {
-		return this;
 	}
 
 	@Override

@@ -110,8 +110,8 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 			selection = ( Selection<? extends T> ) criteriaBuilder().tuple( selections );
 		}
 		else if ( getResultType().isArray() ) {
-			selection = ( Selection<? extends T> )  criteriaBuilder().array(
-					( Class<? extends Object[]> ) getResultType(),
+			selection = criteriaBuilder().array(
+					getResultType(),
 					selections
 			);
 		}
@@ -322,6 +322,7 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 						jpaqlString,
 						getResultType(),
 						getSelection(),
+
 						new HibernateEntityManagerImplementor.QueryOptions() {
 							@Override
 							public List<ValueHandlerFactory.ValueHandler> getValueHandlers() {
@@ -338,7 +339,7 @@ public class CriteriaQueryImpl<T> extends AbstractNode implements CriteriaQuery<
 
 							@Override
 							public ResultMetadataValidator getResultMetadataValidator() {
-								return new HibernateEntityManagerImplementor.QueryOptions.ResultMetadataValidator() {
+								return new SessionImplementor().QueryOptions.ResultMetadataValidator() {
 									@Override
 									public void validate(Type[] returnTypes) {
 										SelectionImplementor selection = (SelectionImplementor) queryStructure.getSelection();
