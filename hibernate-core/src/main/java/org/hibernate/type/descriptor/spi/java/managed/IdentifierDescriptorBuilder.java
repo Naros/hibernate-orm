@@ -6,13 +6,9 @@
  */
 package org.hibernate.type.descriptor.spi.java.managed;
 
-import org.hibernate.id.EntityIdentifierNature;
-
 /**
- * Descriptor for the IdentifiableType's identifier.
- *
- * @author Steve Ebersole
+ * @author Andrea Boriero
  */
-public interface IdentifierDescriptor {
-	EntityIdentifierNature getNature();
+public interface IdentifierDescriptorBuilder<T extends IdentifierDescriptor> {
+	T build();
 }

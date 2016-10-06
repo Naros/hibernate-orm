@@ -9,6 +9,7 @@ package org.hibernate.type.descriptor.internal.java.managed.attribute;
 import javax.persistence.metamodel.PluralAttribute;
 
 import org.hibernate.cfg.NotYetImplementedException;
+import org.hibernate.type.descriptor.spi.java.JavaTypeDescriptor;
 import org.hibernate.type.descriptor.spi.java.managed.AttributeBuilderPlural;
 import org.hibernate.type.descriptor.spi.java.managed.AttributeDeclarer;
 
@@ -25,6 +26,11 @@ public class AttributeBuilderPluralStandardImpl
 
 	@Override
 	protected PluralAttribute generateAttribute() {
+		throw new NotYetImplementedException( "Building PluralAttributes not yet implemented" );
+	}
+
+	@Override
+	public void setCollectionType(JavaTypeDescriptor collectionType) {
 		throw new NotYetImplementedException( "Building PluralAttributes not yet implemented" );
 	}
 }

@@ -7,7 +7,11 @@
 package org.hibernate.type.descriptor.internal.java.managed;
 
 import org.hibernate.EntityMode;
+import org.hibernate.id.EntityIdentifierNature;
+import org.hibernate.type.descriptor.internal.java.managed.identifier.IdentifierDescriptorBuilderSimpleImpl;
 import org.hibernate.type.descriptor.spi.java.managed.EntityHierarchy;
+import org.hibernate.type.descriptor.spi.java.managed.IdentifierDescriptor;
+import org.hibernate.type.descriptor.spi.java.managed.IdentifierDescriptorBuilder;
 
 /**
  * @author Steve Ebersole
@@ -26,5 +30,12 @@ public class RootEntityDescriptor extends EntityDescriptor {
 	@Override
 	public EntityHierarchy getEntityHierarchy() {
 		return entityHierarchy;
+	}
+
+	@Override
+	public void complete() {
+		super.complete();
+		final IdentifierDescriptor identifierDescriptor = identifierDescriptorBuilder.build();
+		entityHierarchy.setIdentifierDescriptor( identifierDescriptor );
 	}
 }

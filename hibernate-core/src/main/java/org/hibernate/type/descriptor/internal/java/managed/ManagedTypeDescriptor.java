@@ -21,9 +21,13 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.HibernateException;
+import org.hibernate.cfg.NotYetImplementedException;
+import org.hibernate.id.EntityIdentifierNature;
 import org.hibernate.internal.util.collections.CollectionHelper;
 import org.hibernate.type.descriptor.internal.java.managed.attribute.AttributeBuilderPluralStandardImpl;
 import org.hibernate.type.descriptor.internal.java.managed.attribute.AttributeBuilderSingularStandardImpl;
+import org.hibernate.type.descriptor.internal.java.managed.identifier.IdentifierDescriptorBuilderAggregatedCompositeImpl;
+import org.hibernate.type.descriptor.internal.java.managed.identifier.IdentifierDescriptorBuilderSimpleImpl;
 import org.hibernate.type.descriptor.spi.JdbcRecommendedSqlTypeMappingContext;
 import org.hibernate.type.descriptor.spi.MutabilityPlan;
 import org.hibernate.type.descriptor.spi.WrapperOptions;
@@ -31,6 +35,7 @@ import org.hibernate.type.descriptor.spi.java.managed.AttributeBuilder;
 import org.hibernate.type.descriptor.spi.java.managed.AttributeBuilderPlural;
 import org.hibernate.type.descriptor.spi.java.managed.AttributeBuilderSingular;
 import org.hibernate.type.descriptor.spi.java.managed.AttributeDeclarer;
+import org.hibernate.type.descriptor.spi.java.managed.IdentifierDescriptorBuilder;
 import org.hibernate.type.descriptor.spi.java.managed.JavaTypeDescriptorManagedImplementor;
 import org.hibernate.type.descriptor.spi.java.managed.InitializationAccess;
 import org.hibernate.type.descriptor.spi.sql.SqlTypeDescriptor;
@@ -50,6 +55,7 @@ public abstract class ManagedTypeDescriptor
 	private ManagedTypeDescriptor superType;
 
 	private Map<String,AttributeBuilder> declaredAttributeBuilders = new HashMap<>();
+	protected IdentifierDescriptorBuilder identifierDescriptorBuilder;
 
 	private boolean initialized;
 	private Map<String,Attribute> declaredAttributes;
@@ -600,8 +606,31 @@ public abstract class ManagedTypeDescriptor
 	}
 
 	@Override
+	public IdentifierDescriptorBuilder getIdentifierDescriptorBuilder(EntityIdentifierNature identifierNature) {
+		if ( identifierDescriptorBuilder != null ) {
+			switch ( identifierNature ) {
+				case SIMPLE: {
+					identifierDescriptorBuilder = new IdentifierDescriptorBuilderSimpleImpl();
+				}
+				case AGGREGATED_COMPOSITE:{
+					identifierDescriptorBuilder = new IdentifierDescriptorBuilderAggregatedCompositeImpl();
+				}
+				case NON_AGGREGATED_COMPOSITE:{
+					throw new NotYetImplementedException( "IdentifierDescriptorBuilderNonAggregatedCompositeImpl not yet implemented" );
+				}
+			}
+		}
+		return identifierDescriptorBuilder;
+	}
+
+	@Override
 	public void attributeBuilt(Attribute attribute) {
 		errorIfInitialized();
-		log.debugf( "ManagedTypeDescriptor[%s] attribute [%s] built : %s", getTypeName(), attribute.getName(), attribute );
+		log.debugf(
+				"ManagedTypeDescriptor[%s] attribute [%s] built : %s",
+				getTypeName(),
+				attribute.getName(),
+				attribute
+		);
 	}
 }

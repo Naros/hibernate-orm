@@ -16,17 +16,14 @@ import org.hibernate.type.descriptor.spi.java.managed.JavaTypeDescriptorEntityIm
 /**
  * @author Chris Cranford
  */
-public class HbmManagedJavaTypeDescriptorBinder {
-	private final MetadataBuildingContext metadataBuildingContext;
+public class HbmManagedJavaTypeDescriptorBinder extends AbstractJavaTypeDescriptorBinder {
 
-	public HbmManagedJavaTypeDescriptorBinder(MetadataBuildingContext metadataBuildingContext) {
-		this.metadataBuildingContext = metadataBuildingContext;
+	protected HbmManagedJavaTypeDescriptorBinder(MetadataBuildingContext metadataBuildingContext) {
+		super( metadataBuildingContext );
 	}
 
 	public void bindDescriptors(final EntityHierarchySourceImpl hierarchySource) {
-		final RootEntityDescriptor rootDescriptor = (RootEntityDescriptor) metadataBuildingContext.getMetadataCollector()
-				.getTypeConfiguration()
-				.getJavaTypeDescriptorRegistry()
+		final RootEntityDescriptor rootDescriptor = (RootEntityDescriptor) getJavaTypeDescriptorRegistry()
 				.makeRootEntityDescriptor(
 						hierarchySource.getRoot().getEntityNamingSource().getEntityName(),
 						interpretInheritanceStyle( hierarchySource.getHierarchyInheritanceType() ),
@@ -43,10 +40,10 @@ public class HbmManagedJavaTypeDescriptorBinder {
 		}
 	}
 
-	private void bindSubclassDescriptor(IdentifiableTypeSource entitySource, JavaTypeDescriptorEntityImplementor superTypeDescriptor) {
-		final JavaTypeDescriptorEntityImplementor entityDescriptor = metadataBuildingContext.getBootstrapContext()
-				.getTypeConfiguration()
-				.getJavaTypeDescriptorRegistry()
+	private void bindSubclassDescriptor(
+			IdentifiableTypeSource entitySource,
+			JavaTypeDescriptorEntityImplementor superTypeDescriptor) {
+		final JavaTypeDescriptorEntityImplementor entityDescriptor = getJavaTypeDescriptorRegistry()
 				.makeEntityDescriptor(
 						entitySource.getTypeName(),
 						superTypeDescriptor

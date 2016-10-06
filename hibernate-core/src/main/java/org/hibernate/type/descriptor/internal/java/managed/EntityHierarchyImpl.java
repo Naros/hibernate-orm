@@ -19,6 +19,7 @@ public class EntityHierarchyImpl implements EntityHierarchy {
 	private final EntityDescriptor rootEntityDescriptor;
 	private final InheritanceStyle inheritanceStyle;
 	private final EntityMode entityMode;
+	private IdentifierDescriptor identifierDescriptor;
 
 	public EntityHierarchyImpl(
 			EntityDescriptor rootEntityDescriptor,
@@ -46,6 +47,10 @@ public class EntityHierarchyImpl implements EntityHierarchy {
 
 	@Override
 	public IdentifierDescriptor getIdentifierDescriptor() {
-		throw new NotYetImplementedException( "IdentifierDescriptor support as part of EntityHierarchyImpl not yet implemented" );
+		return this.identifierDescriptor;
+	}
+
+	void setIdentifierDescriptor(IdentifierDescriptor identifierDescriptor) {
+		this.identifierDescriptor = identifierDescriptor;
 	}
 }

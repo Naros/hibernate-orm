@@ -36,44 +36,4 @@ public class HbmMetadataSourceManagedTypeBuilder {
 		identifierBinder.bindIdentifier( hierarchySource );
 		attributeBinder.bindAttributes( hierarchySource );
 	}
-
-	// todo: move these methods to the HbmManagedJavaTypeIdentifierBinder
-
-	private void buildIdentifierType(final EntityHierarchySourceImpl hierarchySource) {
-		switch ( hierarchySource.getIdentifierSource().getNature() ) {
-			case SIMPLE: {
-				buildSimpleIdentifierType( hierarchySource );
-				break;
-			}
-			case AGGREGATED_COMPOSITE: {
-				buildAggregatedCompositeIdentifierType( hierarchySource );
-				break;
-			}
-			case NON_AGGREGATED_COMPOSITE: {
-				buildNonAggregatedCompositeIdentiferType( hierarchySource );
-				break;
-			}
-		}
-	}
-
-	private void buildSimpleIdentifierType(final EntityHierarchySourceImpl hierarchySource) {
-		final IdentifierSourceSimple idSource = (IdentifierSourceSimple) hierarchySource.getIdentifierSource();
-		// todo: need to create an IdentifierTypeDescriptor here
-	}
-
-	private void buildAggregatedCompositeIdentifierType(final EntityHierarchySourceImpl hierarchySource) {
-		final IdentifierSourceAggregatedComposite identifierSource
-				= (IdentifierSourceAggregatedComposite) hierarchySource.getIdentifierSource();
-		// todo: need to create an IdentifierTypeDescriptor here
-		throw new NotYetImplementedException();
-	}
-
-	private void buildNonAggregatedCompositeIdentiferType(final EntityHierarchySourceImpl hierarchySource) {
-		final IdentifierSourceNonAggregatedComposite identifierSource
-				= (IdentifierSourceNonAggregatedComposite) hierarchySource.getIdentifierSource();
-		// todo: need to create an IdentifierTypeDescriptor here
-		throw new NotYetImplementedException();
-	}
-
-
 }

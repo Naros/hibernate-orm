@@ -28,11 +28,10 @@ import org.hibernate.type.descriptor.spi.java.managed.JavaTypeDescriptorEntityIm
 /**
  * @author Chris Cranford
  */
-public class HbmManagedJavaTypeAttributeBinder {
-	private final MetadataBuildingContext metadataBuildingContext;
+public class HbmManagedJavaTypeAttributeBinder extends AbstractJavaTypeDescriptorBinder {
 
-	public HbmManagedJavaTypeAttributeBinder(MetadataBuildingContext metadataBuildingContext) {
-		this.metadataBuildingContext = metadataBuildingContext;
+	protected HbmManagedJavaTypeAttributeBinder(MetadataBuildingContext metadataBuildingContext) {
+		super( metadataBuildingContext );
 	}
 
 	public void bindAttributes(final EntityHierarchySourceImpl hierarchySource) {
@@ -51,10 +50,8 @@ public class HbmManagedJavaTypeAttributeBinder {
 
 	private void bindAttributes(IdentifiableTypeSource source) {
 		final JavaTypeDescriptorEntityImplementor javaTypeDescriptor =
-				(JavaTypeDescriptorEntityImplementor) metadataBuildingContext.getBootstrapContext()
-				.getTypeConfiguration()
-				.getJavaTypeDescriptorRegistry()
-				.getDescriptor( source.getTypeName() );
+				(JavaTypeDescriptorEntityImplementor) getJavaTypeDescriptorRegistry()
+						.getDescriptor( source.getTypeName() );
 
 		for ( AttributeSource attributeSource : source.attributeSources() ) {
 			if ( attributeSource.isSingular() ) {
@@ -69,15 +66,11 @@ public class HbmManagedJavaTypeAttributeBinder {
 	private void bindSingularAttribute(JavaTypeDescriptorEntityImplementor entityDescriptor, SingularAttributeSource attributeSource) {
 		final JavaTypeDescriptor attributeDescriptor;
 		if ( attributeSource instanceof SingularAttributeSourceEmbedded ) {
-			JavaTypeDescriptor embeddableDescriptor = metadataBuildingContext.getBootstrapContext()
-					.getTypeConfiguration()
-					.getJavaTypeDescriptorRegistry()
+			JavaTypeDescriptor embeddableDescriptor = getJavaTypeDescriptorRegistry()
 					.getDescriptor( attributeSource.getTypeInformation().getName() );
 
 			if ( embeddableDescriptor == null ) {
-				embeddableDescriptor = metadataBuildingContext.getBootstrapContext()
-						.getTypeConfiguration()
-						.getJavaTypeDescriptorRegistry()
+				embeddableDescriptor = getJavaTypeDescriptorRegistry()
 						.makeEmbeddableDescriptor(
 								attributeSource.getTypeInformation().getName(),
 								null
@@ -86,9 +79,7 @@ public class HbmManagedJavaTypeAttributeBinder {
 			attributeDescriptor = embeddableDescriptor;
 		}
 		else {
-			attributeDescriptor = metadataBuildingContext.getBootstrapContext()
-					.getTypeConfiguration()
-					.getJavaTypeDescriptorRegistry()
+			attributeDescriptor = getJavaTypeDescriptorRegistry()
 					.getDescriptor( attributeSource.getTypeInformation().getName() );
 		}
 
@@ -103,28 +94,20 @@ public class HbmManagedJavaTypeAttributeBinder {
 
 		final JavaTypeDescriptor elementTypeDescriptor;
 		if ( attributeSource.getElementSource() instanceof PluralAttributeElementSourceEmbedded ) {
-			JavaTypeDescriptor embeddableDescriptor = metadataBuildingContext.getBootstrapContext()
-					.getTypeConfiguration()
-					.getJavaTypeDescriptorRegistry()
+			JavaTypeDescriptor embeddableDescriptor = getJavaTypeDescriptorRegistry()
 					.getDescriptor( pluralAttributeElementTypeName );
 			if ( embeddableDescriptor == null ) {
-				embeddableDescriptor = metadataBuildingContext.getBootstrapContext()
-						.getTypeConfiguration()
-						.getJavaTypeDescriptorRegistry()
+				embeddableDescriptor = getJavaTypeDescriptorRegistry()
 						.makeEmbeddableDescriptor( pluralAttributeElementTypeName, null );
 			}
 			elementTypeDescriptor = embeddableDescriptor;
 		}
 		else {
-			elementTypeDescriptor = metadataBuildingContext.getBootstrapContext()
-					.getTypeConfiguration()
-					.getJavaTypeDescriptorRegistry()
+			elementTypeDescriptor = getJavaTypeDescriptorRegistry()
 					.getDescriptor( getPluralAttributeElementType( attributeSource ) );
 		}
 
-		final JavaTypeDescriptor attributeDescriptor = metadataBuildingContext.getBootstrapContext()
-				.getTypeConfiguration()
-				.getJavaTypeDescriptorRegistry()
+		final JavaTypeDescriptor attributeDescriptor = getJavaTypeDescriptorRegistry()
 				.getDescriptor( attributeSource.getNature().reportedJavaType() );
 
 		final AttributeBuilderPlural attributeBuilder = entityDescriptor.getInitializationAccess()

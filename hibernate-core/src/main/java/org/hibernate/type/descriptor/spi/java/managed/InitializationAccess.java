@@ -6,7 +6,7 @@
  */
 package org.hibernate.type.descriptor.spi.java.managed;
 
-import org.hibernate.type.descriptor.internal.java.managed.ManagedTypeDescriptor;
+import org.hibernate.id.EntityIdentifierNature;
 
 /**
  * Defines access to initialization for state pertaining to a managed (non-basic) type.
@@ -24,10 +24,12 @@ public interface InitializationAccess {
 	AttributeBuilderSingular getSingularAttributeBuilder(String name);
 	AttributeBuilderPlural getPluralAttributeBuilder(String name);
 
-	/**
-	 * To be called after all initialization work is done - as we transition into a
-	 * working SessionFactory.  After this method is called, access to the
-	 * InitializationAccess nor any of its methods should not be allowed.
-	 */
+	IdentifierDescriptorBuilder getIdentifierDescriptorBuilder(EntityIdentifierNature identifierNature);
+
+		/**
+		 * To be called after all initialization work is done - as we transition into a
+		 * working SessionFactory.  After this method is called, access to the
+		 * InitializationAccess nor any of its methods should not be allowed.
+		 */
 	void complete();
 }
