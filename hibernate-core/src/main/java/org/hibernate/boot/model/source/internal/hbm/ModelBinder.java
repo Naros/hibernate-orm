@@ -90,7 +90,6 @@ import org.hibernate.boot.model.source.spi.Sortable;
 import org.hibernate.boot.model.source.spi.TableSource;
 import org.hibernate.boot.model.source.spi.TableSpecificationSource;
 import org.hibernate.boot.model.source.spi.VersionAttributeSource;
-import org.hibernate.boot.model.type.internal.BasicTypeProducerUnregisteredImpl;
 import org.hibernate.boot.model.type.spi.BasicTypeResolver;
 import org.hibernate.boot.registry.classloading.spi.ClassLoadingException;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
@@ -716,8 +715,8 @@ public class ModelBinder {
 
 		bindSimpleValueType(
 				sourceDocument,
-				idSource.getIdentifierAttributeSource().getTypeInformation(),
-				idValue
+				idValue,
+				new HbmBasicTypeResolverImpl( sourceDocument, idSource.getIdentifierAttributeSource().getTypeInformation() )
 		);
 
 		final String propertyName = idSource.getIdentifierAttributeSource().getName();
@@ -1012,8 +1011,8 @@ public class ModelBinder {
 
 		bindSimpleValueType(
 				sourceDocument,
-				versionAttributeSource.getTypeInformation(),
-				versionValue
+				versionValue,
+				new HbmBasicTypeResolverImpl( sourceDocument, versionAttributeSource.getTypeInformation() )
 		);
 
 		relationalObjectBinder.bindColumnsAndFormulas(
@@ -1076,8 +1075,8 @@ public class ModelBinder {
 		}
 		bindSimpleValueType(
 				sourceDocument,
-				new HibernateTypeSourceImpl( typeName ),
-				discriminatorValue
+				discriminatorValue,
+				new HbmBasicTypeResolverImpl( sourceDocument, new HibernateTypeSourceImpl( typeName ) )
 		);
 
 		relationalObjectBinder.bindColumnOrFormula(
@@ -1903,8 +1902,8 @@ public class ModelBinder {
 
 		bindSimpleValueType(
 				sourceDocument,
-				attributeSource.getTypeInformation(),
-				value
+				value,
+				new HbmBasicTypeResolverImpl( sourceDocument, attributeSource.getTypeInformation() )
 		);
 
 		relationalObjectBinder.bindColumnsAndFormulas(
@@ -2306,13 +2305,14 @@ public class ModelBinder {
 			Any anyBinding,
 			final AttributeRole attributeRole,
 			AttributePath attributePath) {
-		final BasicTypeResolver keyTypeResolver = resolveBasicTypeResolver(
+
+		final BasicTypeResolver identifierTypeResolver = new HbmBasicTypeResolverImpl(
 				sourceDocument,
 				anyMapping.getKeySource().getTypeSource()
 		);
-		anyBinding.setIdentifierTypeResolver( keyTypeResolver );
+		anyBinding.setIdentifierTypeResolver( identifierTypeResolver );
 
-		final BasicTypeResolver discriminatorTypeResolver = resolveBasicTypeResolver(
+		final BasicTypeResolver discriminatorTypeResolver = new HbmBasicTypeResolverImpl(
 				sourceDocument,
 				anyMapping.getDiscriminatorSource().getTypeSource()
 		);
@@ -2726,40 +2726,11 @@ public class ModelBinder {
 		}
 	}
 
-	private static void bindSimpleValueType(
-			MappingDocument mappingDocument,
-			HibernateTypeSource typeSource,
-			SimpleValue simpleValue) {
-		if ( mappingDocument.getBuildingOptions().useNationalizedCharacterData() ) {
-			simpleValue.makeNationalized();
-		}
-
-		final BasicTypeResolver typeProducer = resolveBasicTypeResolver( mappingDocument, typeSource );
-		simpleValue.setBasicTypeResolver( typeProducer );
-	}
-
 	private static void bindSimpleValueType(MappingDocument mappingDocument, SimpleValue simpleValue, BasicTypeResolver basicTypeResolver) {
 		if ( mappingDocument.getBuildingOptions().useNationalizedCharacterData() ) {
 			simpleValue.makeNationalized();
 		}
 		simpleValue.setBasicTypeResolver( basicTypeResolver );
-	}
-
-	private static BasicTypeResolver resolveBasicTypeResolver(
-			MappingDocument mappingDocument,
-			HibernateTypeSource typeSource) {
-		final String typeName = typeSource.getName();
-
-		if ( StringHelper.isNotEmpty( typeName ) ) {
-			final BasicTypeResolver registered = mappingDocument.getMetadataCollector().getBootstrapContext()
-					.getBasicTypeResolverRegistry()
-					.resolve( typeSource.getName() );
-			if ( registered != null ) {
-				return registered;
-			}
-		}
-
-		return new BasicTypeProducerUnregisteredImpl( mappingDocument.getMetadataCollector().getTypeConfiguration() );
 	}
 
 	private Table bindEntityTableSpecification(
@@ -3326,8 +3297,8 @@ public class ModelBinder {
 
 				bindSimpleValueType(
 						mappingDocument,
-						idSource.getTypeInformation(),
-						idBinding
+						idBinding,
+						new HbmBasicTypeResolverImpl( mappingDocument, idSource.getTypeInformation() )
 				);
 
 				relationalObjectBinder.bindColumn(
@@ -3368,8 +3339,8 @@ public class ModelBinder {
 
 				bindSimpleValueType(
 						getMappingDocument(),
-						elementSource.getExplicitHibernateTypeSource(),
-						elementBinding
+						elementBinding,
+						new HbmBasicTypeResolverImpl( getMappingDocument(), elementSource.getExplicitHibernateTypeSource() )
 				);
 
 				relationalObjectBinder.bindColumnsAndFormulas(
@@ -3856,8 +3827,8 @@ public class ModelBinder {
 
 		bindSimpleValueType(
 				mappingDocument,
-				indexSource.getTypeInformation(),
-				indexBinding
+				indexBinding,
+				new HbmBasicTypeResolverImpl( mappingDocument, indexSource.getTypeInformation() )
 		);
 
 		relationalObjectBinder.bindColumnsAndFormulas(
@@ -3900,15 +3871,10 @@ public class ModelBinder {
 					mappingDocument,
 					collectionBinding.getCollectionTable()
 			);
-//			bindSimpleValueType(
-//					mappingDocument,
-//					mapKeySource.getTypeInformation(),
-//					value
-//			);
 			bindSimpleValueType(
 					mappingDocument,
 					value,
-					new BasicTypeResolverMapKeyImpl( mappingDocument, mapKeySource.getTypeInformation() )
+					new HbmBasicTypeResolverImpl( mappingDocument, mapKeySource.getTypeInformation() )
 			);
 			if ( !value.isTypeSpecified() ) {
 				throw new MappingException(
@@ -4314,13 +4280,13 @@ public class ModelBinder {
 
 	}
 
-	private abstract class HbmBasicTypeResolverSupport
+	private class HbmBasicTypeResolverImpl
 			extends BasicTypeResolverSupport
 			implements BasicTypeParameters, JdbcRecommendedSqlTypeMappingContext {
 		private final MappingDocument mappingDocument;
 		private final HibernateTypeSource typeSource;
 
-		public HbmBasicTypeResolverSupport(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
+		public HbmBasicTypeResolverImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
 			super( mappingDocument );
 			this.mappingDocument = mappingDocument;
 			this.typeSource = typeSource;
@@ -4392,18 +4358,6 @@ public class ModelBinder {
 
 		protected HibernateTypeSource getTypeSource() {
 			return typeSource;
-		}
-	}
-
-	private class BasicTypeResolverListIndexImpl extends HbmBasicTypeResolverSupport {
-		public BasicTypeResolverListIndexImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
-			super( mappingDocument, typeSource );
-		}
-	}
-
-	private class BasicTypeResolverMapKeyImpl extends HbmBasicTypeResolverSupport {
-		public BasicTypeResolverMapKeyImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
-			super( mappingDocument, typeSource );
 		}
 	}
 }
