@@ -27,6 +27,7 @@ import org.hibernate.boot.jaxb.hbm.spi.JaxbHbmNamedNativeQueryType;
 import org.hibernate.boot.jaxb.hbm.spi.JaxbHbmNamedQueryType;
 import org.hibernate.boot.model.Caching;
 import org.hibernate.boot.model.IdentifierGeneratorDefinition;
+import org.hibernate.boot.model.JavaTypeDescriptor;
 import org.hibernate.boot.model.TruthValue;
 import org.hibernate.boot.model.TypeDefinition;
 import org.hibernate.boot.model.naming.EntityNaming;
@@ -4285,11 +4286,17 @@ public class ModelBinder {
 			implements BasicTypeParameters, JdbcRecommendedSqlTypeMappingContext {
 		private final MappingDocument mappingDocument;
 		private final HibernateTypeSource typeSource;
+		private final BasicJavaDescriptor javaTypeDescriptor;
 
 		public HbmBasicTypeResolverImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
 			super( mappingDocument );
 			this.mappingDocument = mappingDocument;
 			this.typeSource = typeSource;
+
+			this.javaTypeDescriptor = (BasicJavaDescriptor) mappingDocument.getBootstrapContext()
+					.getTypeConfiguration()
+					.getJavaTypeDescriptorRegistry()
+					.getDescriptor( typeSource.getName() );
 		}
 
 		@Override
@@ -4299,7 +4306,7 @@ public class ModelBinder {
 
 		@Override
 		public BasicJavaDescriptor getJavaTypeDescriptor() {
-			return (BasicJavaDescriptor) this.typeSource.getJavaType();
+			return javaTypeDescriptor;
 		}
 
 		@Override
@@ -4350,14 +4357,6 @@ public class ModelBinder {
 		@Override
 		public TypeConfiguration getTypeConfiguration() {
 			return getBuildingContext().getBootstrapContext().getTypeConfiguration();
-		}
-
-		protected MappingDocument getMappingDocument() {
-			return mappingDocument;
-		}
-
-		protected HibernateTypeSource getTypeSource() {
-			return typeSource;
 		}
 	}
 }
