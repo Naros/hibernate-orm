@@ -7,12 +7,16 @@
 package org.hibernate.boot.model.source.internal.hbm;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.persistence.EnumType;
+import javax.persistence.TemporalType;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.EntityMode;
@@ -93,6 +97,7 @@ import org.hibernate.boot.spi.InFlightMetadataCollector;
 import org.hibernate.boot.spi.InFlightMetadataCollector.EntityTableXref;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.boot.spi.NaturalIdUniqueKeyBinder;
+import org.hibernate.cfg.BasicTypeResolverSupport;
 import org.hibernate.cfg.FkSecondPass;
 import org.hibernate.cfg.SecondPass;
 import org.hibernate.engine.FetchStyle;
@@ -143,7 +148,14 @@ import org.hibernate.mapping.Value;
 import org.hibernate.tuple.GeneratedValueGeneration;
 import org.hibernate.tuple.GenerationTiming;
 import org.hibernate.type.ForeignKeyDirection;
+import org.hibernate.type.converter.spi.AttributeConverterDefinition;
+import org.hibernate.type.descriptor.java.MutabilityPlan;
+import org.hibernate.type.descriptor.java.spi.BasicJavaDescriptor;
+import org.hibernate.type.descriptor.spi.JdbcRecommendedSqlTypeMappingContext;
+import org.hibernate.type.descriptor.sql.spi.SqlTypeDescriptor;
 import org.hibernate.type.spi.BasicType;
+import org.hibernate.type.spi.BasicTypeParameters;
+import org.hibernate.type.spi.TypeConfiguration;
 
 /**
  * Responsible for coordinating the binding of all information inside entity tags ({@code <class/>}, etc).
@@ -2726,6 +2738,13 @@ public class ModelBinder {
 		simpleValue.setBasicTypeResolver( typeProducer );
 	}
 
+	private static void bindSimpleValueType(MappingDocument mappingDocument, SimpleValue simpleValue, BasicTypeResolver basicTypeResolver) {
+		if ( mappingDocument.getBuildingOptions().useNationalizedCharacterData() ) {
+			simpleValue.makeNationalized();
+		}
+		simpleValue.setBasicTypeResolver( basicTypeResolver );
+	}
+
 	private static BasicTypeResolver resolveBasicTypeResolver(
 			MappingDocument mappingDocument,
 			HibernateTypeSource typeSource) {
@@ -3881,10 +3900,15 @@ public class ModelBinder {
 					mappingDocument,
 					collectionBinding.getCollectionTable()
 			);
+//			bindSimpleValueType(
+//					mappingDocument,
+//					mapKeySource.getTypeInformation(),
+//					value
+//			);
 			bindSimpleValueType(
 					mappingDocument,
-					mapKeySource.getTypeInformation(),
-					value
+					value,
+					new BasicTypeResolverMapKeyImpl( mappingDocument, mapKeySource.getTypeInformation() )
 			);
 			if ( !value.isTypeSpecified() ) {
 				throw new MappingException(
@@ -4288,5 +4312,98 @@ public class ModelBinder {
 			entityBinding.getTable().addUniqueKey( uk );
 		}
 
+	}
+
+	private abstract class HbmBasicTypeResolverSupport
+			extends BasicTypeResolverSupport
+			implements BasicTypeParameters, JdbcRecommendedSqlTypeMappingContext {
+		private final MappingDocument mappingDocument;
+		private final HibernateTypeSource typeSource;
+
+		public HbmBasicTypeResolverSupport(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
+			super( mappingDocument );
+			this.mappingDocument = mappingDocument;
+			this.typeSource = typeSource;
+		}
+
+		@Override
+		public BasicType resolveBasicType() {
+			return getTypeConfiguration().getBasicTypeRegistry().resolveBasicType( this, this );
+		}
+
+		@Override
+		public BasicJavaDescriptor getJavaTypeDescriptor() {
+			return (BasicJavaDescriptor) this.typeSource.getJavaType();
+		}
+
+		@Override
+		public SqlTypeDescriptor getSqlTypeDescriptor() {
+			return null;
+		}
+
+		@Override
+		public AttributeConverterDefinition getAttributeConverterDefinition() {
+			// not supported
+			return null;
+		}
+
+		@Override
+		public Comparator getComparator() {
+			// not supported
+			return null;
+		}
+
+		@Override
+		public TemporalType getTemporalPrecision() {
+			// not supported
+			return null;
+		}
+
+		@Override
+		public MutabilityPlan getMutabilityPlan() {
+			// not supported
+			return null;
+		}
+
+		@Override
+		public EnumType getEnumeratedType() {
+			// not supported?
+			return null;
+		}
+
+		@Override
+		public boolean isNationalized() {
+			return getBuildingContext().getBuildingOptions().useNationalizedCharacterData();
+		}
+
+		@Override
+		public boolean isLob() {
+			return false;
+		}
+
+		@Override
+		public TypeConfiguration getTypeConfiguration() {
+			return getBuildingContext().getBootstrapContext().getTypeConfiguration();
+		}
+
+		protected MappingDocument getMappingDocument() {
+			return mappingDocument;
+		}
+
+		protected HibernateTypeSource getTypeSource() {
+			return typeSource;
+		}
+	}
+
+	private class BasicTypeResolverListIndexImpl extends HbmBasicTypeResolverSupport {
+		public BasicTypeResolverListIndexImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
+			super( mappingDocument, typeSource );
+		}
+	}
+
+	private class BasicTypeResolverMapKeyImpl extends HbmBasicTypeResolverSupport {
+		public BasicTypeResolverMapKeyImpl(MappingDocument mappingDocument, HibernateTypeSource typeSource) {
+			super( mappingDocument, typeSource );
+		}
 	}
 }
