@@ -6,15 +6,15 @@
  */
 package org.hibernate.envers.event.spi;
 
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.envers.internal.entities.EntityConfiguration;
 
 /**
  * @author Chris Cranford
  */
 public abstract class BaseEnversUpdateEventListener extends BaseEnversEventListener {
-	public BaseEnversUpdateEventListener(EnversService enversService) {
-		super( enversService );
+	public BaseEnversUpdateEventListener(AuditService auditService) {
+		super( auditService );
 	}
 
 	/**
@@ -26,7 +26,7 @@ public abstract class BaseEnversUpdateEventListener extends BaseEnversEventListe
 	 * @return {@code true} if the entity is/has been updated in detached state, otherwise {@code false}.
 	 */
 	protected boolean isDetachedEntityUpdate(String entityName, Object[] oldState) {
-		final EntityConfiguration configuration = getEnversService().getEntitiesConfigurations().get( entityName );
+		final EntityConfiguration configuration = getAuditService().getEntityBindings().get( entityName );
 		if ( configuration.getPropertyMapper() != null && oldState == null ) {
 			return configuration.getPropertyMapper().hasPropertiesWithModifiedFlag();
 		}

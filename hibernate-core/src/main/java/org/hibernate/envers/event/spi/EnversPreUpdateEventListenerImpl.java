@@ -6,7 +6,7 @@
  */
 package org.hibernate.envers.event.spi;
 
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.AuditService;
 import org.hibernate.envers.internal.synchronization.AuditProcess;
 import org.hibernate.event.spi.PreUpdateEvent;
 import org.hibernate.event.spi.PreUpdateEventListener;
@@ -17,17 +17,17 @@ import org.hibernate.event.spi.PreUpdateEventListener;
  * @author Chris Cranford
  */
 public class EnversPreUpdateEventListenerImpl extends BaseEnversUpdateEventListener implements PreUpdateEventListener {
-	public EnversPreUpdateEventListenerImpl(EnversService enversService) {
-		super( enversService );
+	public EnversPreUpdateEventListenerImpl(AuditService auditService) {
+		super( auditService );
 	}
 
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
 		final String entityName = event.getPersister().getEntityName();
-		if ( getEnversService().getEntitiesConfigurations().isVersioned( entityName ) ) {
+		if ( getAuditService().getEntityBindings().isVersioned( entityName ) ) {
 			checkIfTransactionInProgress( event.getSession() );
 			if ( isDetachedEntityUpdate( entityName, event.getOldState() ) ) {
-				final AuditProcess auditProcess = getEnversService().getAuditProcessManager().get( event.getSession() );
+				final AuditProcess auditProcess = getAuditService().getAuditProcess( event.getSession() );
 				auditProcess.cacheEntityState(
 						event.getId(),
 						entityName,

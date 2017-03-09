@@ -704,7 +704,7 @@ public final class CollectionMetadataGenerator {
 			else if ( mapped && !key ) {
 				// when mapped but not part of the key, its stored as a dummy mapper??
 				return new MiddleComponentData(
-						new MiddleMapElementNotKeyComponentMapper( mainGenerator.getVerEntCfg(), prefix ),
+						new MiddleMapElementNotKeyComponentMapper( prefix ),
 						0
 				);
 			}
