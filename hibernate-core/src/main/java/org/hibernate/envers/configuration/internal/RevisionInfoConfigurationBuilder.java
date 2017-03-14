@@ -92,9 +92,9 @@ public class RevisionInfoConfigurationBuilder {
 			revisionInfoEntityName = "org.hibernate.envers.enhanced.SequenceIdRevisionEntity";
 		}
 
-		revisionInfoIdData = new PropertyData( "id", "id", "field", null );
-		revisionInfoTimestampData = new RevisionTimestampData( "timestamp", "timestamp", "field", null, new LongType() );
-		modifiedEntityNamesData = new PropertyData( "modifiedEntityNames", "modifiedEntityNames", "field", null );
+		revisionInfoIdData = new PropertyData( "id", "id", "field" );
+		revisionInfoTimestampData = new RevisionTimestampData( "timestamp", "timestamp", "field", new LongType() );
+		modifiedEntityNamesData = new PropertyData( "modifiedEntityNames", "modifiedEntityNames", "field" );
 		revisionPropType = "integer";
 	}
 
@@ -293,12 +293,12 @@ public class RevisionInfoConfigurationBuilder {
 				final XClass revisionNumberClass = property.getType();
 				if ( reflectionManager.equals( revisionNumberClass, Integer.class ) ||
 						reflectionManager.equals( revisionNumberClass, Integer.TYPE ) ) {
-					revisionInfoIdData = new PropertyData( property.getName(), property.getName(), accessType, null );
+					revisionInfoIdData = new PropertyData( property.getName(), property.getName(), accessType );
 					revisionNumberFound.set();
 				}
 				else if ( reflectionManager.equals( revisionNumberClass, Long.class ) ||
 						reflectionManager.equals( revisionNumberClass, Long.TYPE ) ) {
-					revisionInfoIdData = new PropertyData( property.getName(), property.getName(), accessType, null );
+					revisionInfoIdData = new PropertyData( property.getName(), property.getName(), accessType );
 					revisionNumberFound.set();
 
 					// The default is integer
@@ -330,7 +330,6 @@ public class RevisionInfoConfigurationBuilder {
 							property.getName(),
 							property.getName(),
 							accessType,
-							null,
 							persistentClass.getProperty( property.getName() ).getType()
 					);
 					revisionTimestampFound.set();
@@ -353,8 +352,7 @@ public class RevisionInfoConfigurationBuilder {
 					modifiedEntityNamesData = new PropertyData(
 							property.getName(),
 							property.getName(),
-							accessType,
-							null
+							accessType
 					);
 					modifiedEntityNamesFound.set();
 				}

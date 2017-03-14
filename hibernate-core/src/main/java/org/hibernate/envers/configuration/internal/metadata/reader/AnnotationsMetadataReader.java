@@ -10,7 +10,6 @@ import org.hibernate.annotations.common.reflection.ReflectionManager;
 import org.hibernate.annotations.common.reflection.XClass;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
-import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.SecondaryAuditTable;
 import org.hibernate.envers.SecondaryAuditTables;
 import org.hibernate.envers.boot.spi.AuditMetadataBuildingOptions;
@@ -51,17 +50,6 @@ public final class AnnotationsMetadataReader {
 		auditData = new ClassAuditingData();
 	}
 
-	private ModificationStore getDefaultAudited(XClass clazz) {
-		final Audited defaultAudited = clazz.getAnnotation( Audited.class );
-
-		if ( defaultAudited != null ) {
-			return defaultAudited.modStore();
-		}
-		else {
-			return null;
-		}
-	}
-
 	private void addAuditTable(XClass clazz) {
 		final AuditTable auditTable = clazz.getAnnotation( AuditTable.class );
 		if ( auditTable != null ) {
@@ -94,13 +82,11 @@ public final class AnnotationsMetadataReader {
 	}
 
 	public ClassAuditingData getAuditData() {
-		final ModificationStore defaultStore = getDefaultAudited( xclass );
-		if ( defaultStore != null ) {
+		if ( xclass.isAnnotationPresent( Audited.class ) ) {
 			auditData.setDefaultAudited( true );
 		}
 
 		new AuditedPropertiesReader(
-				defaultStore,
 				new PersistentClassPropertiesSource( xclass ),
 				auditData,
 				options,

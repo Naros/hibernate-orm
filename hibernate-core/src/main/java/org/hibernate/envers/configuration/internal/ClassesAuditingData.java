@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hibernate.MappingException;
-import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.envers.configuration.internal.metadata.reader.AuditedPropertiesHolder;
 import org.hibernate.envers.configuration.internal.metadata.reader.ClassAuditingData;
@@ -153,7 +152,6 @@ public class ClassesAuditingData {
 				final PropertyAuditingData auditingData = new PropertyAuditingData(
 						indexColumnName,
 						propertyAccessorName,
-						ModificationStore.FULL,
 						RelationTargetAuditMode.AUDITED,
 						null,
 						null,

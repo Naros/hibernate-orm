@@ -21,7 +21,6 @@ import javax.persistence.JoinColumn;
 import org.dom4j.Element;
 import org.hibernate.MappingException;
 import org.hibernate.annotations.common.reflection.ReflectionManager;
-import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.envers.configuration.internal.metadata.reader.AuditedPropertiesReader;
 import org.hibernate.envers.configuration.internal.metadata.reader.ComponentAuditedPropertiesReader;
@@ -264,7 +263,7 @@ public final class CollectionMetadataGenerator {
 					relMapper,
 					// The mapper will only be used to map from entity to map, so no need to provide other details
 					// when constructing the PropertyData.
-					new PropertyData( auditMappedBy, null, null, null ),
+					new PropertyData( auditMappedBy, null, null ),
 					referencingEntityName, false
 			);
 
@@ -285,7 +284,6 @@ public final class CollectionMetadataGenerator {
 				fakeBidirectionalRelationIndexMapper = new SinglePropertyMapper(
 						new PropertyData(
 								positionMappedBy,
-								null,
 								null,
 								null
 						)
@@ -621,7 +619,6 @@ public final class CollectionMetadataGenerator {
 			final ReflectionManager reflectionManager = mainGenerator.getMetadata().getMetadataBuildingOptions().getReflectionManager();
 
 			new ComponentAuditedPropertiesReader(
-					ModificationStore.FULL,
 					new AuditedPropertiesReader.ComponentPropertiesSource( reflectionManager, component ),
 					auditData,
 					mainGenerator.getOptions(),
@@ -682,7 +679,6 @@ public final class CollectionMetadataGenerator {
 					new PropertyAuditingData(
 							prefix,
 							"field",
-							ModificationStore.FULL,
 							RelationTargetAuditMode.AUDITED,
 							null,
 							null,

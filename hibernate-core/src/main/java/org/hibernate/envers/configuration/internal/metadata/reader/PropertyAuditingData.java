@@ -12,7 +12,6 @@ import java.util.List;
 import org.hibernate.envers.AuditJoinTable;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.envers.AuditOverrides;
-import org.hibernate.envers.ModificationStore;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.hibernate.envers.internal.entities.PropertyData;
 import org.hibernate.mapping.Value;
@@ -25,7 +24,6 @@ import org.hibernate.mapping.Value;
 public class PropertyAuditingData {
 	private String name;
 	private String beanName;
-	private ModificationStore store;
 	private String mapKey;
 	private AuditJoinTable joinTable;
 	private String accessType;
@@ -46,14 +44,13 @@ public class PropertyAuditingData {
 	}
 
 	public PropertyAuditingData(
-			String name, String accessType, ModificationStore store,
+			String name, String accessType,
 			RelationTargetAuditMode relationTargetAuditMode,
 			String auditMappedBy, String positionMappedBy,
 			boolean forceInsertable) {
 		this(
 				name,
 				accessType,
-				store,
 				relationTargetAuditMode,
 				auditMappedBy,
 				positionMappedBy,
@@ -66,7 +63,6 @@ public class PropertyAuditingData {
 	public PropertyAuditingData(
 			String name,
 			String accessType,
-			ModificationStore store,
 			RelationTargetAuditMode relationTargetAuditMode,
 			String auditMappedBy,
 			String positionMappedBy,
@@ -76,7 +72,6 @@ public class PropertyAuditingData {
 		this.name = name;
 		this.beanName = name;
 		this.accessType = accessType;
-		this.store = store;
 		this.relationTargetAuditMode = relationTargetAuditMode;
 		this.auditMappedBy = auditMappedBy;
 		this.positionMappedBy = positionMappedBy;
@@ -99,22 +94,6 @@ public class PropertyAuditingData {
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
-	}
-
-	/**
-	 * @deprecated since 5.2, to be removed in 6.0 with no replacement.
-	 */
-	@Deprecated
-	public ModificationStore getStore() {
-		return store;
-	}
-
-	/**
-	 * @deprecated since 5.2, to be removed in 6.0 with no replacement.
-	 */
-	@Deprecated
-	public void setStore(ModificationStore store) {
-		this.store = store;
 	}
 
 	public String getMapKey() {
@@ -146,7 +125,6 @@ public class PropertyAuditingData {
 				name,
 				beanName,
 				accessType,
-				store,
 				usingModifiedFlag,
 				modifiedFlagName,
 				syntheic
