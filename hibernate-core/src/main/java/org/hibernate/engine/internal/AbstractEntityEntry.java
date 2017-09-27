@@ -15,6 +15,7 @@ import org.hibernate.CustomEntityDirtinessStrategy;
 import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CachedNaturalIdValueSource;
@@ -320,9 +321,10 @@ public abstract class AbstractEntityEntry implements Serializable, EntityEntry {
 			return null;
 		}
 		else {
-			getDescriptor().findAttribute( propertyName );
-			final int propertyIndex = ( (UniqueKeyLoadable) persister ).getPropertyIndex( propertyName );
-			return loadedState[propertyIndex];
+//			getDescriptor().findAttribute( propertyName );
+//			final int propertyIndex = ( (UniqueKeyLoadable) persister ).getPropertyIndex( propertyName );
+//			return loadedState[propertyIndex];
+			throw new NotYetImplementedFor6Exception( );
 		}
 	}
 
@@ -330,11 +332,12 @@ public abstract class AbstractEntityEntry implements Serializable, EntityEntry {
 	public void overwriteLoadedStateCollectionValue(String propertyName, PersistentCollection collection) {
 		// nothing to do if status is READ_ONLY
 		if ( getStatus() != Status.READ_ONLY ) {
-			assert propertyName != null;
-			assert loadedState != null;
-
-			final int propertyIndex = ( (UniqueKeyLoadable) persister ).getPropertyIndex( propertyName );
-			loadedState[propertyIndex] = collection;
+//			assert propertyName != null;
+//			assert loadedState != null;
+//
+//			final int propertyIndex = ( (UniqueKeyLoadable) persister ).getPropertyIndex( propertyName );
+//			loadedState[propertyIndex] = collection;
+			throw new NotYetImplementedFor6Exception( );
 		}
 	}
 
@@ -346,21 +349,22 @@ public abstract class AbstractEntityEntry implements Serializable, EntityEntry {
 
 	@SuppressWarnings( {"SimplifiableIfStatement"})
 	private boolean isUnequivocallyNonDirty(Object entity) {
-		if ( entity instanceof SelfDirtinessTracker ) {
-			return ! ( (SelfDirtinessTracker) entity ).$$_hibernate_hasDirtyAttributes();
-		}
-
-		final CustomEntityDirtinessStrategy customEntityDirtinessStrategy =
-				getPersistenceContext().getSession().getFactory().getCustomEntityDirtinessStrategy();
-		if ( customEntityDirtinessStrategy.canDirtyCheck( entity, getDescriptor(), (Session) getPersistenceContext().getSession() ) ) {
-			return ! customEntityDirtinessStrategy.isDirty( entity, getDescriptor(), (Session) getPersistenceContext().getSession() );
-		}
-
-		if ( getDescriptor().hasMutableProperties() ) {
-			return false;
-		}
-
-		return false;
+//		if ( entity instanceof SelfDirtinessTracker ) {
+//			return ! ( (SelfDirtinessTracker) entity ).$$_hibernate_hasDirtyAttributes();
+//		}
+//
+//		final CustomEntityDirtinessStrategy customEntityDirtinessStrategy =
+//				getPersistenceContext().getSession().getFactory().getCustomEntityDirtinessStrategy();
+//		if ( customEntityDirtinessStrategy.canDirtyCheck( entity, getDescriptor(), (Session) getPersistenceContext().getSession() ) ) {
+//			return ! customEntityDirtinessStrategy.isDirty( entity, getDescriptor(), (Session) getPersistenceContext().getSession() );
+//		}
+//
+//		if ( getDescriptor().hasMutableProperties() ) {
+//			return false;
+//		}
+//
+//		return false;
+		throw new NotYetImplementedFor6Exception( );
 	}
 
 	@Override
@@ -374,12 +378,13 @@ public abstract class AbstractEntityEntry implements Serializable, EntityEntry {
 
 	@Override
 	public void forceLocked(Object entity, Object nextVersion) {
-		version = nextVersion;
-		loadedState[ persister.getVersionProperty() ] = version;
-		// TODO:  use LockMode.PESSIMISTIC_FORCE_INCREMENT
-		//noinspection deprecation
-		setLockMode( LockMode.FORCE );
-		persister.setPropertyValue( entity, getDescriptor().getVersionProperty(), nextVersion );
+//		version = nextVersion;
+//		loadedState[ persister.getVersionProperty() ] = version;
+//		// TODO:  use LockMode.PESSIMISTIC_FORCE_INCREMENT
+//		//noinspection deprecation
+//		setLockMode( LockMode.FORCE );
+//		persister.setPropertyValue( entity, getDescriptor().getVersionProperty(), nextVersion );
+		throw new NotYetImplementedFor6Exception( );
 	}
 
 	@Override

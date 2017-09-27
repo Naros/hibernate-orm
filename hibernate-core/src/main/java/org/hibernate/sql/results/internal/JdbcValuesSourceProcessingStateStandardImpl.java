@@ -243,7 +243,8 @@ public class JdbcValuesSourceProcessingStateStandardImpl implements JdbcValuesSo
 		for ( int i = 0; i < hydratedState.length; i++ ) {
 			final Object value = hydratedState[i];
 			if ( value!= LazyPropertyInitializer.UNFETCHED_PROPERTY && value!= PropertyAccessStrategyBackRefImpl.UNKNOWN ) {
-				hydratedState[i] = types[i].resolve( value, session, entity );
+				//hydratedState[i] = types[i].resolve( value, session, entity );
+				throw new NotYetImplementedFor6Exception(  );
 			}
 		}
 

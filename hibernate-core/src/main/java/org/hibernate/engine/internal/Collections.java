@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CollectionEntry;
 import org.hibernate.engine.spi.EntityEntry;
@@ -151,84 +152,85 @@ public final class Collections {
 			PluralAttributeCollection attributeCollection,
 			Object entity,
 			SessionImplementor session) {
-		collection.setOwner( entity );
-		final CollectionEntry ce = session.getPersistenceContext().getCollectionEntry( collection );
-
-		if ( ce == null ) {
-			// refer to comment in StatefulPersistenceContext.addCollection()
-			throw new HibernateException(
-					"Found two representations of same collection: " + attributeCollection.getNavigableName() );
-		}
-
-		final SessionFactoryImplementor factory = session.getFactory();
-		final PersistentCollectionDescriptor descriptor = factory.getTypeConfiguration().findCollectionPersister(
-				attributeCollection.getNavigableName() );
-		ce.setCurrentPersister( descriptor );
-
-		//TODO: better to pass the id in as an argument?
-		ce.setCurrentKey( descriptor.getKeyOfOwner( entity, session ) );
-
-		final EntityDescriptor ownerEntityDescriptor = getOwnerEntityDescriptor( descriptor, factory );
-		final boolean isBytecodeEnhanced = ownerEntityDescriptor.getBytecodeEnhancementMetadata().isEnhancedForLazyLoading();
-		if ( isBytecodeEnhanced && !collection.wasInitialized() ) {
-			// skip it
-			LOG.debugf(
-					"Skipping uninitialized bytecode-lazy collection: %s",
-					MessageHelper.collectionInfoString( descriptor, collection, ce.getCurrentKey(), session )
-			);
-			ce.setReached( true );
-			ce.setProcessed( true );
-		}
-		else {
-			// The CollectionEntry.isReached() stuff is just to detect any silly users
-			// who set up circular or shared references between/to collections.
-			if ( ce.isReached() ) {
-				// We've been here beforeQuery
-				throw new HibernateException(
-						"Found shared references to a collection: " + descriptor.getNavigableRole().getFullPath()
-				);
-			}
-			ce.setReached( true );
-
-			if ( LOG.isDebugEnabled() ) {
-				if ( collection.wasInitialized() ) {
-					LOG.debugf(
-							"Collection found: %s, was: %s (initialized)",
-							MessageHelper.collectionInfoString(
-									descriptor,
-									collection,
-									ce.getCurrentKey(),
-									session
-							),
-							MessageHelper.collectionInfoString(
-									ce.getLoadedPersistentCollectionDescriptor(),
-									collection,
-									ce.getLoadedKey(),
-									session
-							)
-					);
-				}
-				else {
-					LOG.debugf(
-							"Collection found: %s, was: %s (uninitialized)",
-							MessageHelper.collectionInfoString(
-									descriptor,
-									collection,
-									ce.getCurrentKey(),
-									session
-							),
-							MessageHelper.collectionInfoString(
-									ce.getLoadedPersistentCollectionDescriptor(),
-									collection,
-									ce.getLoadedKey(),
-									session
-							)
-					);
-				}
-			}
-
-			prepareCollectionForUpdate( collection, ce, factory );
-		}
+//		collection.setOwner( entity );
+//		final CollectionEntry ce = session.getPersistenceContext().getCollectionEntry( collection );
+//
+//		if ( ce == null ) {
+//			// refer to comment in StatefulPersistenceContext.addCollection()
+//			throw new HibernateException(
+//					"Found two representations of same collection: " + attributeCollection.getNavigableName() );
+//		}
+//
+//		final SessionFactoryImplementor factory = session.getFactory();
+//		final PersistentCollectionDescriptor descriptor = factory.getTypeConfiguration().findCollectionPersister(
+//				attributeCollection.getNavigableName() );
+//		ce.setCurrentPersister( descriptor );
+//
+//		//TODO: better to pass the id in as an argument?
+//		ce.setCurrentKey( descriptor.getKeyOfOwner( entity, session ) );
+//
+//		final EntityDescriptor ownerEntityDescriptor = getOwnerEntityDescriptor( descriptor, factory );
+//		final boolean isBytecodeEnhanced = ownerEntityDescriptor.getBytecodeEnhancementMetadata().isEnhancedForLazyLoading();
+//		if ( isBytecodeEnhanced && !collection.wasInitialized() ) {
+//			// skip it
+//			LOG.debugf(
+//					"Skipping uninitialized bytecode-lazy collection: %s",
+//					MessageHelper.collectionInfoString( descriptor, collection, ce.getCurrentKey(), session )
+//			);
+//			ce.setReached( true );
+//			ce.setProcessed( true );
+//		}
+//		else {
+//			// The CollectionEntry.isReached() stuff is just to detect any silly users
+//			// who set up circular or shared references between/to collections.
+//			if ( ce.isReached() ) {
+//				// We've been here beforeQuery
+//				throw new HibernateException(
+//						"Found shared references to a collection: " + descriptor.getNavigableRole().getFullPath()
+//				);
+//			}
+//			ce.setReached( true );
+//
+//			if ( LOG.isDebugEnabled() ) {
+//				if ( collection.wasInitialized() ) {
+//					LOG.debugf(
+//							"Collection found: %s, was: %s (initialized)",
+//							MessageHelper.collectionInfoString(
+//									descriptor,
+//									collection,
+//									ce.getCurrentKey(),
+//									session
+//							),
+//							MessageHelper.collectionInfoString(
+//									ce.getLoadedPersistentCollectionDescriptor(),
+//									collection,
+//									ce.getLoadedKey(),
+//									session
+//							)
+//					);
+//				}
+//				else {
+//					LOG.debugf(
+//							"Collection found: %s, was: %s (uninitialized)",
+//							MessageHelper.collectionInfoString(
+//									descriptor,
+//									collection,
+//									ce.getCurrentKey(),
+//									session
+//							),
+//							MessageHelper.collectionInfoString(
+//									ce.getLoadedPersistentCollectionDescriptor(),
+//									collection,
+//									ce.getLoadedKey(),
+//									session
+//							)
+//					);
+//				}
+//			}
+//
+//			prepareCollectionForUpdate( collection, ce, factory );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private static EntityDescriptor getOwnerEntityDescriptor(

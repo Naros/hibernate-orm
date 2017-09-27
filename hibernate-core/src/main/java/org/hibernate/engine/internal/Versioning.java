@@ -6,6 +6,7 @@
  */
 package org.hibernate.engine.internal;
 
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.internal.CoreMessageLogger;
 import org.hibernate.metamodel.model.domain.spi.EntityDescriptor;
@@ -58,20 +59,21 @@ public final class Versioning {
 			VersionDescriptor versionDescriptor,
 			SharedSessionContractImplementor session) {
 
-		final Object initialVersion = fields[versionProperty];
-		if (
-			initialVersion==null ||
-			// This next bit is to allow for both unsaved-value="negative"
-			// and for "older" behavior where version number did not get
-			// seeded if it was already set in the object
-			// TODO: shift it into unsaved-value strategy
-			( (initialVersion instanceof Number) && ( (Number) initialVersion ).longValue()<0 )
-		) {
-			fields[versionProperty] = seed( versionDescriptor.getVersionSupport(), session );
-			return true;
-		}
-		LOG.tracev( "Using initial version: {0}", initialVersion );
-		return false;
+//		final Object initialVersion = fields[versionProperty];
+//		if (
+//			initialVersion==null ||
+//			// This next bit is to allow for both unsaved-value="negative"
+//			// and for "older" behavior where version number did not get
+//			// seeded if it was already set in the object
+//			// TODO: shift it into unsaved-value strategy
+//			( (initialVersion instanceof Number) && ( (Number) initialVersion ).longValue()<0 )
+//		) {
+//			fields[versionProperty] = seed( versionDescriptor.getVersionSupport(), session );
+//			return true;
+//		}
+//		LOG.tracev( "Using initial version: {0}", initialVersion );
+//		return false;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 
@@ -110,7 +112,8 @@ public final class Versioning {
 			return;
 		}
 
-		fields[ persister.getVersionProperty() ] = version;
+		//fields[ persister.getVersionProperty() ] = version;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**
@@ -121,12 +124,13 @@ public final class Versioning {
 	 * @return The extracted optimistic locking value
 	 */
 	public static Object getVersion(Object[] fields, EntityDescriptor persister) {
-		final VersionDescriptor<Object, Object> versionDescriptor = persister.getHierarchy().getVersionDescriptor();
-		if ( versionDescriptor == null ) {
-			return;
-		}
-
-		return fields[ persister.getVersionProperty() ];
+//		final VersionDescriptor<Object, Object> versionDescriptor = persister.getHierarchy().getVersionDescriptor();
+//		if ( versionDescriptor == null ) {
+//			return;
+//		}
+//
+//		return fields[ persister.getVersionProperty() ];
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**

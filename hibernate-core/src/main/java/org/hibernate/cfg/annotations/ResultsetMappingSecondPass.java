@@ -22,6 +22,7 @@ import javax.persistence.SqlResultSetMapping;
 
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.cfg.BinderHelper;
 import org.hibernate.cfg.QuerySecondPass;
@@ -154,37 +155,40 @@ public class ResultsetMappingSecondPass implements QuerySecondPass {
 				propertyResults = java.util.Collections.emptyMap();
 			}
 
-			NativeSQLQueryRootReturn result = new NativeSQLQueryRootReturn(
-					"alias" + entityAliasIndex++,
-					entity.entityClass().getName(),
-					propertyResults,
-					LockMode.READ
-			);
-			definition.addQueryReturn( result );
+//			NativeSQLQueryRootReturn result = new NativeSQLQueryRootReturn(
+//					"alias" + entityAliasIndex++,
+//					entity.entityClass().getName(),
+//					propertyResults,
+//					LockMode.READ
+//			);
+//			definition.addQueryReturn( result );
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		for ( ColumnResult column : ann.columns() ) {
-			definition.addQueryReturn(
-					new NativeSQLQueryScalarReturn(
-							normalizeColumnQuoting( column.name() ),
-							column.type() != null ? context.getMetadataCollector().heuristicType( column.type().getName() ) : null
-					)
-			);
+//			definition.addQueryReturn(
+//					new NativeSQLQueryScalarReturn(
+//							normalizeColumnQuoting( column.name() ),
+//							column.type() != null ? context.getMetadataCollector().heuristicType( column.type().getName() ) : null
+//					)
+//			);
+			throw new NotYetImplementedFor6Exception( );
 		}
 
 		for ( ConstructorResult constructorResult : ann.classes() ) {
-			List<NativeSQLQueryScalarReturn> columnReturns = new ArrayList<NativeSQLQueryScalarReturn>();
-			for ( ColumnResult columnResult : constructorResult.columns() ) {
-				columnReturns.add(
-						new NativeSQLQueryScalarReturn(
-								normalizeColumnQuoting( columnResult.name() ),
-								columnResult.type() != null ? context.getMetadataCollector().heuristicType( columnResult.type().getName() ) : null
-						)
-				);
-			}
-			definition.addQueryReturn(
-					new NativeSQLQueryConstructorReturn( constructorResult.targetClass(), columnReturns )
-			);
+//			List<NativeSQLQueryScalarReturn> columnReturns = new ArrayList<NativeSQLQueryScalarReturn>();
+//			for ( ColumnResult columnResult : constructorResult.columns() ) {
+//				columnReturns.add(
+//						new NativeSQLQueryScalarReturn(
+//								normalizeColumnQuoting( columnResult.name() ),
+//								columnResult.type() != null ? context.getMetadataCollector().heuristicType( columnResult.type().getName() ) : null
+//						)
+//				);
+//			}
+//			definition.addQueryReturn(
+//					new NativeSQLQueryConstructorReturn( constructorResult.targetClass(), columnReturns )
+//			);
+			throw new NotYetImplementedFor6Exception( );
 		}
 
 		if ( isDefault ) {

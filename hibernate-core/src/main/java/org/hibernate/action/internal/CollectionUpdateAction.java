@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.event.service.spi.EventListenerGroup;
@@ -80,9 +81,10 @@ public final class CollectionUpdateAction extends CollectionAction {
 			collectionDescriptor.recreate( collection, id, session );
 		}
 		else {
-			collectionDescriptor.deleteRows( collection, id, session );
-			collectionDescriptor.updateRows( collection, id, session );
-			collectionDescriptor.insertRows( collection, id, session );
+//			collectionDescriptor.deleteRows( collection, id, session );
+//			collectionDescriptor.updateRows( collection, id, session );
+//			collectionDescriptor.insertRows( collection, id, session );
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		getSession().getPersistenceContext().getCollectionEntry( collection ).afterAction( collection );

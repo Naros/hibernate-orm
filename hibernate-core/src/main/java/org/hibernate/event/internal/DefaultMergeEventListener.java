@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.ObjectDeletedException;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.WrongClassException;
@@ -207,40 +208,41 @@ public class DefaultMergeEventListener extends AbstractSaveEventListener impleme
 	}
 
 	protected void entityIsTransient(MergeEvent event, Map copyCache) {
-
-		LOG.trace( "Merging transient instance" );
-
-		final Object entity = event.getEntity();
-		final EventSource source = event.getSession();
-
-		final String entityName = event.getEntityName();
-		final EntityDescriptor entityDescriptor = source.getEntityPersister( entityName, entity );
-
-		final Serializable id = entityDescriptor.hasIdentifierProperty() ?
-				entityDescriptor.getIdentifier( entity, source ) :
-				null;
-		if ( copyCache.containsKey( entity ) ) {
-			entityDescriptor.setIdentifier( copyCache.get( entity ), id, source );
-		}
-		else {
-			( (MergeContext) copyCache ).put( entity, source.instantiate( entityDescriptor, id ), true ); //beforeQuery cascade!
-		}
-		final Object copy = copyCache.get( entity );
-
-		// cascade first, so that all unsaved objects get their
-		// copy created beforeQuery we actually copy
-		//cascadeOnMerge(event, entityDescriptor, entity, copyCache, Cascades.CASCADE_BEFORE_MERGE);
-		super.cascadeBeforeSave( source, entityDescriptor, entity, copyCache );
-		copyValues( entityDescriptor, entity, copy, source, copyCache, ForeignKeyDirection.FROM_PARENT );
-
-		saveTransientEntity( copy, entityName, event.getRequestedId(), source, copyCache );
-
-		// cascade first, so that all unsaved objects get their
-		// copy created beforeQuery we actually copy
-		super.cascadeAfterSave( source, entityDescriptor, entity, copyCache );
-		copyValues( entityDescriptor, entity, copy, source, copyCache, ForeignKeyDirection.TO_PARENT );
-
-		event.setResult( copy );
+//
+//		LOG.trace( "Merging transient instance" );
+//
+//		final Object entity = event.getEntity();
+//		final EventSource source = event.getSession();
+//
+//		final String entityName = event.getEntityName();
+//		final EntityDescriptor entityDescriptor = source.getEntityPersister( entityName, entity );
+//
+//		final Serializable id = entityDescriptor.hasIdentifierProperty() ?
+//				entityDescriptor.getIdentifier( entity, source ) :
+//				null;
+//		if ( copyCache.containsKey( entity ) ) {
+//			entityDescriptor.setIdentifier( copyCache.get( entity ), id, source );
+//		}
+//		else {
+//			( (MergeContext) copyCache ).put( entity, source.instantiate( entityDescriptor, id ), true ); //beforeQuery cascade!
+//		}
+//		final Object copy = copyCache.get( entity );
+//
+//		// cascade first, so that all unsaved objects get their
+//		// copy created beforeQuery we actually copy
+//		//cascadeOnMerge(event, entityDescriptor, entity, copyCache, Cascades.CASCADE_BEFORE_MERGE);
+//		super.cascadeBeforeSave( source, entityDescriptor, entity, copyCache );
+//		copyValues( entityDescriptor, entity, copy, source, copyCache, ForeignKeyDirection.FROM_PARENT );
+//
+//		saveTransientEntity( copy, entityName, event.getRequestedId(), source, copyCache );
+//
+//		// cascade first, so that all unsaved objects get their
+//		// copy created beforeQuery we actually copy
+//		super.cascadeAfterSave( source, entityDescriptor, entity, copyCache );
+//		copyValues( entityDescriptor, entity, copy, source, copyCache, ForeignKeyDirection.TO_PARENT );
+//
+//		event.setResult( copy );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private void saveTransientEntity(
@@ -401,16 +403,16 @@ public class DefaultMergeEventListener extends AbstractSaveEventListener impleme
 			final Object target,
 			final SessionImplementor source,
 			final Map copyCache) {
-		final Object[] copiedValues = TypeHelper.replace(
-				entityDescriptor.getPropertyValues( entity ),
-				entityDescriptor.getPropertyValues( target ),
-				entityDescriptor.getPropertyTypes(),
-				source,
-				target,
-				copyCache
-		);
-
-		entityDescriptor.setPropertyValues( target, copiedValues );
+//		final Object[] copiedValues = TypeHelper.replace(
+//				entityDescriptor.getPropertyValues( entity ),
+//				entityDescriptor.getPropertyValues( target ),
+//				entityDescriptor.getPropertyTypes(),
+//				source,
+//				target,
+//				copyCache
+//		);
+//
+//		entityDescriptor.setPropertyValues( target, copiedValues );
 	}
 
 	protected void copyValues(
@@ -420,36 +422,37 @@ public class DefaultMergeEventListener extends AbstractSaveEventListener impleme
 			final SessionImplementor source,
 			final Map copyCache,
 			final ForeignKeyDirection foreignKeyDirection) {
-
-		final Object[] copiedValues;
-
-		if ( foreignKeyDirection == ForeignKeyDirection.TO_PARENT ) {
-			// this is the second pass through on a merge op, so here we limit the
-			// replacement to associations types (value types were already replaced
-			// during the first pass)
-			copiedValues = TypeHelper.replaceAssociations(
-					entityDescriptor.getPropertyValues( entity ),
-					entityDescriptor.getPropertyValues( target ),
-					entityDescriptor.getPropertyTypes(),
-					source,
-					target,
-					copyCache,
-					foreignKeyDirection
-			);
-		}
-		else {
-			copiedValues = TypeHelper.replace(
-					entityDescriptor.getPropertyValues( entity ),
-					entityDescriptor.getPropertyValues( target ),
-					entityDescriptor.getPropertyTypes(),
-					source,
-					target,
-					copyCache,
-					foreignKeyDirection
-			);
-		}
-
-		entityDescriptor.setPropertyValues( target, copiedValues );
+//
+//		final Object[] copiedValues;
+//
+//		if ( foreignKeyDirection == ForeignKeyDirection.TO_PARENT ) {
+//			// this is the second pass through on a merge op, so here we limit the
+//			// replacement to associations types (value types were already replaced
+//			// during the first pass)
+//			copiedValues = TypeHelper.replaceAssociations(
+//					entityDescriptor.getPropertyValues( entity ),
+//					entityDescriptor.getPropertyValues( target ),
+//					entityDescriptor.getPropertyTypes(),
+//					source,
+//					target,
+//					copyCache,
+//					foreignKeyDirection
+//			);
+//		}
+//		else {
+//			copiedValues = TypeHelper.replace(
+//					entityDescriptor.getPropertyValues( entity ),
+//					entityDescriptor.getPropertyValues( target ),
+//					entityDescriptor.getPropertyTypes(),
+//					source,
+//					target,
+//					copyCache,
+//					foreignKeyDirection
+//			);
+//		}
+//
+//		entityDescriptor.setPropertyValues( target, copiedValues );
+		throw new org.hibernate.cfg.NotYetImplementedException(  );
 	}
 
 	/**

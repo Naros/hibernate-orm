@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.hibernate.CacheMode;
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.cache.spi.access.CollectionDataAccess;
 import org.hibernate.cache.spi.entry.CollectionCacheEntry;
 import org.hibernate.collection.spi.CollectionClassification;
@@ -310,8 +311,9 @@ public class CollectionLoadContext {
 				if ( lce.getCollection() != null ) {
 					final Object linkedOwner = lce.getCollection().getOwner();
 					if ( linkedOwner != null ) {
-						final Serializable ownerKey = persister.getOwnerEntityPersister().getIdentifier( linkedOwner, session );
-						collectionOwner = getLoadContext().getPersistenceContext().getCollectionOwner( ownerKey, persister );
+//						final Serializable ownerKey = persister.getOwnerEntityPersister().getIdentifier( linkedOwner, session );
+//						collectionOwner = getLoadContext().getPersistenceContext().getCollectionOwner( ownerKey, persister );
+						throw new NotYetImplementedFor6Exception(  );
 					}
 				}
 				if ( collectionOwner == null ) {

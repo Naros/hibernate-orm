@@ -12,6 +12,7 @@ import org.hibernate.AssertionFailure;
 import org.hibernate.CacheMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.bytecode.enhance.spi.LazyPropertyInitializer;
 import org.hibernate.cache.spi.access.EntityDataAccess;
 import org.hibernate.cache.spi.entry.CacheEntry;
@@ -153,7 +154,8 @@ public final class TwoPhaseLoad {
 		for ( int i = 0; i < hydratedState.length; i++ ) {
 			final Object value = hydratedState[i];
 			if ( value!=LazyPropertyInitializer.UNFETCHED_PROPERTY && value!= PropertyAccessStrategyBackRefImpl.UNKNOWN ) {
-				hydratedState[i] = types[i].resolve( value, session, entity );
+				//hydratedState[i] = types[i].resolve( value, session, entity );
+				throw new NotYetImplementedFor6Exception(  );
 			}
 		}
 
@@ -351,8 +353,9 @@ public final class TwoPhaseLoad {
 			return session.getCacheMode() != CacheMode.REFRESH;
 		}
 		else {
-			return entityEntry.getPersister().hasLazyProperties()
-					&& entityEntry.getPersister().isLazyPropertiesCacheable();
+//			return entityEntry.getPersister().hasLazyProperties()
+//					&& entityEntry.getPersister().isLazyPropertiesCacheable();
+			throw new NotYetImplementedFor6Exception(  );
 		}
 	}
 

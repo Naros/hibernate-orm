@@ -6,6 +6,7 @@
  */
 package org.hibernate.dialect;
 
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.query.sqm.consume.multitable.internal.StandardIdTableSupport;
 import org.hibernate.query.sqm.consume.multitable.spi.IdTableStrategy;
@@ -29,7 +30,8 @@ public class PostgreSQL82Dialect extends PostgreSQL81Dialect {
 		super.contributeTypes( typeContributions, serviceRegistry );
 
 		// HHH-9562
-		typeContributions.contributeType( PostgresUUIDType.INSTANCE );
+		//typeContributions.contributeType( PostgresUUIDType.INSTANCE );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override

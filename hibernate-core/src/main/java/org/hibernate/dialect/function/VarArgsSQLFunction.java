@@ -8,10 +8,13 @@ package org.hibernate.dialect.function;
 
 import java.util.List;
 
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.QueryException;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.metamodel.model.domain.spi.AllowableFunctionReturnType;
 import org.hibernate.query.sqm.produce.function.spi.NamedSqmFunctionTemplate;
 import org.hibernate.query.sqm.produce.function.SqmFunctionTemplate;
+import org.hibernate.query.sqm.tree.expression.SqmExpression;
 import org.hibernate.type.Type;
 
 /**
@@ -94,5 +97,10 @@ public class VarArgsSQLFunction implements SqmFunctionTemplate {
 	 */
 	protected String transformArgument(String argument) {
 		return argument;
+	}
+
+	@Override
+	public SqmExpression makeSqmFunctionExpression(List<SqmExpression> arguments, AllowableFunctionReturnType impliedResultType) {
+		throw new NotYetImplementedFor6Exception(  );
 	}
 }

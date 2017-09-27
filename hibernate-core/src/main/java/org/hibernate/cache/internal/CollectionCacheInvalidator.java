@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.action.internal.CollectionAction;
 import org.hibernate.action.spi.AfterTransactionCompletionProcess;
 import org.hibernate.boot.Metadata;
@@ -98,60 +99,61 @@ public class CollectionCacheInvalidator
 	}
 
 	private void evictCache(Object entity, EntityDescriptor entityDescriptor, EventSource session, Object[] oldState) {
-		try {
-			SessionFactoryImplementor factory = entityDescriptor.getFactory();
-
-			Set<String> collectionRoles = factory.getMetamodel().getTypeConfiguration().getCollectionRolesByEntityParticipant( entityDescriptor.getEntityName() );
-			if ( collectionRoles == null || collectionRoles.isEmpty() ) {
-				return;
-			}
-			for ( String role : collectionRoles ) {
-				final PersistentCollectionDescriptor collectionDescriptor = factory.getTypeConfiguration().findCollectionPersister( role );
-				final CollectionDataAccess cacheAccess = collectionDescriptor.getCacheAccess();
-				if ( cacheAccess == null ) {
-					// ignore collection if no caching is used
-					continue;
-				}
-				// this is the property this OneToMany relation is mapped by
-				String mappedBy = collectionDescriptor.getMappedByProperty();
-				if ( !collectionDescriptor.isManyToMany() &&
-						mappedBy != null && !mappedBy.isEmpty() ) {
-					int i = entityDescriptor.getEntityMetamodel().getPropertyIndex( mappedBy );
-					Serializable oldId = null;
-					if ( oldState != null ) {
-						// in case of updating an entity we perhaps have to decache 2 entity collections, this is the
-						// old one
-						oldId = getIdentifier( session, oldState[i] );
-					}
-					Object ref = entityDescriptor.getPropertyValue( entity, i );
-					Serializable id = getIdentifier( session, ref );
-
-					// only evict if the related entity has changed
-					if ( ( id != null && !id.equals( oldId ) ) || ( oldId != null && !oldId.equals( id ) ) ) {
-						if ( id != null ) {
-							evict( id, collectionDescriptor, session );
-						}
-						if ( oldId != null ) {
-							evict( oldId, collectionDescriptor, session );
-						}
-					}
-				}
-				else {
-					LOG.debug( "Evict CollectionRegion " + role );
-					final SoftLock softLock = cacheAccess.lockRegion();
-					session.getActionQueue().registerProcess( (success, session1) -> {
-						cacheAccess.unlockRegion( softLock );
-					} );
-				}
-			}
-		}
-		catch ( Exception e ) {
-			if ( PROPAGATE_EXCEPTION ) {
-				throw new IllegalStateException( e );
-			}
-			// don't let decaching influence other logic
-			LOG.error( "", e );
-		}
+//		try {
+//			SessionFactoryImplementor factory = entityDescriptor.getFactory();
+//
+//			Set<String> collectionRoles = factory.getMetamodel().getTypeConfiguration().getCollectionRolesByEntityParticipant( entityDescriptor.getEntityName() );
+//			if ( collectionRoles == null || collectionRoles.isEmpty() ) {
+//				return;
+//			}
+//			for ( String role : collectionRoles ) {
+//				final PersistentCollectionDescriptor collectionDescriptor = factory.getTypeConfiguration().findCollectionPersister( role );
+//				final CollectionDataAccess cacheAccess = collectionDescriptor.getCacheAccess();
+//				if ( cacheAccess == null ) {
+//					// ignore collection if no caching is used
+//					continue;
+//				}
+//				// this is the property this OneToMany relation is mapped by
+//				String mappedBy = collectionDescriptor.getMappedByProperty();
+//				if ( !collectionDescriptor.isManyToMany() &&
+//						mappedBy != null && !mappedBy.isEmpty() ) {
+//					int i = entityDescriptor.getEntityMetamodel().getPropertyIndex( mappedBy );
+//					Serializable oldId = null;
+//					if ( oldState != null ) {
+//						// in case of updating an entity we perhaps have to decache 2 entity collections, this is the
+//						// old one
+//						oldId = getIdentifier( session, oldState[i] );
+//					}
+//					Object ref = entityDescriptor.getPropertyValue( entity, i );
+//					Serializable id = getIdentifier( session, ref );
+//
+//					// only evict if the related entity has changed
+//					if ( ( id != null && !id.equals( oldId ) ) || ( oldId != null && !oldId.equals( id ) ) ) {
+//						if ( id != null ) {
+//							evict( id, collectionDescriptor, session );
+//						}
+//						if ( oldId != null ) {
+//							evict( oldId, collectionDescriptor, session );
+//						}
+//					}
+//				}
+//				else {
+//					LOG.debug( "Evict CollectionRegion " + role );
+//					final SoftLock softLock = cacheAccess.lockRegion();
+//					session.getActionQueue().registerProcess( (success, session1) -> {
+//						cacheAccess.unlockRegion( softLock );
+//					} );
+//				}
+//			}
+//		}
+//		catch ( Exception e ) {
+//			if ( PROPAGATE_EXCEPTION ) {
+//				throw new IllegalStateException( e );
+//			}
+//			// don't let decaching influence other logic
+//			LOG.error( "", e );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private Serializable getIdentifier(EventSource session, Object obj) {

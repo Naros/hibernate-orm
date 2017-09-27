@@ -28,6 +28,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
 import org.hibernate.NonUniqueObjectException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.PersistentObjectException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.bytecode.enhance.spi.interceptor.LazyAttributeLoadingInterceptor;
@@ -353,24 +354,25 @@ public class StatefulPersistenceContext implements PersistenceContext {
 			return dbValue;
 		}
 		else {
-			// for a mutable natural there is a likelihood that the the information will already be
-			// snapshot-cached.
-			final int[] props = persister.getNaturalIdentifierProperties();
-			final Object[] entitySnapshot = getDatabaseSnapshot( id, persister );
-			if ( entitySnapshot == NO_ROW || entitySnapshot == null ) {
-				return null;
-			}
-
-			final Object[] naturalIdSnapshotSubSet = new Object[ props.length ];
-			for ( int i = 0; i < props.length; i++ ) {
-				naturalIdSnapshotSubSet[i] = entitySnapshot[ props[i] ];
-			}
-			naturalIdHelper.cacheNaturalIdCrossReferenceFromLoad(
-					persister,
-					id,
-					naturalIdSnapshotSubSet
-			);
-			return naturalIdSnapshotSubSet;
+//			// for a mutable natural there is a likelihood that the the information will already be
+//			// snapshot-cached.
+//			final int[] props = persister.getNaturalIdentifierProperties();
+//			final Object[] entitySnapshot = getDatabaseSnapshot( id, persister );
+//			if ( entitySnapshot == NO_ROW || entitySnapshot == null ) {
+//				return null;
+//			}
+//
+//			final Object[] naturalIdSnapshotSubSet = new Object[ props.length ];
+//			for ( int i = 0; i < props.length; i++ ) {
+//				naturalIdSnapshotSubSet[i] = entitySnapshot[ props[i] ];
+//			}
+//			naturalIdHelper.cacheNaturalIdCrossReferenceFromLoad(
+//					persister,
+//					id,
+//					naturalIdSnapshotSubSet
+//			);
+//			return naturalIdSnapshotSubSet;
+			throw new NotYetImplementedFor6Exception(  );
 		}
 	}
 
@@ -723,65 +725,66 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
 	@Override
 	public Object getCollectionOwner(Serializable key, PersistentCollectionDescriptor collectionPersister) throws MappingException {
-		// todo : we really just need to add a split in the notions of:
-		//		1) collection key
-		//		2) collection owner key
-		// these 2 are not always the same.  Same is true in the case of ToOne associations with property-ref...
-		final EntityDescriptor ownerPersister = collectionPersister.getOwnerEntityPersister();
-		if ( ownerPersister.getIdentifierType().getJavaTypeDescriptor().getJavaType().isInstance( key ) ) {
-			return getEntity( session.generateEntityKey( key, collectionPersister.getOwnerEntityPersister() ) );
-		}
-
-		// we have a property-ref type mapping for the collection key.  But that could show up a few ways here...
-		//
-		//		1) The incoming key could be the entity itself...
-		if ( ownerPersister.isInstance( key ) ) {
-			final Serializable owenerId = ownerPersister.getIdentifier( key, session );
-			if ( owenerId == null ) {
-				return null;
-			}
-			return getEntity( session.generateEntityKey( owenerId, ownerPersister ) );
-		}
-
-		final CollectionType collectionType = collectionPersister.getOrmType();
-
-		//		2) The incoming key is most likely the collection key which we need to resolve to the owner key
-		//			find the corresponding owner instance
-		//			a) try by EntityUniqueKey
-		if ( collectionType.getLHSPropertyName() != null ) {
-			final Object owner = getEntity(
-					new EntityUniqueKey(
-							ownerPersister.getEntityName(),
-							collectionType.getLHSPropertyName(),
-							key,
-							collectionPersister.getKeyType(),
-							ownerPersister.getRepresentationStrategy().getMode(),
-							session.getFactory()
-					)
-			);
-			if ( owner != null ) {
-				return owner;
-			}
-
-			//		b) try by EntityKey, which means we need to resolve owner-key -> collection-key
-			//			IMPL NOTE : yes if we get here this impl is very non-performant, but PersistenceContext
-			//					was never designed to handle this case; adding that capability for real means splitting
-			//					the notions of:
-			//						1) collection key
-			//						2) collection owner key
-			// 					these 2 are not always the same (same is true in the case of ToOne associations with
-			// 					property-ref).  That would require changes to (at least) CollectionEntry and quite
-			//					probably changes to how the sql for collection initializers are generated
-			//
-			//			We could also possibly see if the referenced property is a natural id since we already have caching
-			//			in place of natural id snapshots.  BUt really its better to just do it the right way ^^ if we start
-			// 			going that route
-			final Serializable ownerId = ownerPersister.getIdByUniqueKey( key, collectionType.getLHSPropertyName(), session );
-			return getEntity( session.generateEntityKey( ownerId, ownerPersister ) );
-		}
-
-		// as a last resort this is what the old code did...
-		return getEntity( session.generateEntityKey( key, collectionPersister.getOwnerEntityPersister() ) );
+//		// todo : we really just need to add a split in the notions of:
+//		//		1) collection key
+//		//		2) collection owner key
+//		// these 2 are not always the same.  Same is true in the case of ToOne associations with property-ref...
+//		final EntityDescriptor ownerPersister = collectionPersister.getOwnerEntityPersister();
+//		if ( ownerPersister.getIdentifierType().getJavaTypeDescriptor().getJavaType().isInstance( key ) ) {
+//			return getEntity( session.generateEntityKey( key, collectionPersister.getOwnerEntityPersister() ) );
+//		}
+//
+//		// we have a property-ref type mapping for the collection key.  But that could show up a few ways here...
+//		//
+//		//		1) The incoming key could be the entity itself...
+//		if ( ownerPersister.isInstance( key ) ) {
+//			final Serializable owenerId = ownerPersister.getIdentifier( key, session );
+//			if ( owenerId == null ) {
+//				return null;
+//			}
+//			return getEntity( session.generateEntityKey( owenerId, ownerPersister ) );
+//		}
+//
+//		final CollectionType collectionType = collectionPersister.getOrmType();
+//
+//		//		2) The incoming key is most likely the collection key which we need to resolve to the owner key
+//		//			find the corresponding owner instance
+//		//			a) try by EntityUniqueKey
+//		if ( collectionType.getLHSPropertyName() != null ) {
+//			final Object owner = getEntity(
+//					new EntityUniqueKey(
+//							ownerPersister.getEntityName(),
+//							collectionType.getLHSPropertyName(),
+//							key,
+//							collectionPersister.getKeyType(),
+//							ownerPersister.getRepresentationStrategy().getMode(),
+//							session.getFactory()
+//					)
+//			);
+//			if ( owner != null ) {
+//				return owner;
+//			}
+//
+//			//		b) try by EntityKey, which means we need to resolve owner-key -> collection-key
+//			//			IMPL NOTE : yes if we get here this impl is very non-performant, but PersistenceContext
+//			//					was never designed to handle this case; adding that capability for real means splitting
+//			//					the notions of:
+//			//						1) collection key
+//			//						2) collection owner key
+//			// 					these 2 are not always the same (same is true in the case of ToOne associations with
+//			// 					property-ref).  That would require changes to (at least) CollectionEntry and quite
+//			//					probably changes to how the sql for collection initializers are generated
+//			//
+//			//			We could also possibly see if the referenced property is a natural id since we already have caching
+//			//			in place of natural id snapshots.  BUt really its better to just do it the right way ^^ if we start
+//			// 			going that route
+//			final Serializable ownerId = ownerPersister.getIdByUniqueKey( key, collectionType.getLHSPropertyName(), session );
+//			return getEntity( session.generateEntityKey( ownerId, ownerPersister ) );
+//		}
+//
+//		// as a last resort this is what the old code did...
+//		return getEntity( session.generateEntityKey( key, collectionPersister.getOwnerEntityPersister() ) );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override
@@ -816,27 +819,30 @@ public class StatefulPersistenceContext implements PersistenceContext {
 		if ( ce == null || ce.getLoadedKey() == null || ce.getLoadedPersistentCollectionDescriptor() == null ) {
 			return null;
 		}
-		// TODO: an alternative is to check if the owner has changed; if it hasn't then
-		// get the ID from collection.getOwner()
-		return ce.getLoadedPersistentCollectionDescriptor().getOrmType().getIdOfOwnerOrNull( ce.getLoadedKey(), session );
+//		// TODO: an alternative is to check if the owner has changed; if it hasn't then
+//		// get the ID from collection.getOwner()
+//		return ce.getLoadedPersistentCollectionDescriptor().getOrmType().getIdOfOwnerOrNull( ce.getLoadedKey(), session );
+		return new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override
 	public void addUninitializedCollection(PersistentCollectionDescriptor persister, PersistentCollection collection, Serializable id) {
-		final CollectionEntry ce = new CollectionEntry( collection, persister, id, flushing );
-		addCollection( collection, ce, id );
-		if ( persister.getBatchSize() > 1 ) {
-			getBatchFetchQueue().addBatchLoadableCollection( collection, ce );
-		}
+//		final CollectionEntry ce = new CollectionEntry( collection, persister, id, flushing );
+//		addCollection( collection, ce, id );
+//		if ( persister.getBatchSize() > 1 ) {
+//			getBatchFetchQueue().addBatchLoadableCollection( collection, ce );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override
 	public void addUninitializedDetachedCollection(PersistentCollectionDescriptor persister, PersistentCollection collection) {
-		final CollectionEntry ce = new CollectionEntry( persister, collection.getKey() );
-		addCollection( collection, ce, collection.getKey() );
-		if ( persister.getBatchSize() > 1 ) {
-			getBatchFetchQueue().addBatchLoadableCollection( collection, ce );
-		}
+//		final CollectionEntry ce = new CollectionEntry( persister, collection.getKey() );
+//		addCollection( collection, ce, collection.getKey() );
+//		if ( persister.getBatchSize() > 1 ) {
+//			getBatchFetchQueue().addBatchLoadableCollection( collection, ce );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override
@@ -1134,110 +1140,111 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
 	@Override
 	public Serializable getOwnerId(String entityName, String propertyName, Object childEntity, Map mergeMap) {
-		final String collectionRole = entityName + '.' + propertyName;
-		final EntityDescriptor persister = session.getFactory().getTypeConfiguration().findEntityDescriptor( entityName );
-		final PersistentCollectionDescriptor collectionPersister = session.getFactory().getTypeConfiguration().findCollectionPersister( collectionRole );
-
-	    // try cache lookup first
-		final Object parent = parentsByChild.get( childEntity );
-		if ( parent != null ) {
-			final EntityEntry entityEntry = entityEntryContext.getEntityEntry( parent );
-			//there maybe more than one parent, filter by type
-			if ( persister.isSubclassEntityName( entityEntry.getEntityName() )
-					&& isFoundInParent( propertyName, childEntity, persister, collectionPersister, parent ) ) {
-				return getEntry( parent ).getId();
-			}
-			else {
-				// remove wrong entry
-				parentsByChild.remove( childEntity );
-			}
-		}
-
-		//not found in case, proceed
-		// iterate all the entities currently associated with the persistence context.
-		for ( Entry<Object,EntityEntry> me : reentrantSafeEntityEntries() ) {
-			final EntityEntry entityEntry = me.getValue();
-			// does this entity entry pertain to the entity persister in which we are interested (owner)?
-			if ( persister.isSubclassEntityName( entityEntry.getEntityName() ) ) {
-				final Object entityEntryInstance = me.getKey();
-
-				//check if the managed object is the parent
-				boolean found = isFoundInParent(
-						propertyName,
-						childEntity,
-						persister,
-						collectionPersister,
-						entityEntryInstance
-				);
-
-				if ( !found && mergeMap != null ) {
-					//check if the detached object being merged is the parent
-					final Object unmergedInstance = mergeMap.get( entityEntryInstance );
-					final Object unmergedChild = mergeMap.get( childEntity );
-					if ( unmergedInstance != null && unmergedChild != null ) {
-						found = isFoundInParent(
-								propertyName,
-								unmergedChild,
-								persister,
-								collectionPersister,
-								unmergedInstance
-						);
-						LOG.debugf(
-								"Detached object being merged (corresponding with a managed entity) has a collection that [%s] the detached child.",
-								( found ? "contains" : "does not contain" )
-						);
-					}
-				}
-
-				if ( found ) {
-					return entityEntry.getId();
-				}
-
-			}
-		}
-
-		// if we get here, it is possible that we have a proxy 'in the way' of the merge map resolution...
-		// 		NOTE: decided to put this here rather than in the above loop as I was nervous about the performance
-		//		of the loop-in-loop especially considering this is far more likely the 'edge case'
-		if ( mergeMap != null ) {
-			for ( Object o : mergeMap.entrySet() ) {
-				final Entry mergeMapEntry = (Entry) o;
-				if ( mergeMapEntry.getKey() instanceof HibernateProxy ) {
-					final HibernateProxy proxy = (HibernateProxy) mergeMapEntry.getKey();
-					if ( persister.isSubclassEntityName( proxy.getHibernateLazyInitializer().getEntityName() ) ) {
-						boolean found = isFoundInParent(
-								propertyName,
-								childEntity,
-								persister,
-								collectionPersister,
-								mergeMap.get( proxy )
-						);
-						LOG.debugf(
-								"Detached proxy being merged has a collection that [%s] the managed child.",
-								(found ? "contains" : "does not contain")
-						);
-						if ( !found ) {
-							found = isFoundInParent(
-									propertyName,
-									mergeMap.get( childEntity ),
-									persister,
-									collectionPersister,
-									mergeMap.get( proxy )
-							);
-							LOG.debugf(
-									"Detached proxy being merged has a collection that [%s] the detached child being merged..",
-									(found ? "contains" : "does not contain")
-							);
-						}
-						if ( found ) {
-							return proxy.getHibernateLazyInitializer().getIdentifier();
-						}
-					}
-				}
-			}
-		}
-
-		return null;
+//		final String collectionRole = entityName + '.' + propertyName;
+//		final EntityDescriptor persister = session.getFactory().getTypeConfiguration().findEntityDescriptor( entityName );
+//		final PersistentCollectionDescriptor collectionPersister = session.getFactory().getTypeConfiguration().findCollectionPersister( collectionRole );
+//
+//	    // try cache lookup first
+//		final Object parent = parentsByChild.get( childEntity );
+//		if ( parent != null ) {
+//			final EntityEntry entityEntry = entityEntryContext.getEntityEntry( parent );
+//			//there maybe more than one parent, filter by type
+//			if ( persister.isSubclassEntityName( entityEntry.getEntityName() )
+//					&& isFoundInParent( propertyName, childEntity, persister, collectionPersister, parent ) ) {
+//				return getEntry( parent ).getId();
+//			}
+//			else {
+//				// remove wrong entry
+//				parentsByChild.remove( childEntity );
+//			}
+//		}
+//
+//		//not found in case, proceed
+//		// iterate all the entities currently associated with the persistence context.
+//		for ( Entry<Object,EntityEntry> me : reentrantSafeEntityEntries() ) {
+//			final EntityEntry entityEntry = me.getValue();
+//			// does this entity entry pertain to the entity persister in which we are interested (owner)?
+//			if ( persister.isSubclassEntityName( entityEntry.getEntityName() ) ) {
+//				final Object entityEntryInstance = me.getKey();
+//
+//				//check if the managed object is the parent
+//				boolean found = isFoundInParent(
+//						propertyName,
+//						childEntity,
+//						persister,
+//						collectionPersister,
+//						entityEntryInstance
+//				);
+//
+//				if ( !found && mergeMap != null ) {
+//					//check if the detached object being merged is the parent
+//					final Object unmergedInstance = mergeMap.get( entityEntryInstance );
+//					final Object unmergedChild = mergeMap.get( childEntity );
+//					if ( unmergedInstance != null && unmergedChild != null ) {
+//						found = isFoundInParent(
+//								propertyName,
+//								unmergedChild,
+//								persister,
+//								collectionPersister,
+//								unmergedInstance
+//						);
+//						LOG.debugf(
+//								"Detached object being merged (corresponding with a managed entity) has a collection that [%s] the detached child.",
+//								( found ? "contains" : "does not contain" )
+//						);
+//					}
+//				}
+//
+//				if ( found ) {
+//					return entityEntry.getId();
+//				}
+//
+//			}
+//		}
+//
+//		// if we get here, it is possible that we have a proxy 'in the way' of the merge map resolution...
+//		// 		NOTE: decided to put this here rather than in the above loop as I was nervous about the performance
+//		//		of the loop-in-loop especially considering this is far more likely the 'edge case'
+//		if ( mergeMap != null ) {
+//			for ( Object o : mergeMap.entrySet() ) {
+//				final Entry mergeMapEntry = (Entry) o;
+//				if ( mergeMapEntry.getKey() instanceof HibernateProxy ) {
+//					final HibernateProxy proxy = (HibernateProxy) mergeMapEntry.getKey();
+//					if ( persister.isSubclassEntityName( proxy.getHibernateLazyInitializer().getEntityName() ) ) {
+//						boolean found = isFoundInParent(
+//								propertyName,
+//								childEntity,
+//								persister,
+//								collectionPersister,
+//								mergeMap.get( proxy )
+//						);
+//						LOG.debugf(
+//								"Detached proxy being merged has a collection that [%s] the managed child.",
+//								(found ? "contains" : "does not contain")
+//						);
+//						if ( !found ) {
+//							found = isFoundInParent(
+//									propertyName,
+//									mergeMap.get( childEntity ),
+//									persister,
+//									collectionPersister,
+//									mergeMap.get( proxy )
+//							);
+//							LOG.debugf(
+//									"Detached proxy being merged has a collection that [%s] the detached child being merged..",
+//									(found ? "contains" : "does not contain")
+//							);
+//						}
+//						if ( found ) {
+//							return proxy.getHibernateLazyInitializer().getIdentifier();
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		return null;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private boolean isFoundInParent(
@@ -1254,63 +1261,64 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
 	@Override
 	public Object getIndexInOwner(String entity, String property, Object childEntity, Map mergeMap) {
-		final EntityDescriptor persister = session.getFactory().getTypeConfiguration().findEntityDescriptor( entity );
-		final PersistentCollectionDescriptor cp = session.getFactory().getTypeConfiguration().findCollectionPersister( entity + '.' + property );
-
-	    // try cache lookup first
-		final Object parent = parentsByChild.get( childEntity );
-		if ( parent != null ) {
-			final EntityEntry entityEntry = entityEntryContext.getEntityEntry( parent );
-			//there maybe more than one parent, filter by type
-			if ( persister.isSubclassEntityName( entityEntry.getEntityName() ) ) {
-				Object index = getIndexInParent( property, childEntity, persister, cp, parent );
-
-				if (index==null && mergeMap!=null) {
-					final Object unMergedInstance = mergeMap.get( parent );
-					final Object unMergedChild = mergeMap.get( childEntity );
-					if ( unMergedInstance != null && unMergedChild != null ) {
-						index = getIndexInParent( property, unMergedChild, persister, cp, unMergedInstance );
-						LOG.debugf(
-								"A detached object being merged (corresponding to a parent in parentsByChild) has an indexed collection that [%s] the detached child being merged. ",
-								( index != null ? "contains" : "does not contain" )
-						);
-					}
-				}
-				if ( index != null ) {
-					return index;
-				}
-			}
-			else {
-				// remove wrong entry
-				parentsByChild.remove( childEntity );
-			}
-		}
-
-		//Not found in cache, proceed
-		for ( Entry<Object, EntityEntry> me : reentrantSafeEntityEntries() ) {
-			final EntityEntry ee = me.getValue();
-			if ( persister.isSubclassEntityName( ee.getEntityName() ) ) {
-				final Object instance = me.getKey();
-
-				Object index = getIndexInParent( property, childEntity, persister, cp, instance );
-				if ( index==null && mergeMap!=null ) {
-					final Object unMergedInstance = mergeMap.get( instance );
-					final Object unMergedChild = mergeMap.get( childEntity );
-					if ( unMergedInstance != null && unMergedChild!=null ) {
-						index = getIndexInParent( property, unMergedChild, persister, cp, unMergedInstance );
-						LOG.debugf(
-								"A detached object being merged (corresponding to a managed entity) has an indexed collection that [%s] the detached child being merged. ",
-								(index != null ? "contains" : "does not contain" )
-						);
-					}
-				}
-
-				if ( index != null ) {
-					return index;
-				}
-			}
-		}
-		return null;
+//		final EntityDescriptor persister = session.getFactory().getTypeConfiguration().findEntityDescriptor( entity );
+//		final PersistentCollectionDescriptor cp = session.getFactory().getTypeConfiguration().findCollectionPersister( entity + '.' + property );
+//
+//	    // try cache lookup first
+//		final Object parent = parentsByChild.get( childEntity );
+//		if ( parent != null ) {
+//			final EntityEntry entityEntry = entityEntryContext.getEntityEntry( parent );
+//			//there maybe more than one parent, filter by type
+//			if ( persister.isSubclassEntityName( entityEntry.getEntityName() ) ) {
+//				Object index = getIndexInParent( property, childEntity, persister, cp, parent );
+//
+//				if (index==null && mergeMap!=null) {
+//					final Object unMergedInstance = mergeMap.get( parent );
+//					final Object unMergedChild = mergeMap.get( childEntity );
+//					if ( unMergedInstance != null && unMergedChild != null ) {
+//						index = getIndexInParent( property, unMergedChild, persister, cp, unMergedInstance );
+//						LOG.debugf(
+//								"A detached object being merged (corresponding to a parent in parentsByChild) has an indexed collection that [%s] the detached child being merged. ",
+//								( index != null ? "contains" : "does not contain" )
+//						);
+//					}
+//				}
+//				if ( index != null ) {
+//					return index;
+//				}
+//			}
+//			else {
+//				// remove wrong entry
+//				parentsByChild.remove( childEntity );
+//			}
+//		}
+//
+//		//Not found in cache, proceed
+//		for ( Entry<Object, EntityEntry> me : reentrantSafeEntityEntries() ) {
+//			final EntityEntry ee = me.getValue();
+//			if ( persister.isSubclassEntityName( ee.getEntityName() ) ) {
+//				final Object instance = me.getKey();
+//
+//				Object index = getIndexInParent( property, childEntity, persister, cp, instance );
+//				if ( index==null && mergeMap!=null ) {
+//					final Object unMergedInstance = mergeMap.get( instance );
+//					final Object unMergedChild = mergeMap.get( childEntity );
+//					if ( unMergedInstance != null && unMergedChild!=null ) {
+//						index = getIndexInParent( property, unMergedChild, persister, cp, unMergedInstance );
+//						LOG.debugf(
+//								"A detached object being merged (corresponding to a managed entity) has an indexed collection that [%s] the detached child being merged. ",
+//								(index != null ? "contains" : "does not contain" )
+//						);
+//					}
+//				}
+//
+//				if ( index != null ) {
+//					return index;
+//				}
+//			}
+//		}
+//		return null;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private Object getIndexInParent(
@@ -1948,35 +1956,37 @@ public class StatefulPersistenceContext implements PersistenceContext {
 
 		@Override
 		public Object[] extractNaturalIdValues(Object[] state, EntityDescriptor persister) {
-			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
-			if ( state.length == naturalIdPropertyIndexes.length ) {
-				return state;
-			}
-
-			final Object[] naturalIdValues = new Object[naturalIdPropertyIndexes.length];
-			for ( int i = 0; i < naturalIdPropertyIndexes.length; i++ ) {
-				naturalIdValues[i] = state[naturalIdPropertyIndexes[i]];
-			}
-			return naturalIdValues;
+//			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
+//			if ( state.length == naturalIdPropertyIndexes.length ) {
+//				return state;
+//			}
+//
+//			final Object[] naturalIdValues = new Object[naturalIdPropertyIndexes.length];
+//			for ( int i = 0; i < naturalIdPropertyIndexes.length; i++ ) {
+//				naturalIdValues[i] = state[naturalIdPropertyIndexes[i]];
+//			}
+//			return naturalIdValues;
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		@Override
 		public Object[] extractNaturalIdValues(Object entity, EntityDescriptor persister) {
-			if ( entity == null ) {
-				throw new AssertionFailure( "Entity from which to extract natural id value(s) cannot be null" );
-			}
-			if ( persister == null ) {
-				throw new AssertionFailure( "Persister to use in extracting natural id value(s) cannot be null" );
-			}
-
-			final int[] naturalIdentifierProperties = persister.getNaturalIdentifierProperties();
-			final Object[] naturalIdValues = new Object[naturalIdentifierProperties.length];
-
-			for ( int i = 0; i < naturalIdentifierProperties.length; i++ ) {
-				naturalIdValues[i] = persister.getPropertyValue( entity, naturalIdentifierProperties[i] );
-			}
-
-			return naturalIdValues;
+//			if ( entity == null ) {
+//				throw new AssertionFailure( "Entity from which to extract natural id value(s) cannot be null" );
+//			}
+//			if ( persister == null ) {
+//				throw new AssertionFailure( "Persister to use in extracting natural id value(s) cannot be null" );
+//			}
+//
+//			final int[] naturalIdentifierProperties = persister.getNaturalIdentifierProperties();
+//			final Object[] naturalIdValues = new Object[naturalIdentifierProperties.length];
+//
+//			for ( int i = 0; i < naturalIdentifierProperties.length; i++ ) {
+//				naturalIdValues[i] = persister.getPropertyValue( entity, naturalIdentifierProperties[i] );
+//			}
+//
+//			return naturalIdValues;
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		@Override
@@ -2034,13 +2044,14 @@ public class StatefulPersistenceContext implements PersistenceContext {
 	}
 
 	private Object[] getNaturalIdValues(Object[] state, EntityDescriptor persister) {
-		final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
-		final Object[] naturalIdValues = new Object[naturalIdPropertyIndexes.length];
-
-		for ( int i = 0; i < naturalIdPropertyIndexes.length; i++ ) {
-			naturalIdValues[i] = state[naturalIdPropertyIndexes[i]];
-		}
-
-		return naturalIdValues;
+//		final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
+//		final Object[] naturalIdValues = new Object[naturalIdPropertyIndexes.length];
+//
+//		for ( int i = 0; i < naturalIdPropertyIndexes.length; i++ ) {
+//			naturalIdValues[i] = state[naturalIdPropertyIndexes[i]];
+//		}
+//
+//		return naturalIdValues;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 }

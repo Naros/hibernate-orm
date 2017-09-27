@@ -22,6 +22,7 @@ import org.hibernate.AssertionFailure;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.LockMode;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.annotations.CacheModeType;
 import org.hibernate.annotations.FlushModeType;
 import org.hibernate.annotations.QueryHints;
@@ -118,14 +119,15 @@ public abstract class QueryBinder {
 					.createNamedQueryDefinition();
 		}
 		else if ( !void.class.equals( queryAnn.resultClass() ) ) {
-			//class mapping usage
-			//FIXME should be done in a second pass due to entity name?
-			final QueryResultBuilderRootEntity entityQueryReturn =
-					new QueryResultBuilderRootEntity( "alias1", queryAnn.resultClass().getName() );
-			entityQueryReturn.setLockMode( LockMode.READ );
-			final List<QueryResultBuilder> queryResultBuilders = new ArrayList<>();
-			queryResultBuilders.add( entityQueryReturn );
-			builder.setQueryReturns( queryResultBuilders );
+//			//class mapping usage
+//			//FIXME should be done in a second pass due to entity name?
+//			final QueryResultBuilderRootEntity entityQueryReturn =
+//					new QueryResultBuilderRootEntity( "alias1", queryAnn.resultClass().getName() );
+//			entityQueryReturn.setLockMode( LockMode.READ );
+//			final List<QueryResultBuilder> queryResultBuilders = new ArrayList<>();
+//			queryResultBuilders.add( entityQueryReturn );
+//			builder.setQueryReturns( queryResultBuilders );
+			throw new NotYetImplementedFor6Exception(  );
 		}
 		else {
 			builder.setQueryReturns( Collections.EMPTY_LIST );
@@ -183,30 +185,31 @@ public abstract class QueryBinder {
 		else if ( !void.class.equals( queryAnn.resultClass() ) ) {
 			//class mapping usage
 			//FIXME should be done in a second pass due to entity name?
-			final QueryResultBuilderRootEntity entityQueryReturn =
-					new QueryResultBuilderRootEntity( "alias1", queryAnn.resultClass().getName() );
-			entityQueryReturn.setLockMode( LockMode.READ );
-			final List<QueryResultBuilder> queryResultBuilders = new ArrayList<>();
-			queryResultBuilders.add( entityQueryReturn );
-			query = new NamedSQLQueryDefinitionBuilder().setName( queryAnn.name() )
-					.setQuery( queryAnn.query() )
-					.setQueryReturns( queryResultBuilders )
-					.setQuerySpaces( null )
-					.setCacheable( queryAnn.cacheable() )
-					.setCacheRegion(
-							BinderHelper.isEmptyAnnotationValue( queryAnn.cacheRegion() ) ?
-									null :
-									queryAnn.cacheRegion()
-					)
-					.setTimeout( queryAnn.timeout() < 0 ? null : queryAnn.timeout() )
-					.setFetchSize( queryAnn.fetchSize() < 0 ? null : queryAnn.fetchSize() )
-					.setFlushMode( getFlushMode( queryAnn.flushMode() ) )
-					.setCacheMode( getCacheMode( queryAnn.cacheMode() ) )
-					.setReadOnly( queryAnn.readOnly() )
-					.setComment( BinderHelper.isEmptyAnnotationValue( queryAnn.comment() ) ? null : queryAnn.comment() )
-					.setParameterTypes( null )
-					.setCallable( queryAnn.callable() )
-					.createNamedQueryDefinition();
+//			final QueryResultBuilderRootEntity entityQueryReturn =
+//					new QueryResultBuilderRootEntity( "alias1", queryAnn.resultClass().getName() );
+//			entityQueryReturn.setLockMode( LockMode.READ );
+//			final List<QueryResultBuilder> queryResultBuilders = new ArrayList<>();
+//			queryResultBuilders.add( entityQueryReturn );
+//			query = new NamedSQLQueryDefinitionBuilder().setName( queryAnn.name() )
+//					.setQuery( queryAnn.query() )
+//					.setQueryReturns( queryResultBuilders )
+//					.setQuerySpaces( null )
+//					.setCacheable( queryAnn.cacheable() )
+//					.setCacheRegion(
+//							BinderHelper.isEmptyAnnotationValue( queryAnn.cacheRegion() ) ?
+//									null :
+//									queryAnn.cacheRegion()
+//					)
+//					.setTimeout( queryAnn.timeout() < 0 ? null : queryAnn.timeout() )
+//					.setFetchSize( queryAnn.fetchSize() < 0 ? null : queryAnn.fetchSize() )
+//					.setFlushMode( getFlushMode( queryAnn.flushMode() ) )
+//					.setCacheMode( getCacheMode( queryAnn.cacheMode() ) )
+//					.setReadOnly( queryAnn.readOnly() )
+//					.setComment( BinderHelper.isEmptyAnnotationValue( queryAnn.comment() ) ? null : queryAnn.comment() )
+//					.setParameterTypes( null )
+//					.setCallable( queryAnn.callable() )
+//					.createNamedQueryDefinition();
+			throw new NotYetImplementedFor6Exception(  );
 		}
 		else {
 			throw new NotYetImplementedException( "Pure native scalar queries are not yet supported" );

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.ScrollableResults;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.loader.spi.Loader;
@@ -175,29 +176,30 @@ public class ScrollableResultsImpl extends AbstractScrollableResults implements 
 	}
 
 	private void prepareCurrentRow(boolean underlyingScrollSuccessful) {
-		if ( !underlyingScrollSuccessful ) {
-			currentRow = null;
-			return;
-		}
-
-		final Object result = getLoader().loadSingleRow(
-				getResultSet(),
-				getSession(),
-				getQueryParameters(),
-				false
-		);
-		if ( result != null && result.getClass().isArray() ) {
-			currentRow = (Object[]) result;
-		}
-		else {
-			currentRow = new Object[] {result};
-		}
-
-		if ( getHolderInstantiator() != null ) {
-			currentRow = new Object[] {getHolderInstantiator().instantiate( currentRow )};
-		}
-
-		afterScrollOperation();
+//		if ( !underlyingScrollSuccessful ) {
+//			currentRow = null;
+//			return;
+//		}
+//
+//		final Object result = getLoader().loadSingleRow(
+//				getResultSet(),
+//				getSession(),
+//				getQueryParameters(),
+//				false
+//		);
+//		if ( result != null && result.getClass().isArray() ) {
+//			currentRow = (Object[]) result;
+//		}
+//		else {
+//			currentRow = new Object[] {result};
+//		}
+//
+//		if ( getHolderInstantiator() != null ) {
+//			currentRow = new Object[] {getHolderInstantiator().instantiate( currentRow )};
+//		}
+//
+//		afterScrollOperation();
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 }

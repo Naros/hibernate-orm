@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.hibernate.EntityMode;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.pretty.MessageHelper;
 import org.hibernate.type.Type;
 
@@ -40,12 +41,13 @@ public class EntityUniqueKey implements Serializable {
 			final Type keyType,
 			final EntityMode entityMode,
 			final SessionFactoryImplementor factory) {
-		this.uniqueKeyName = uniqueKeyName;
-		this.entityName = entityName;
-		this.key = semiResolvedKey;
-		this.keyType = keyType.getSemiResolvedType( factory );
-		this.entityMode = entityMode;
-		this.hashCode = generateHashCode( factory );
+//		this.uniqueKeyName = uniqueKeyName;
+//		this.entityName = entityName;
+//		this.key = semiResolvedKey;
+//		this.keyType = keyType.getSemiResolvedType( factory );
+//		this.entityMode = entityMode;
+//		this.hashCode = generateHashCode( factory );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	public String getEntityName() {

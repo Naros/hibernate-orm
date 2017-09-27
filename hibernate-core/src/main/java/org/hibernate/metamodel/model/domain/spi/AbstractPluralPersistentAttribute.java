@@ -40,7 +40,7 @@ public class AbstractPluralPersistentAttribute<O,C,E>
 			JavaTypeDescriptor<C> javaTypeDescriptor,
 			PropertyAccess access,
 			PersistentCollectionDescriptor<O, C, E> collectionMetadata) {
-		super( container, name, javaTypeDescriptor, access );
+		super( container, name, javaTypeDescriptor, access, false );
 		this.collectionMetadata = collectionMetadata;
 	}
 

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.hibernate.AssertionFailure;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.cache.spi.access.NaturalIdDataAccess;
 import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -357,18 +358,19 @@ public class NaturalIdXrefDelegate {
 			int hashCodeCalculation = 1;
 			hashCodeCalculation = prime * hashCodeCalculation + persister.hashCode();
 
-			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
-			naturalIdTypes = new JavaTypeDescriptor[ naturalIdPropertyIndexes.length ];
-			int i = 0;
-			for ( int naturalIdPropertyIndex : naturalIdPropertyIndexes ) {
-				final JavaTypeDescriptor javaTypeDescriptor = persister.getPropertyJavaTypeDescriptor( persister.getPropertyNames()[ naturalIdPropertyIndex ] );
-				naturalIdTypes[i] = javaTypeDescriptor;
-				final int elementHashCode = values[i] == null ? 0 : javaTypeDescriptor.extractHashCode( values[i] );
-				hashCodeCalculation = prime * hashCodeCalculation + elementHashCode;
-				i++;
-			}
-
-			this.hashCode = hashCodeCalculation;
+//			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
+//			naturalIdTypes = new JavaTypeDescriptor[ naturalIdPropertyIndexes.length ];
+//			int i = 0;
+//			for ( int naturalIdPropertyIndex : naturalIdPropertyIndexes ) {
+//				final JavaTypeDescriptor javaTypeDescriptor = persister.getPropertyJavaTypeDescriptor( persister.getPropertyNames()[ naturalIdPropertyIndex ] );
+//				naturalIdTypes[i] = javaTypeDescriptor;
+//				final int elementHashCode = values[i] == null ? 0 : javaTypeDescriptor.extractHashCode( values[i] );
+//				hashCodeCalculation = prime * hashCodeCalculation + elementHashCode;
+//				i++;
+//			}
+//
+//			this.hashCode = hashCodeCalculation;
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		public Object[] getValues() {
@@ -420,14 +422,15 @@ public class NaturalIdXrefDelegate {
 		private List<CachedNaturalId> invalidNaturalIdList;
 
 		private NaturalIdResolutionCache(EntityDescriptor persister) {
-			this.persister = persister;
-
-			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
-			naturalIdTypes = new JavaTypeDescriptor[ naturalIdPropertyIndexes.length ];
-			int i = 0;
-			for ( int naturalIdPropertyIndex : naturalIdPropertyIndexes ) {
-				naturalIdTypes[i++] = persister.getPropertyJavaTypeDescriptor( persister.getPropertyNames()[ naturalIdPropertyIndex ] );
-			}
+//			this.persister = persister;
+//
+//			final int[] naturalIdPropertyIndexes = persister.getNaturalIdentifierProperties();
+//			naturalIdTypes = new JavaTypeDescriptor[ naturalIdPropertyIndexes.length ];
+//			int i = 0;
+//			for ( int naturalIdPropertyIndex : naturalIdPropertyIndexes ) {
+//				naturalIdTypes[i++] = persister.getPropertyJavaTypeDescriptor( persister.getPropertyNames()[ naturalIdPropertyIndex ] );
+//			}
+			throw new NotYetImplementedFor6Exception(  );
 		}
 
 		public EntityDescriptor getPersister() {

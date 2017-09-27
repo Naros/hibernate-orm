@@ -42,6 +42,7 @@ import org.hibernate.Interceptor;
 import org.hibernate.MappingException;
 import org.hibernate.Metamodel;
 import org.hibernate.MultiTenancyStrategy;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.Session;
 import org.hibernate.SessionBuilder;
 import org.hibernate.SessionEventListener;
@@ -809,12 +810,13 @@ public final class SessionFactoryImpl implements SessionFactoryImplementor {
 	}
 
 	private NamedSQLQueryDefinition extractSqlQueryDefinition(org.hibernate.query.NativeQuery nativeSqlQuery, String name) {
-		final NamedSQLQueryDefinitionBuilder builder = new NamedSQLQueryDefinitionBuilder( name );
-		fillInNamedQueryBuilder( builder, nativeSqlQuery );
-		builder.setCallable( nativeSqlQuery.isCallable() )
-				.setQuerySpaces( nativeSqlQuery.getSynchronizedQuerySpaces() )
-				.setQueryReturns( nativeSqlQuery.getQueryReturns() );
-		return builder.createNamedQueryDefinition();
+//		final NamedSQLQueryDefinitionBuilder builder = new NamedSQLQueryDefinitionBuilder( name );
+//		fillInNamedQueryBuilder( builder, nativeSqlQuery );
+//		builder.setCallable( nativeSqlQuery.isCallable() )
+//				.setQuerySpaces( nativeSqlQuery.getSynchronizedQuerySpaces() )
+//				.setQueryReturns( nativeSqlQuery.getQueryReturns() );
+//		return builder.createNamedQueryDefinition();
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private NamedQueryDefinition extractHqlQueryDefinition(org.hibernate.query.Query hqlQuery, String name) {

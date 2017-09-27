@@ -68,18 +68,19 @@ public abstract class AbstractCollectionEvent extends AbstractEvent {
 	}
 
 	protected static String getAffectedOwnerEntityName(PersistentCollectionDescriptor collectionPersister, Object affectedOwner, EventSource source ) {
-
-		// collectionPersister should not be null, but we don't want to throw
-		// an exception if it is null
-		String entityName =
-				( collectionPersister == null ? null : collectionPersister.getOwnerEntityPersister().getEntityName() );
-		if ( affectedOwner != null ) {
-			EntityEntry ee = source.getPersistenceContext().getEntry( affectedOwner );
-			if ( ee != null && ee.getEntityName() != null) {
-				entityName = ee.getEntityName();
-			}
-		}	
-		return entityName;
+//
+//		// collectionPersister should not be null, but we don't want to throw
+//		// an exception if it is null
+//		String entityName =
+//				( collectionPersister == null ? null : collectionPersister.getOwnerEntityPersister().getEntityName() );
+//		if ( affectedOwner != null ) {
+//			EntityEntry ee = source.getPersistenceContext().getEntry( affectedOwner );
+//			if ( ee != null && ee.getEntityName() != null) {
+//				entityName = ee.getEntityName();
+//			}
+//		}
+//		return entityName;
+		throw new org.hibernate.cfg.NotYetImplementedException(  );
 	}
 
 	public PersistentCollection getCollection() {

@@ -9,6 +9,7 @@ package org.hibernate.action.internal;
 import java.io.Serializable;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.metamodel.model.domain.spi.PersistentCollectionDescriptor;
@@ -40,6 +41,7 @@ public final class QueuedOperationCollectionAction extends CollectionAction {
 
 	@Override
 	public void execute() throws HibernateException {
-		getPersistentCollectionDescriptor().processQueuedOps( getCollection(), getKey(), getSession() );
+		//getPersistentCollectionDescriptor().processQueuedOps( getCollection(), getKey(), getSession() );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 }

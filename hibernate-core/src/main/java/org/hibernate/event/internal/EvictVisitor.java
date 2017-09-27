@@ -7,6 +7,7 @@
 package org.hibernate.event.internal;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.collection.spi.CollectionClassification;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CollectionEntry;
@@ -60,23 +61,24 @@ public class EvictVisitor extends AbstractVisitor {
 	}
 
 	private void evictCollection(PersistentCollection collection) {
-		CollectionEntry ce = (CollectionEntry) getSession().getPersistenceContext().getCollectionEntries().remove(collection);
-		if ( LOG.isDebugEnabled() ) {
-			LOG.debugf(
-					"Evicting collection: %s",
-					MessageHelper.collectionInfoString( ce.getLoadedPersistentCollectionDescriptor(),
-							collection,
-							ce.getLoadedKey(),
-							getSession() ) );
-		}
-		if (ce.getLoadedPersistentCollectionDescriptor() != null && ce.getLoadedPersistentCollectionDescriptor().getgetBatchSize() > 1) {
-			getSession().getPersistenceContext().getBatchFetchQueue().removeBatchLoadableCollection(ce);
-		}
-		if ( ce.getLoadedPersistentCollectionDescriptor() != null && ce.getLoadedKey() != null ) {
-			//TODO: is this 100% correct?
-			getSession().getPersistenceContext().getCollectionsByKey().remove(
-					new CollectionKey( ce.getLoadedPersistentCollectionDescriptor(), ce.getLoadedKey() )
-			);
-		}
+//		CollectionEntry ce = (CollectionEntry) getSession().getPersistenceContext().getCollectionEntries().remove(collection);
+//		if ( LOG.isDebugEnabled() ) {
+//			LOG.debugf(
+//					"Evicting collection: %s",
+//					MessageHelper.collectionInfoString( ce.getLoadedPersistentCollectionDescriptor(),
+//							collection,
+//							ce.getLoadedKey(),
+//							getSession() ) );
+//		}
+//		if (ce.getLoadedPersistentCollectionDescriptor() != null && ce.getLoadedPersistentCollectionDescriptor().getgetBatchSize() > 1) {
+//			getSession().getPersistenceContext().getBatchFetchQueue().removeBatchLoadableCollection(ce);
+//		}
+//		if ( ce.getLoadedPersistentCollectionDescriptor() != null && ce.getLoadedKey() != null ) {
+//			//TODO: is this 100% correct?
+//			getSession().getPersistenceContext().getCollectionsByKey().remove(
+//					new CollectionKey( ce.getLoadedPersistentCollectionDescriptor(), ce.getLoadedKey() )
+//			);
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 }

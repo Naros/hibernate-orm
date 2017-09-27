@@ -13,6 +13,7 @@ import java.util.Set;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.LockOptions;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.ReplicationMode;
 import org.hibernate.TransientPropertyValueException;
 import org.hibernate.collection.spi.PersistentCollection;
@@ -490,7 +491,8 @@ public class CascadingActions {
 			EventSource session,
 			PersistentCollectionDescriptor collectionDescriptor,
 			Object collection) {
-		return collectionDescriptor.getElementsIterator( collection, session );
+		//return collectionDescriptor.getElementsIterator( collection, session );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**
@@ -501,15 +503,16 @@ public class CascadingActions {
 			SharedSessionContractImplementor session,
 			PersistentCollectionDescriptor collectionDescriptor,
 			Object collection) {
-		if ( collectionIsInitialized( collection ) ) {
-			// handles arrays and newly instantiated collections
-			return collectionDescriptor.getElementsIterator( collection, session );
-		}
-		else {
-			// does not handle arrays (thats ok, cos they can't be lazy)
-			// or newly instantiated collections, so we can do the cast
-			return ((PersistentCollection) collection).queuedAdditionIterator();
-		}
+//		if ( collectionIsInitialized( collection ) ) {
+//			// handles arrays and newly instantiated collections
+//			return collectionDescriptor.getElementsIterator( collection, session );
+//		}
+//		else {
+//			// does not handle arrays (thats ok, cos they can't be lazy)
+//			// or newly instantiated collections, so we can do the cast
+//			return ((PersistentCollection) collection).queuedAdditionIterator();
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private static boolean collectionIsInitialized(Object collection) {

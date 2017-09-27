@@ -7,6 +7,7 @@
 package org.hibernate.internal;
 
 
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.metamodel.model.domain.spi.EntityDescriptor;
 
 /**
@@ -27,10 +28,11 @@ public class DynamicFilterAliasGenerator implements FilterAliasGenerator {
 			return rootAlias;
 		}
 		else {
-			return EntityDescriptor.generateTableAlias(
-					rootAlias,
-					AbstractEntityPersister.getTableId( table, tables )
-			);
+//			return EntityDescriptor.generateTableAlias(
+//					rootAlias,
+//					AbstractEntityPersister.getTableId( table, tables )
+//			);
+			throw new NotYetImplementedFor6Exception(  );
 		}
 	}
 

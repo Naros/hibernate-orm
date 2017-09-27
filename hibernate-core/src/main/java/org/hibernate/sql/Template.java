@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.internal.util.StringHelper;
 import org.hibernate.query.sqm.produce.function.SqmFunctionRegistry;
@@ -741,7 +742,8 @@ public final class Template {
 		}
 		// if function.hasParenthesesIfNoArguments() is true, then assume
 		// lcToken is not a function (since it is not followed by '(')
-		return ! function.hasParenthesesIfNoArguments();
+		// return ! function.hasParenthesesIfNoArguments();
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private static boolean isIdentifier(String token) {

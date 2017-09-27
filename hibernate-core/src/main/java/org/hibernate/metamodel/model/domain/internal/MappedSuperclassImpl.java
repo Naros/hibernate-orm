@@ -12,7 +12,6 @@ import javax.persistence.metamodel.Type;
 
 import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.boot.model.domain.IdentifiableTypeMapping;
-import org.hibernate.boot.model.domain.spi.IdentifiableTypeMappingImplementor;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
 import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.model.domain.spi.AbstractIdentifiableType;
@@ -55,7 +54,7 @@ public class MappedSuperclassImpl<J>
 	public void completeInitialization(
 			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor<? super J> superType,
-			IdentifiableTypeMappingImplementor bootMapping,
+			IdentifiableTypeMapping bootMapping,
 			RuntimeModelCreationContext creationContext) {
 		throw new NotYetImplementedFor6Exception(  );
 	}

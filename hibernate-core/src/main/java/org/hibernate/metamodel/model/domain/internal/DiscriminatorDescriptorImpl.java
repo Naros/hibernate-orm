@@ -212,6 +212,11 @@ public class DiscriminatorDescriptorImpl<O,J> implements DiscriminatorDescriptor
 		);
 	}
 
+	@Override
+	public boolean includeInOptimisticLocking() {
+		throw new NotYetImplementedFor6Exception(  );
+	}
+
 	private SqlSelection resolveSqlSelection(
 			ColumnReferenceQualifier qualifier,
 			SqlSelectionGroupResolutionContext resolutionContext) {

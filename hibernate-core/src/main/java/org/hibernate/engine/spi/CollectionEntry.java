@@ -15,6 +15,7 @@ import java.util.Collection;
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.collection.internal.AbstractPersistentCollection;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.CoreLogging;
@@ -197,16 +198,17 @@ public final class CollectionEntry implements Serializable {
 	}
 
 	public void postInitialize(PersistentCollection collection) throws HibernateException {
-		snapshot = getLoadedPersistentCollectionDescriptor().getJavaTypeDescriptor().getMutabilityPlan().isMutable()
-				? collection.getSnapshot( getLoadedPersistentCollectionDescriptor() )
-				: null;
-		collection.setSnapshot(loadedKey, role, snapshot);
-		if ( getLoadedPersistentCollectionDescriptor().getBatchSize() > 1 ) {
-			( (AbstractPersistentCollection) collection ).getSession()
-					.getPersistenceContext()
-					.getBatchFetchQueue()
-					.removeBatchLoadableCollection( this );
-		}
+//		snapshot = getLoadedPersistentCollectionDescriptor().getJavaTypeDescriptor().getMutabilityPlan().isMutable()
+//				? collection.getSnapshot( getLoadedPersistentCollectionDescriptor() )
+//				: null;
+//		collection.setSnapshot(loadedKey, role, snapshot);
+//		if ( getLoadedPersistentCollectionDescriptor().getBatchSize() > 1 ) {
+//			( (AbstractPersistentCollection) collection ).getSession()
+//					.getPersistenceContext()
+//					.getBatchFetchQueue()
+//					.removeBatchLoadableCollection( this );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**

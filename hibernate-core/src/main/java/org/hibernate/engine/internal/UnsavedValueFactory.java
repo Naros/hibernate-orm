@@ -11,6 +11,7 @@ import java.lang.reflect.Constructor;
 
 import org.hibernate.InstantiationException;
 import org.hibernate.MappingException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.engine.spi.IdentifierValue;
 import org.hibernate.engine.spi.VersionValue;
 import org.hibernate.property.access.spi.Getter;
@@ -89,8 +90,9 @@ public class UnsavedValueFactory {
 		}
 		else {
 			try {
-				return new IdentifierValue( (Serializable) identifierType.getJavaTypeDescriptor()
-						.fromString( unsavedValue ) );
+//				return new IdentifierValue( (Serializable) identifierType.getJavaTypeDescriptor()
+//						.fromString( unsavedValue ) );
+				throw new NotYetImplementedFor6Exception(  );
 			}
 			catch ( ClassCastException cce ) {
 				throw new MappingException( "Bad identifier type: " + identifierType.getJavaType().getName() );

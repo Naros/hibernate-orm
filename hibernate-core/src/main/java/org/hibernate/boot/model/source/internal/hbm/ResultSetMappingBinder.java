@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.AssertionFailure;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.boot.MappingException;
 import org.hibernate.boot.jaxb.hbm.spi.JaxbHbmNativeQueryCollectionLoadReturnType;
 import org.hibernate.boot.jaxb.hbm.spi.JaxbHbmNativeQueryJoinReturnType;
@@ -202,14 +203,15 @@ public abstract class ResultSetMappingBinder {
 		String roleOwnerAlias = rtnSource.getProperty().substring( 0, dot );
 		String roleProperty = rtnSource.getProperty().substring( dot + 1 );
 
-		return new NativeSQLQueryJoinReturn(
-				rtnSource.getAlias(),
-				roleOwnerAlias,
-				roleProperty,
-				//FIXME: get the PersistentClass
-				extractPropertyResults( rtnSource.getAlias(), rtnSource, null, context ),
-				rtnSource.getLockMode()
-		);
+		throw new NotYetImplementedFor6Exception(  );
+//		return new NativeSQLQueryJoinReturn(
+//				rtnSource.getAlias(),
+//				roleOwnerAlias,
+//				roleProperty,
+//				//FIXME: get the PersistentClass
+//				extractPropertyResults( rtnSource.getAlias(), rtnSource, null, context ),
+//				rtnSource.getLockMode()
+//		);
 	}
 
 	public static QueryResultBuilder extractReturnDescription(
@@ -232,14 +234,15 @@ public abstract class ResultSetMappingBinder {
 				.getClassName();
 		String ownerPropertyName = rtnSource.getRole().substring( dot + 1 );
 
-		return new NativeSQLQueryCollectionReturn(
-				rtnSource.getAlias(),
-				ownerClassName,
-				ownerPropertyName,
-				// FIXME: get the PersistentClass
-				extractPropertyResults( rtnSource.getAlias(), rtnSource, null, context ),
-				rtnSource.getLockMode()
-		);
+		throw new NotYetImplementedFor6Exception(  );
+//		return new NativeSQLQueryCollectionReturn(
+//				rtnSource.getAlias(),
+//				ownerClassName,
+//				ownerPropertyName,
+//				// FIXME: get the PersistentClass
+//				extractPropertyResults( rtnSource.getAlias(), rtnSource, null, context ),
+//				rtnSource.getLockMode()
+//		);
 	}
 
 	/**

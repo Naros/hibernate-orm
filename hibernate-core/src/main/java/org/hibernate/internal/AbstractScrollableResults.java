@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.loader.spi.Loader;
 import org.hibernate.query.spi.QueryOptions;
@@ -138,16 +139,17 @@ public abstract class AbstractScrollableResults implements ScrollableResultsImpl
 			throw new IllegalStateException( "ScrollableResults is closed" );
 		}
 
-		if ( holderInstantiator != null ) {
-			throw new HibernateException( "query specifies a holder class" );
-		}
-
-		if ( returnType.getJavaTypeDescriptor().getJavaType() == types[col].getJavaTypeDescriptor().getJavaType() ) {
-			return get( col );
-		}
-		else {
-			return throwInvalidColumnTypeException( col, types[col], returnType );
-		}
+//		if ( holderInstantiator != null ) {
+//			throw new HibernateException( "query specifies a holder class" );
+//		}
+//
+//		if ( returnType.getJavaTypeDescriptor().getJavaType() == types[col].getJavaTypeDescriptor().getJavaType() ) {
+//			return get( col );
+//		}
+//		else {
+//			return throwInvalidColumnTypeException( col, types[col], returnType );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**
@@ -163,16 +165,17 @@ public abstract class AbstractScrollableResults implements ScrollableResultsImpl
 			throw new IllegalStateException( "ScrollableResults is closed" );
 		}
 
-		if ( holderInstantiator != null ) {
-			throw new HibernateException( "query specifies a holder class" );
-		}
-
-		if ( returnType.getJavaTypeDescriptor().getJavaType().isAssignableFrom( types[col].getJavaTypeDescriptor().getJavaType() ) ) {
-			return get( col );
-		}
-		else {
-			return throwInvalidColumnTypeException( col, types[col], returnType );
-		}
+//		if ( holderInstantiator != null ) {
+//			throw new HibernateException( "query specifies a holder class" );
+//		}
+//
+//		if ( returnType.getJavaTypeDescriptor().getJavaType().isAssignableFrom( types[col].getJavaTypeDescriptor().getJavaType() ) ) {
+//			return get( col );
+//		}
+//		else {
+//			return throwInvalidColumnTypeException( col, types[col], returnType );
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override
@@ -272,7 +275,8 @@ public abstract class AbstractScrollableResults implements ScrollableResultsImpl
 
 	@Override
 	public final Type getType(int i) {
-		return types[i];
+		//return types[i];
+		throw new org.hibernate.cfg.NotYetImplementedException(  );
 	}
 
 	private Object throwInvalidColumnTypeException(

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import org.hibernate.AssertionFailure;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.event.service.spi.EventListenerGroup;
 import org.hibernate.event.service.spi.EventListenerRegistry;
@@ -51,16 +52,17 @@ public class StandardCacheEntryImpl implements CacheEntry {
 			final SharedSessionContractImplementor session,
 			final Object owner) throws HibernateException {
 		// disassembled state gets put in a new array (we write to cache by value!)
-		this.disassembledState = TypeHelper.disassemble(
-				state,
-				persister.getPropertyTypes(),
-				persister.isLazyPropertiesCacheable() ? null : persister.getPropertyLaziness(),
-				session,
-				owner
-		);
-		this.disassembledStateText = TypeHelper.toLoggableString( state, persister );
-		this.subclass = persister.getEntityName();
-		this.version = version;
+//		this.disassembledState = TypeHelper.disassemble(
+//				state,
+//				persister.getPropertyTypes(),
+//				persister.isLazyPropertiesCacheable() ? null : persister.getPropertyLaziness(),
+//				session,
+//				owner
+//		);
+//		this.disassembledStateText = TypeHelper.toLoggableString( state, persister );
+//		this.subclass = persister.getEntityName();
+//		this.version = version;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	StandardCacheEntryImpl(Serializable[] state, String disassembledStateText, String subclass, Object version) {
@@ -128,38 +130,39 @@ public class StandardCacheEntryImpl implements CacheEntry {
 			final EntityDescriptor persister,
 			final Interceptor interceptor,
 			final EventSource session) throws HibernateException {
-		if ( !persister.getEntityName().equals( subclass ) ) {
-			throw new AssertionFailure( "Tried to assemble a different subclass instance" );
-		}
-
-		//assembled state gets put in a new array (we read from cache by value!)
-		final Object[] assembledProps = TypeHelper.assemble(
-				disassembledState,
-				persister.getPropertyTypes(),
-				session, instance
-		);
-
-		//persister.setIdentifier(instance, id); //beforeQuery calling interceptor, for consistency with normal load
-
-		//TODO: reuse the PreLoadEvent
-		final PreLoadEvent preLoadEvent = new PreLoadEvent( session )
-				.setEntity( instance )
-				.setState( assembledProps )
-				.setId( id )
-				.setPersister( persister );
-
-		final EventListenerGroup<PreLoadEventListener> listenerGroup = session
-				.getFactory()
-				.getServiceRegistry()
-				.getService( EventListenerRegistry.class )
-				.getEventListenerGroup( EventType.PRE_LOAD );
-		for ( PreLoadEventListener listener : listenerGroup.listeners() ) {
-			listener.onPreLoad( preLoadEvent );
-		}
-
-		persister.setPropertyValues( instance, assembledProps );
-
-		return assembledProps;
+//		if ( !persister.getEntityName().equals( subclass ) ) {
+//			throw new AssertionFailure( "Tried to assemble a different subclass instance" );
+//		}
+//
+//		//assembled state gets put in a new array (we read from cache by value!)
+//		final Object[] assembledProps = TypeHelper.assemble(
+//				disassembledState,
+//				persister.getPropertyTypes(),
+//				session, instance
+//		);
+//
+//		//persister.setIdentifier(instance, id); //beforeQuery calling interceptor, for consistency with normal load
+//
+//		//TODO: reuse the PreLoadEvent
+//		final PreLoadEvent preLoadEvent = new PreLoadEvent( session )
+//				.setEntity( instance )
+//				.setState( assembledProps )
+//				.setId( id )
+//				.setPersister( persister );
+//
+//		final EventListenerGroup<PreLoadEventListener> listenerGroup = session
+//				.getFactory()
+//				.getServiceRegistry()
+//				.getService( EventListenerRegistry.class )
+//				.getEventListenerGroup( EventType.PRE_LOAD );
+//		for ( PreLoadEventListener listener : listenerGroup.listeners() ) {
+//			listener.onPreLoad( preLoadEvent );
+//		}
+//
+//		persister.setPropertyValues( instance, assembledProps );
+//
+//		return assembledProps;
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override

@@ -9,6 +9,7 @@ package org.hibernate.event.internal;
 import java.io.Serializable;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.cache.spi.access.CollectionDataAccess;
 import org.hibernate.cache.spi.entry.CollectionCacheEntry;
 import org.hibernate.collection.spi.PersistentCollection;
@@ -69,19 +70,20 @@ public class DefaultInitializeCollectionEventListener implements InitializeColle
 				}
 			}
 			else {
-				if ( traceEnabled ) {
-					LOG.trace( "Collection not cached" );
-				}
-				ce.getLoadedPersistentCollectionDescriptor().initialize( ce.getLoadedKey(), source );
-				if ( traceEnabled ) {
-					LOG.trace( "Collection initialized" );
-				}
-
-				if ( source.getFactory().getStatistics().isStatisticsEnabled() ) {
-					source.getFactory().getStatisticsImplementor().fetchCollection(
-							ce.getLoadedPersistentCollectionDescriptor().getNavigableRole().getFullPath()
-					);
-				}
+//				if ( traceEnabled ) {
+//					LOG.trace( "Collection not cached" );
+//				}
+//				ce.getLoadedPersistentCollectionDescriptor().initialize( ce.getLoadedKey(), source );
+//				if ( traceEnabled ) {
+//					LOG.trace( "Collection initialized" );
+//				}
+//
+//				if ( source.getFactory().getStatistics().isStatisticsEnabled() ) {
+//					source.getFactory().getStatisticsImplementor().fetchCollection(
+//							ce.getLoadedPersistentCollectionDescriptor().getNavigableRole().getFullPath()
+//					);
+//				}
+				throw new NotYetImplementedFor6Exception(  );
 			}
 		}
 	}

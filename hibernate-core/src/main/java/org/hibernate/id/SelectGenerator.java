@@ -14,6 +14,7 @@ import java.util.Properties;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.insert.AbstractSelectingDelegate;
@@ -68,13 +69,14 @@ public class SelectGenerator extends AbstractPostInsertGenerator implements Conf
 			);
 		}
 
-		if ( persister.getEntityMetamodel().isNaturalIdentifierInsertGenerated() ) {
-			throw new IdentifierGenerationException(
-					"natural-id also defined as insert-generated; need to specify [key] " +
-							"in generator parameters"
-			);
-		}
-		return naturalIdDescriptor.getPersistentAttributes().iterator().next().getName();
+//		if ( persister.getEntityMetamodel().isNaturalIdentifierInsertGenerated() ) {
+//			throw new IdentifierGenerationException(
+//					"natural-id also defined as insert-generated; need to specify [key] " +
+//							"in generator parameters"
+//			);
+//		}
+//		return naturalIdDescriptor.getPersistentAttributes().iterator().next().getName();
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 
@@ -122,26 +124,28 @@ public class SelectGenerator extends AbstractPostInsertGenerator implements Conf
 				SharedSessionContractImplementor session,
 				PreparedStatement ps,
 				Object entity) throws SQLException {
-			Object uniqueKeyValue = persister.getPropertyValue( entity, uniqueKeyPropertyName );
-			uniqueKeyType.nullSafeSet( ps, uniqueKeyValue, 1, session );
+//			Object uniqueKeyValue = persister.getPropertyValue( entity, uniqueKeyPropertyName );
+//			uniqueKeyType.nullSafeSet( ps, uniqueKeyValue, 1, session );
+			throw new org.hibernate.cfg.NotYetImplementedException(  );
 		}
 
 		protected Serializable getResult(
 				SharedSessionContractImplementor session,
 				ResultSet rs,
 				Object entity) throws SQLException {
-			if ( !rs.next() ) {
-				throw new IdentifierGenerationException(
-						"the inserted row could not be located by the unique key: " +
-								uniqueKeyPropertyName
-				);
-			}
-			return (Serializable) idType.nullSafeGet(
-					rs,
-					persister.getRootTableKeyColumnNames(),
-					session,
-					entity
-			);
+//			if ( !rs.next() ) {
+//				throw new IdentifierGenerationException(
+//						"the inserted row could not be located by the unique key: " +
+//								uniqueKeyPropertyName
+//				);
+//			}
+//			return (Serializable) idType.nullSafeGet(
+//					rs,
+//					persister.getRootTableKeyColumnNames(),
+//					session,
+//					entity
+//			);
+			throw new org.hibernate.cfg.NotYetImplementedException(  );
 		}
 	}
 }

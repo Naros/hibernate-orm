@@ -15,6 +15,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.hibernate.HibernateException;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.bytecode.enhance.spi.interceptor.LazyAttributeLoadingInterceptor;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CascadeStyle;
@@ -230,18 +231,19 @@ public final class Cascade {
 								LOG.tracev( "Deleting orphaned entity instance: {0}", description );
 							}
 							
-							if (type.isAssociationType() && ((AssociationType)type).getForeignKeyDirection().equals(
-											ForeignKeyDirection.TO_PARENT
-							)) {
-								// If FK direction is to-parent, we must remove the orphan *beforeQuery* the queued update(s)
-								// occur.  Otherwise, replacing the association on a managed entity, without manually
-								// nulling and flushing, causes FK constraint violations.
-								eventSource.removeOrphanBeforeUpdates( entityName, loadedValue );
-							}
-							else {
-								// Else, we must delete afterQuery the updates.
-								eventSource.delete( entityName, loadedValue, isCascadeDeleteEnabled, new HashSet() );
-							}
+//							if (type.isAssociationType() && ((AssociationType)type).getForeignKeyDirection().equals(
+//											ForeignKeyDirection.TO_PARENT
+//							)) {
+//								// If FK direction is to-parent, we must remove the orphan *beforeQuery* the queued update(s)
+//								// occur.  Otherwise, replacing the association on a managed entity, without manually
+//								// nulling and flushing, causes FK constraint violations.
+//								eventSource.removeOrphanBeforeUpdates( entityName, loadedValue );
+//							}
+//							else {
+//								// Else, we must delete afterQuery the updates.
+//								eventSource.delete( entityName, loadedValue, isCascadeDeleteEnabled, new HashSet() );
+//							}
+							throw new NotYetImplementedFor6Exception(  );
 						}
 					}
 				}
@@ -262,7 +264,8 @@ public final class Cascade {
 	}
 
 	private static boolean cascadeAssociationNow(final CascadePoint cascadePoint, PersistentAttribute attribute) {
-		return attribute.getForeignKeyDirection().cascadeNow( cascadePoint );
+		//return attribute.getForeignKeyDirection().cascadeNow( cascadePoint );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private static void cascadeComponent(
@@ -275,32 +278,33 @@ public final class Cascade {
 			final EmbeddedValuedNavigable attribute,
 			final Object anything) {
 
-		Object[] children = null;
-		final List<PersistentAttribute> attributes = attribute.getContainer().getNavigables();
-		for ( int i = 0; i < attributes.size(); i++ ) {
-			final PersistentAttribute subattribute = attributes.get( i );
-			final CascadeStyle componentPropertyStyle = subattribute.getCascadeStyle( i );
-			final String subPropertyName = subattribute.getName();
-			if ( componentPropertyStyle.doCascade( action ) ) {
-				if ( children == null ) {
-					// Get children on demand.
-					children = subattribute.getPropertyValues( child, eventSource );
-				}
-				cascadeProperty(
-						action,
-						cascadePoint,
-						eventSource,
-						componentPathStackDepth + 1,
-						parent,
-						children[i],
-						subattribute,
-						componentPropertyStyle,
-						subPropertyName,
-						anything,
-						false
-				);
-			}
-		}
+//		Object[] children = null;
+//		final List<PersistentAttribute> attributes = attribute.getContainer().getNavigables();
+//		for ( int i = 0; i < attributes.size(); i++ ) {
+//			final PersistentAttribute subattribute = attributes.get( i );
+//			final CascadeStyle componentPropertyStyle = subattribute.getCascadeStyle( i );
+//			final String subPropertyName = subattribute.getName();
+//			if ( componentPropertyStyle.doCascade( action ) ) {
+//				if ( children == null ) {
+//					// Get children on demand.
+//					children = subattribute.getPropertyValues( child, eventSource );
+//				}
+//				cascadeProperty(
+//						action,
+//						cascadePoint,
+//						eventSource,
+//						componentPathStackDepth + 1,
+//						parent,
+//						children[i],
+//						subattribute,
+//						componentPropertyStyle,
+//						subPropertyName,
+//						anything,
+//						false
+//				);
+//			}
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private static void cascadeAssociation(
@@ -416,57 +420,58 @@ public final class Cascade {
 			final CollectionElement collectionElement,
 			final Object anything,
 			final PersistentCollectionDescriptor persister) throws HibernateException {
-		final boolean reallyDoCascade = style.reallyDoCascade( action ) && child != CollectionType.UNFETCHED_COLLECTION;
-
-		if ( reallyDoCascade ) {
-			final boolean traceEnabled = LOG.isTraceEnabled();
-			if ( traceEnabled ) {
-				LOG.tracev( "Cascade {0} for collection: {1}", action, attribute.getNavigableName() );
-			}
-
-			final Iterator itr = action.getCascadableChildrenIterator( eventSource, persister, child );
-			while ( itr.hasNext() ) {
-				cascadeProperty(
-						action,
-						cascadePoint,
-						eventSource,
-						componentPathStackDepth,
-						parent,
-						itr.next(),
-						attribute,
-						style,
-						null,
-						anything,
-						isCascadeDeleteEnabled
-				);
-			}
-
-			if ( traceEnabled ) {
-				LOG.tracev( "Done cascade {0} for collection: {1}", action, attribute.getNavigableName() );
-			}
-		}
-
-		final boolean deleteOrphans = style.hasOrphanDelete()
-				&& action.deleteOrphans()
-				&& ( collectionElement.getJavaTypeDescriptor() instanceof EntityJavaDescriptor)
-				// a newly instantiated collection can't have orphans
-				&& child instanceof PersistentCollection;
-
-		if ( deleteOrphans ) {
-			final boolean traceEnabled = LOG.isTraceEnabled();
-			if ( traceEnabled ) {
-				LOG.tracev( "Deleting orphans for collection: {0}", attribute.getNavigableName() );
-			}
-			// we can do the cast since orphan-delete does not apply to:
-			// 1. newly instantiated collections
-			// 2. arrays (we can't track orphans for detached arrays)
-			final String entityName = ((EntityJavaDescriptor)collectionElement.getJavaTypeDescriptor()).getEntityName();
-			deleteOrphans( eventSource, entityName, (PersistentCollection) child );
-
-			if ( traceEnabled ) {
-				LOG.tracev( "Done deleting orphans for collection: {0}", attribute.getNavigableName()  );
-			}
-		}
+//		final boolean reallyDoCascade = style.reallyDoCascade( action ) && child != CollectionType.UNFETCHED_COLLECTION;
+//
+//		if ( reallyDoCascade ) {
+//			final boolean traceEnabled = LOG.isTraceEnabled();
+//			if ( traceEnabled ) {
+//				LOG.tracev( "Cascade {0} for collection: {1}", action, attribute.getNavigableName() );
+//			}
+//
+//			final Iterator itr = action.getCascadableChildrenIterator( eventSource, persister, child );
+//			while ( itr.hasNext() ) {
+//				cascadeProperty(
+//						action,
+//						cascadePoint,
+//						eventSource,
+//						componentPathStackDepth,
+//						parent,
+//						itr.next(),
+//						attribute,
+//						style,
+//						null,
+//						anything,
+//						isCascadeDeleteEnabled
+//				);
+//			}
+//
+//			if ( traceEnabled ) {
+//				LOG.tracev( "Done cascade {0} for collection: {1}", action, attribute.getNavigableName() );
+//			}
+//		}
+//
+//		final boolean deleteOrphans = style.hasOrphanDelete()
+//				&& action.deleteOrphans()
+//				&& ( collectionElement.getJavaTypeDescriptor() instanceof EntityJavaDescriptor)
+//				// a newly instantiated collection can't have orphans
+//				&& child instanceof PersistentCollection;
+//
+//		if ( deleteOrphans ) {
+//			final boolean traceEnabled = LOG.isTraceEnabled();
+//			if ( traceEnabled ) {
+//				LOG.tracev( "Deleting orphans for collection: {0}", attribute.getNavigableName() );
+//			}
+//			// we can do the cast since orphan-delete does not apply to:
+//			// 1. newly instantiated collections
+//			// 2. arrays (we can't track orphans for detached arrays)
+//			final String entityName = ((EntityJavaDescriptor)collectionElement.getJavaTypeDescriptor()).getEntityName();
+//			deleteOrphans( eventSource, entityName, (PersistentCollection) child );
+//
+//			if ( traceEnabled ) {
+//				LOG.tracev( "Done deleting orphans for collection: {0}", attribute.getNavigableName()  );
+//			}
+//		}
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	/**
