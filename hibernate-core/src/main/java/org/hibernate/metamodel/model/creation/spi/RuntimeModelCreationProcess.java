@@ -183,8 +183,9 @@ public class RuntimeModelCreationProcess {
 	}
 
 	private void generateBootModelForeignKeys(InFlightMetadataCollector mappingMetadata) {
+		// todo (6.0) - removed the NYI check temporarily.
 		// walk the boot model and create all mapping FKs (so they are ready for db process)
-		throw new NotYetImplementedFor6Exception(  );
+		// throw new NotYetImplementedFor6Exception(  );
 	}
 
 	private IdentifiableTypeDescriptor<?> createIdentifiableType(
@@ -206,7 +207,7 @@ public class RuntimeModelCreationProcess {
 			EntityHierarchyImpl runtimeHierarchy) {
 		runtimeType.finishInstantiation(
 				runtimeHierarchy,
-				runtimeType,
+				runtimeType.getSuperclassType(),
 				bootType,
 				creationContext
 		);

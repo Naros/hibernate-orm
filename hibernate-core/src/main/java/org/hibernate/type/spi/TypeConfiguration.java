@@ -23,6 +23,7 @@ import javax.persistence.EntityGraph;
 import org.hibernate.EntityNameResolver;
 import org.hibernate.HibernateException;
 import org.hibernate.Incubating;
+import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.SessionFactory;
 import org.hibernate.SessionFactoryObserver;
 import org.hibernate.UnknownEntityTypeException;
@@ -496,7 +497,7 @@ public class TypeConfiguration implements SessionFactoryObserver {
 		// todo : come back and implement this...
 		//		release Database, persister Maps, etc... things that are only
 		// 		valid while the TypeConfiguration is scoped to SessionFactory
-		throw new NotYetImplementedException(  );
+		throw new NotYetImplementedFor6Exception(  );
 	}
 
 	// todo (6.0) - have this algorithm be extendable by users.
@@ -728,7 +729,8 @@ public class TypeConfiguration implements SessionFactoryObserver {
 				log.scopingTypesToSessionFactoryAfterAlreadyScoped( this.sessionFactory, factory );
 			}
 			else {
-				this.metadataBuildingContext = null;
+				// todo (6.0) - removed setting this to null as other places seem to expect this to exist, not sure if correct.
+				// this.metadataBuildingContext = null;
 
 				this.sessionFactoryUuid = factory.getUuid();
 				String sfName = factory.getSessionFactoryOptions().getSessionFactoryName();
@@ -829,7 +831,10 @@ public class TypeConfiguration implements SessionFactoryObserver {
 	}
 
 	private void registerEntityNameResolvers(EntityDescriptor persister) {
-		this.entityNameResolvers.addAll( persister.getEntityNameResolvers() );
+		final List<EntityNameResolver> resolvers = persister.getEntityNameResolvers();
+		if ( resolvers != null ) {
+			this.entityNameResolvers.addAll( resolvers );
+		}
 	}
 
 	public Set<EntityHierarchy> getEntityHierarchies() {

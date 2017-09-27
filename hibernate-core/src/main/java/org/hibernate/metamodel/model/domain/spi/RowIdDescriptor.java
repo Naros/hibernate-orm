@@ -16,4 +16,9 @@ public interface RowIdDescriptor<O,J> extends VirtualPersistentAttribute<O,J>, S
 	default void visitNavigable(NavigableVisitationStrategy visitor) {
 		visitor.visitRowIdDescriptor( this );
 	}
+
+	@Override
+	default boolean includeInOptimisticLocking() {
+		return false;
+	}
 }

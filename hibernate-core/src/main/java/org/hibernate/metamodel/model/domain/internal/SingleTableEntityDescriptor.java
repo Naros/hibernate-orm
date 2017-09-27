@@ -85,7 +85,9 @@ public class SingleTableEntityDescriptor<T> extends AbstractEntityDescriptor<T> 
 			IdentifiableTypeDescriptor<? super T> superType,
 			IdentifiableTypeMapping bootMapping,
 			RuntimeModelCreationContext creationContext) {
-
+		// todo (6.0) - is this what we want to call?
+		super.finishInitialization( entityHierarchy, superType, bootMapping, creationContext );
+		creationContext.registerEntityDescriptor( this, (EntityMapping) bootMapping );
 	}
 
 	@Override

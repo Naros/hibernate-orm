@@ -430,7 +430,14 @@ public abstract class Dialect implements ConversionContext {
 	// todo (6.0) : use one of these (pick) vv, rather than ^^
 
 	public String getTypeName(int code, Size size) throws HibernateException {
-		throw new NotYetImplementedFor6Exception(  );
+		// throw new NotYetImplementedFor6Exception( );
+		// todo (6.0) : temporary solution to mimic old behavior (should be removed)
+		return getTypeName(
+				code,
+				size.getLength() != null ? size.getLength() : Size.Builder.DEFAULT_LENGTH,
+				size.getPrecision() != null ? size.getPrecision() : Size.Builder.DEFAULT_PRECISION,
+				size.getScale() != null ? size.getScale() : Size.Builder.DEFAULT_SCALE
+		);
 	}
 
 	public String getTypeName(SqlTypeDescriptor sqlTypeDescriptor, Size size) {

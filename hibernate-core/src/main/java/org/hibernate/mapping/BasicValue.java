@@ -138,4 +138,15 @@ public class BasicValue extends SimpleValue implements BasicValueMapping {
 	public AttributeConverterDefinition getAttributeConverterDefinition() {
 		return attributeConverterDescriptor;
 	}
+
+	@Override
+	public boolean isTypeSpecified() {
+		// this is always true, a BasicTypeResolver is mandatory.
+		return true;
+	}
+
+	@Override
+	public void setTypeUsingReflection(String className, String propertyName) throws MappingException {
+		// For BasicValue, there is no need to use reflection as a BasicTypeResolver should have been provided.
+	}
 }

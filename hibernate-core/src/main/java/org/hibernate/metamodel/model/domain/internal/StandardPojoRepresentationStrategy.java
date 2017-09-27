@@ -22,7 +22,6 @@ import org.hibernate.metamodel.model.domain.spi.RepresentationStrategy;
 import org.hibernate.property.access.spi.BuiltInPropertyAccessStrategies;
 import org.hibernate.property.access.spi.PropertyAccess;
 import org.hibernate.property.access.spi.PropertyAccessStrategy;
-import org.hibernate.NotYetImplementedFor6Exception;
 
 /**
  * @author Steve Ebersole
@@ -43,7 +42,14 @@ public class StandardPojoRepresentationStrategy implements RepresentationStrateg
 	private static ReflectionOptimizer resolveReflectionOptimizer(
 			ManagedTypeMapping bootModel,
 			BytecodeProvider bytecodeProvider) {
-		throw new NotYetImplementedFor6Exception(  );
+		// todo (6.0) - this is a temporary solution until this can be properly implemented.
+		return bytecodeProvider.getReflectionOptimizer(
+				bootModel.getJavaTypeDescriptor().getJavaType(),
+				new String[]{},
+				new String[]{},
+				new Class[]{}
+		);
+		// throw new NotYetImplementedFor6Exception(  );
 	}
 
 	@Override

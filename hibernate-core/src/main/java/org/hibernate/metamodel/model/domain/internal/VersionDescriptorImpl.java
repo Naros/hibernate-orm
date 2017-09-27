@@ -57,12 +57,12 @@ public class VersionDescriptorImpl<O,J>
 			String unsavedValue,
 			RuntimeModelCreationContext creationContext) {
 		super(
-				(ManagedTypeDescriptor<O>) hierarchy.getRootEntityType().getJavaTypeDescriptor(),
+				hierarchy.getRootEntityType(),
 				name,
 				hierarchy.getRootEntityType().getRepresentationStrategy().generatePropertyAccess(
 						rootEntityBinding,
 						rootEntityBinding.getVersion(),
-						(ManagedTypeDescriptor) hierarchy.getRootEntityType().getJavaTypeDescriptor(),
+						hierarchy.getRootEntityType(),
 						Environment.getBytecodeProvider()
 				),
 				Disposition.VERSION,
