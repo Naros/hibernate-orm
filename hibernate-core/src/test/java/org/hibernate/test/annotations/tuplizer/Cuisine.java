@@ -17,7 +17,7 @@ import org.hibernate.annotations.Tuplizer;
  * @author Emmanuel Bernard
  */
 @Entity
-@Tuplizer(impl = DynamicEntityTuplizer.class)
+//@Tuplizer(impl = DynamicEntityTuplizer.class)
 public interface Cuisine {
 	@Id
 	@GeneratedValue
@@ -27,7 +27,7 @@ public interface Cuisine {
 	public String getName();
 	public void setName(String name);
 
-	@Tuplizer(impl = DynamicComponentTuplizer.class)
+	//@Tuplizer(impl = DynamicComponentTuplizer.class)
 	public Country getCountry();
 	public void setCountry(Country country);
 

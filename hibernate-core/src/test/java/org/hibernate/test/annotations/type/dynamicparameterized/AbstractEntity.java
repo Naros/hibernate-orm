@@ -37,7 +37,7 @@ import org.hibernate.annotations.TypeDef;
  * @author Daniel Gredler
  */
 @MappedSuperclass
-@TypeDef(name = "string", typeClass = MyStringType.class, defaultForType = String.class)
+//@TypeDef(name = "string", typeClass = MyStringType.class, defaultForType = String.class)
 public abstract class AbstractEntity {
 
 	@Id

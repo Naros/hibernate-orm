@@ -18,7 +18,7 @@ import org.hibernate.annotations.TypeDef;
  * @author Janario Oliveira
  */
 @Entity
-@TypeDef(typeClass = ImplicitSerializableType.class, defaultForType = ImplicitSerializable.class)
+//@TypeDef(typeClass = ImplicitSerializableType.class, defaultForType = ImplicitSerializable.class)
 public class EntitySerialize {
 	@Id
 	@GeneratedValue

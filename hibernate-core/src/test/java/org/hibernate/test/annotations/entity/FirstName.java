@@ -12,13 +12,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 
-@TypeDef(
-		name = "lowerCase",
-		typeClass = CasterStringType.class,
-		parameters = {
-			@Parameter(name = "cast", value = "lower")
-		}
-)
+//@TypeDef(
+//		name = "lowerCase",
+//		typeClass = CasterStringType.class,
+//		parameters = {
+//			@Parameter(name = "cast", value = "lower")
+//		}
+//)
 
 @MappedSuperclass
 public class FirstName {

@@ -17,13 +17,14 @@
 				@ParamDef(name = "maxLength", type = "integer")
 		}
 )
-@TypeDef(
-		name = "caster",
-		typeClass = CasterStringType.class,
-		parameters = {
-				@Parameter(name = "cast", value = "lower")
-		}
-) package org.hibernate.test.annotations.entity;
+//@TypeDef(
+//		name = "caster",
+//		typeClass = CasterStringType.class,
+//		parameters = {
+//				@Parameter(name = "cast", value = "lower")
+//		}
+//)
+package org.hibernate.test.annotations.entity;
 
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;

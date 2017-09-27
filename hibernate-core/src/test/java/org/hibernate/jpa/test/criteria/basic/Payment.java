@@ -24,7 +24,7 @@ import org.hibernate.annotations.TypeDef;
  */
 @Entity
 @Table(name = "crit_basic_payment")
-@TypeDef(name = "paymentDate", typeClass = Date3Type.class)
+//@TypeDef(name = "paymentDate", typeClass = Date3Type.class)
 public class Payment {
 
 	private Long id;

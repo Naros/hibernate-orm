@@ -12,13 +12,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 
-@TypeDef(
-		name = "upperCase",
-		typeClass = CasterStringType.class,
-		parameters = {
-			@Parameter(name = "cast", value = "upper")
-		}
-)
+//@TypeDef(
+//		name = "upperCase",
+//		typeClass = CasterStringType.class,
+//		parameters = {
+//			@Parameter(name = "cast", value = "upper")
+//		}
+//)
 
 @Embeddable
 public class LastName {

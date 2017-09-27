@@ -23,7 +23,7 @@ import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
-import org.hibernate.test.annotations.enumerated.custom_types.LastNumberType;
+//import org.hibernate.test.annotations.enumerated.custom_types.LastNumberType;
 import org.hibernate.test.annotations.enumerated.enums.Common;
 import org.hibernate.test.annotations.enumerated.enums.FirstLetter;
 import org.hibernate.test.annotations.enumerated.enums.LastNumber;
@@ -34,7 +34,7 @@ import org.hibernate.test.annotations.enumerated.enums.Trimmed;
  * @author Brett Meyer
  */
 @Entity
-@TypeDef(typeClass = LastNumberType.class, defaultForType = LastNumber.class)
+//@TypeDef(typeClass = LastNumberType.class, defaultForType = LastNumber.class)
 public class EntityEnum {
 
 	@Id

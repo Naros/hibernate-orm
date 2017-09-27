@@ -20,8 +20,8 @@ import org.hibernate.envers.Audited;
  * @author Adam Warski (adam at warski dot org)
  */
 @Entity
-@TypeDef(name = "param", typeClass = ParametrizedTestUserType.class,
-		 parameters = {@Parameter(name = "param1", value = "x"), @Parameter(name = "param2", value = "y")})
+//@TypeDef(name = "param", typeClass = ParametrizedTestUserType.class,
+//		 parameters = {@Parameter(name = "param1", value = "x"), @Parameter(name = "param2", value = "y")})
 @Table(name = "ParamCustType")
 public class ParametrizedCustomTypeEntity {
 	@Id

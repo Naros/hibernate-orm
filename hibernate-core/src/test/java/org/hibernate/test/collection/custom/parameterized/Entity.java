@@ -25,11 +25,11 @@ import org.hibernate.annotations.TypeDef;
  *
  * @author Steve Ebersole
  */
-@TypeDef(
-		name = "DefaultableList", 
-		typeClass = DefaultableListType.class,
-		parameters = @Parameter(name = "default", value = "Hello" )
-)
+//@TypeDef(
+//		name = "DefaultableList",
+//		typeClass = DefaultableListType.class,
+//		parameters = @Parameter(name = "default", value = "Hello" )
+//)
 @javax.persistence.Entity
 public class Entity {
 	private String name;

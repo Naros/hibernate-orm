@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.hibernate.envers.test.entities.collection;
 
@@ -18,13 +18,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.test.entities.customtype.Component;
-import org.hibernate.envers.test.entities.customtype.CompositeTestUserType;
+//import org.hibernate.envers.test.entities.customtype.CompositeTestUserType;
 
 /**
  * @author Felix Feisst (feisst dot felix at gmail dot com)
  */
 @Entity
-@TypeDef(name = "comp", typeClass = CompositeTestUserType.class)
+//@TypeDef(name = "comp", typeClass = CompositeTestUserType.class)
 public class CompositeCustomTypeSetEntity {
 
 	@Id

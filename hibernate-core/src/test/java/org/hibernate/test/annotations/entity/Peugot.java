@@ -10,13 +10,13 @@ import javax.persistence.Entity;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 
-@TypeDef(
-		name = "definedInDerivedClass",
-		typeClass = CasterStringType.class,
-		parameters = {
-			@Parameter(name = "cast", value = "upper")
-		}
-)
+//@TypeDef(
+//		name = "definedInDerivedClass",
+//		typeClass = CasterStringType.class,
+//		parameters = {
+//			@Parameter(name = "cast", value = "upper")
+//		}
+//)
 
 /**
  * Defines a custom type that is used in the 

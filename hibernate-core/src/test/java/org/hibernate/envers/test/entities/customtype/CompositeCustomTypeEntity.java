@@ -20,7 +20,7 @@ import org.hibernate.envers.Audited;
  * @author Adam Warski (adam at warski dot org)
  */
 @Entity
-@TypeDef(name = "comp", typeClass = CompositeTestUserType.class)
+//@TypeDef(name = "comp", typeClass = CompositeTestUserType.class)
 public class CompositeCustomTypeEntity {
 	@Id
 	@GeneratedValue

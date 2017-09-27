@@ -12,13 +12,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Persister;
-import org.hibernate.persister.entity.SingleTableEntityPersister;
+//import org.hibernate.persister.entity.SingleTableEntityPersister;
 
 /**
  * @author Emmanuel Bernard <emmanuel@hibernate.org>
  */
 @Entity
-@Persister( impl = SingleTableEntityPersister.class)
+//@Persister( impl = SingleTableEntityPersister.class)
 public class Portal {
 	@Id
 	public Long getId() { return id; }
