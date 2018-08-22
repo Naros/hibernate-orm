@@ -14,6 +14,7 @@ import org.hibernate.boot.model.domain.MappedSuperclassMapping;
 import org.hibernate.boot.model.domain.PersistentAttributeMapping;
 import org.hibernate.boot.model.domain.spi.MappedSuperclassImplementor;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
+import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
 
 /**
@@ -50,10 +51,12 @@ public abstract class AbstractMappedSuperclassMapping
 
 	@Override
 	public <X> IdentifiableTypeDescriptor<X> makeRuntimeDescriptor(
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) {
 		return creationContext.getRuntimeModelDescriptorFactory().createMappedSuperclassDescriptor(
 				this,
+				entityHierarchy,
 				superTypeDescriptor,
 				creationContext
 		);

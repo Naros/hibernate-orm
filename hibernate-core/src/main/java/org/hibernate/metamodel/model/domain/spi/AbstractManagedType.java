@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.hibernate.HibernateException;
+import org.hibernate.MappingException;
 import org.hibernate.boot.model.domain.IdentifiableTypeMapping;
 import org.hibernate.boot.model.domain.ManagedTypeMapping;
 import org.hibernate.boot.model.domain.PersistentAttributeMapping;
@@ -40,11 +41,12 @@ public abstract class AbstractManagedType<J> implements InheritanceCapable<J> {
 
 	private final TypeConfiguration typeConfiguration;
 
-	private final InheritanceCapable<? super J> superTypeDescriptor;
 	private final Set<InheritanceCapable<? extends J>> subclassTypes = ConcurrentHashMap.newKeySet();
 	private final Set<String> subClassEntityNames = ConcurrentHashMap.newKeySet();
 
 	private final Object discriminatorValue;
+
+	private InheritanceCapable<? super J> superTypeDescriptor;
 
 	private ManagedTypeRepresentationStrategy representationStrategy;
 
@@ -71,6 +73,20 @@ public abstract class AbstractManagedType<J> implements InheritanceCapable<J> {
 
 		this.representationStrategy = creationContext.getRepresentationStrategySelector()
 				.resolveStrategy( bootDescriptor, this, creationContext );
+	}
+
+	@Override
+	public void setSuperclassType(InheritanceCapable<? super J> superClassType) {
+		if ( superTypeDescriptor != null ) {
+			throw new MappingException(
+					String.format(
+							Locale.ROOT,
+							"ManagedType %s already has a defined super type",
+							getNavigableName()
+					)
+			);
+		}
+		this.superTypeDescriptor = superClassType;
 	}
 
 	private boolean fullyInitialized;

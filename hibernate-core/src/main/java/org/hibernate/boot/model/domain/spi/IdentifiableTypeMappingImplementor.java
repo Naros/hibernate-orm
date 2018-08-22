@@ -11,6 +11,7 @@ import org.hibernate.boot.model.domain.IdentifiableTypeMapping;
 import org.hibernate.boot.model.domain.PersistentAttributeMapping;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
 import org.hibernate.metamodel.model.domain.RepresentationMode;
+import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
 
 /**
@@ -26,6 +27,8 @@ public interface IdentifiableTypeMappingImplementor extends IdentifiableTypeMapp
 	}
 
 	void injectSuperclassMapping(IdentifiableTypeMappingImplementor superTypeMapping);
+
+	void injectSubclassMapping(IdentifiableTypeMappingImplementor subclassTypeMapping);
 
 	void setDeclaredIdentifierAttributeMapping(PersistentAttributeMapping declaredIdentifierAttributeMapping);
 
@@ -48,6 +51,7 @@ public interface IdentifiableTypeMappingImplementor extends IdentifiableTypeMapp
 	int nextSubclassId();
 
 	<X> IdentifiableTypeDescriptor<X> makeRuntimeDescriptor(
+			EntityHierarchy runtimeHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext context);
 }

@@ -22,6 +22,7 @@ import org.hibernate.metamodel.model.creation.spi.RuntimeModelDescriptorFactory;
 import org.hibernate.metamodel.model.domain.spi.EmbeddedContainer;
 import org.hibernate.metamodel.model.domain.spi.EmbeddedTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.EntityDescriptor;
+import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.ManagedTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.MappedSuperclassDescriptor;
@@ -122,10 +123,12 @@ public final class RuntimeModelDescriptorFactoryImpl
 	@SuppressWarnings("unchecked")
 	public <J> MappedSuperclassDescriptor<J> createMappedSuperclassDescriptor(
 			MappedSuperclassMapping bootMapping,
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) throws HibernateException {
 		return instantiateMappedSuperclassDescriptor(
 				bootMapping,
+				entityHierarchy,
 				superTypeDescriptor,
 				creationContext
 		);
@@ -134,6 +137,7 @@ public final class RuntimeModelDescriptorFactoryImpl
 	@SuppressWarnings("unchecked")
 	private MappedSuperclassDescriptor instantiateMappedSuperclassDescriptor(
 			MappedSuperclassMapping bootMapping,
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) {
 		// currently we do not allow user to explicitly name a descriptor class to use on the mapping.
@@ -144,6 +148,7 @@ public final class RuntimeModelDescriptorFactoryImpl
 		return instantiateMappedSuperclassDescriptor(
 				runtimeDescriptorClass,
 				bootMapping,
+				entityHierarchy,
 				superTypeDescriptor,
 				creationContext
 		);
@@ -153,6 +158,7 @@ public final class RuntimeModelDescriptorFactoryImpl
 	private MappedSuperclassDescriptor instantiateMappedSuperclassDescriptor(
 			Class<? extends MappedSuperclassDescriptor> descriptorClass,
 			MappedSuperclassMapping bootMapping,
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) {
 		try {
@@ -161,9 +167,9 @@ public final class RuntimeModelDescriptorFactoryImpl
 				final MappedSuperclassDescriptor descriptor = constructor.newInstance(
 						bootMapping,
 						superTypeDescriptor,
+						entityHierarchy,
 						creationContext
 				);
-				creationContext.registerMappedSuperclassDescriptor( descriptor, bootMapping );
 				return descriptor;
 			}
 			catch (MappingException e) {

@@ -33,12 +33,13 @@ public class MappedSuperclassImpl<J>
 		extends AbstractIdentifiableType<J>
 		implements MappedSuperclassDescriptor<J> {
 	private final EntityHierarchy hierarchy;
+	private final NavigableRole navigableRole;
 
 	@SuppressWarnings("unchecked")
 	public MappedSuperclassImpl(
 			IdentifiableTypeMapping bootMapping,
-			EntityHierarchy hierarchy,
 			IdentifiableTypeDescriptor<? super J> superTypeDescriptor,
+			EntityHierarchy entityHierarchy,
 			RuntimeModelCreationContext creationContext) {
 		super(
 				bootMapping,
@@ -46,7 +47,8 @@ public class MappedSuperclassImpl<J>
 				(IdentifiableJavaDescriptor<J>) bootMapping.getJavaTypeMapping().getJavaTypeDescriptor(),
 				creationContext
 		);
-		this.hierarchy = hierarchy;
+		this.hierarchy = entityHierarchy;
+		this.navigableRole = new NavigableRole( bootMapping.getEntityMappingHierarchy().getRootType().getName() );
 	}
 
 	@Override
@@ -63,7 +65,8 @@ public class MappedSuperclassImpl<J>
 	public void finishInitialization(
 			ManagedTypeMappingImplementor bootDescriptor,
 			RuntimeModelCreationContext creationContext) {
-		throw new NotYetImplementedFor6Exception(  );
+		super.finishInitialization( bootDescriptor, creationContext );
+		// todo (6.0) - is there anything we need to do here?
 	}
 
 	@Override
@@ -118,7 +121,7 @@ public class MappedSuperclassImpl<J>
 
 	@Override
 	public NavigableRole getNavigableRole() {
-		throw new NotYetImplementedFor6Exception(  );
+		return navigableRole;
 	}
 
 	@Override

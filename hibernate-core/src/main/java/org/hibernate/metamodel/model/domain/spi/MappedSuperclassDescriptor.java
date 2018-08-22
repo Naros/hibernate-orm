@@ -8,7 +8,7 @@ package org.hibernate.metamodel.model.domain.spi;
 
 import javax.persistence.metamodel.MappedSuperclassType;
 
-import org.hibernate.boot.model.domain.EntityMapping;
+import org.hibernate.boot.model.domain.IdentifiableTypeMapping;
 import org.hibernate.boot.model.domain.MappedSuperclassMapping;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelDescriptorFactory;
@@ -41,8 +41,9 @@ public interface MappedSuperclassDescriptor<T>
 	 *         information useful while constructing the descriptor.
 	 */
 	Class[] STANDARD_CONSTRUCTOR_SIG = new Class[] {
-			MappedSuperclassMapping.class,
+			IdentifiableTypeMapping.class,
 			IdentifiableTypeDescriptor.class,
+			EntityHierarchy.class,
 			RuntimeModelCreationContext.class
 	};
 }

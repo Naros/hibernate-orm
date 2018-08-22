@@ -152,6 +152,7 @@ public class RuntimeModelCreationProcess implements ResolutionContext {
 			final EntityDescriptor<?> rootEntityDescriptor = (EntityDescriptor<?>) createIdentifiableType(
 					bootHierarchy.getRootType(),
 					null,
+					null,
 					creationContext
 			);
 
@@ -307,25 +308,58 @@ public class RuntimeModelCreationProcess implements ResolutionContext {
 			creationContext.registerEntityDescriptor( (EntityDescriptor) runtimeMapping, (EntityMapping) bootMapping );
 		}
 
-		if ( bootMapping.getSuperTypeMapping() == null ) {
-			runtimeRootByBootHierarchy.put( bootHierarchy, runtimeMapping );
-		}
-		else {
-			// always create going up
-			final IdentifiableTypeDescriptor<?> runtimeSuperDescriptor = createIdentifiableType(
-					(IdentifiableTypeMappingImplementor) bootMapping.getSuperTypeMapping(),
-					runtimeMapping,
-					creationContext
-			);
-
-			walkSupers(
+		if ( bootMapping.getSuperTypeMapping() != null ) {
+			final IdentifiableTypeDescriptor superTypeDescriptor = walkSupersInternal(
 					bootHierarchy,
 					(IdentifiableTypeMappingImplementor) bootMapping.getSuperTypeMapping(),
 					runtimeHierarchy,
-					runtimeSuperDescriptor,
+					creationContext
+			);
+
+			runtimeMapping.setSuperclassType( superTypeDescriptor );
+		}
+
+		runtimeRootByBootHierarchy.put( bootHierarchy, runtimeMapping );
+
+//		if ( bootMapping.getSuperTypeMapping() == null ) {
+//			runtimeRootByBootHierarchy.put( bootHierarchy, runtimeMapping );
+//		}
+//		else {
+//			// always create going up
+//			final IdentifiableTypeDescriptor<?> runtimeSuperDescriptor = createIdentifiableType(
+//					(IdentifiableTypeMappingImplementor) bootMapping.getSuperTypeMapping(),
+//					runtimeMapping,
+//					creationContext
+//			);
+//
+//			walkSupers(
+//					bootHierarchy,
+//					(IdentifiableTypeMappingImplementor) bootMapping.getSuperTypeMapping(),
+//					runtimeHierarchy,
+//					runtimeSuperDescriptor,
+//					creationContext
+//			);
+	}
+
+	private IdentifiableTypeDescriptor walkSupersInternal(
+			EntityMappingHierarchy bootHierarchy,
+			IdentifiableTypeMappingImplementor bootMapping,
+			EntityHierarchy runtimeHierarchy,
+			RuntimeModelCreationContext creationContext) {
+		final IdentifiableTypeDescriptor superTypeDescriptor;
+		if ( bootMapping.getSuperTypeMapping() != null ) {
+			superTypeDescriptor = walkSupersInternal(
+					bootHierarchy,
+					(IdentifiableTypeMappingImplementor) bootMapping.getSuperTypeMapping(),
+					runtimeHierarchy,
 					creationContext
 			);
 		}
+		else {
+			superTypeDescriptor = null;
+		}
+
+		return createIdentifiableType( bootMapping, superTypeDescriptor, runtimeHierarchy, creationContext );
 	}
 
 	private void walkSubs(
@@ -337,6 +371,7 @@ public class RuntimeModelCreationProcess implements ResolutionContext {
 			final IdentifiableTypeDescriptor<?> runtimeSubclassDescriptor = createIdentifiableType(
 					(IdentifiableTypeMappingImplementor) bootSubTypeMapping,
 					runtimeDescriptor,
+					runtimeDescriptor.getHierarchy(),
 					creationContext
 			);
 
@@ -352,8 +387,10 @@ public class RuntimeModelCreationProcess implements ResolutionContext {
 	private IdentifiableTypeDescriptor<?> createIdentifiableType(
 			IdentifiableTypeMappingImplementor bootMapping,
 			IdentifiableTypeDescriptor superTypeDescriptor,
+			EntityHierarchy entityHierarchy,
 			RuntimeModelCreationContext creationContext) {
 		final IdentifiableTypeDescriptor runtimeType = bootMapping.makeRuntimeDescriptor(
+				entityHierarchy,
 				superTypeDescriptor,
 				creationContext
 		);
@@ -378,6 +415,14 @@ public class RuntimeModelCreationProcess implements ResolutionContext {
 			IdentifiableTypeDescriptor runtimeType,
 			IdentifiableTypeMappingImplementor bootType,
 			RuntimeModelCreationContext creationContext) {
+		// Based on the note before the finishInitialization for-loop, this may be incorrect?
+		if ( runtimeType.getSuperclassType() != null ) {
+			runtimeType.getSuperclassType().finishInitialization(
+					bootByRuntime.get( runtimeType.getSuperclassType() ),
+					creationContext
+			);
+		}
+
 		runtimeType.finishInitialization(
 				bootType,
 				creationContext

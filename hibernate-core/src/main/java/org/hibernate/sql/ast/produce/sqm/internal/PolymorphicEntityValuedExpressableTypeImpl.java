@@ -48,6 +48,7 @@ import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.model.domain.spi.EntityDescriptor;
 import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
+import org.hibernate.metamodel.model.domain.spi.InheritanceCapable;
 import org.hibernate.metamodel.model.domain.spi.ManagedTypeRepresentationStrategy;
 import org.hibernate.metamodel.model.domain.spi.Navigable;
 import org.hibernate.metamodel.model.domain.spi.NavigableContainer;
@@ -150,6 +151,11 @@ public class PolymorphicEntityValuedExpressableTypeImpl<T> implements EntityDesc
 	@Override
 	public IdentifiableTypeDescriptor getSuperclassType() {
 		return null;
+	}
+
+	@Override
+	public void setSuperclassType(InheritanceCapable<? super T> superClassType) {
+		// does nothing
 	}
 
 	@Override

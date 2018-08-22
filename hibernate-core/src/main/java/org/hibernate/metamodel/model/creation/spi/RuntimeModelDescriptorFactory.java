@@ -14,6 +14,7 @@ import org.hibernate.mapping.Property;
 import org.hibernate.metamodel.model.domain.spi.EmbeddedContainer;
 import org.hibernate.metamodel.model.domain.spi.EmbeddedTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.EntityDescriptor;
+import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.ManagedTypeDescriptor;
 import org.hibernate.metamodel.model.domain.spi.MappedSuperclassDescriptor;
@@ -50,6 +51,7 @@ public interface RuntimeModelDescriptorFactory extends Service {
 
 	<J> MappedSuperclassDescriptor<J> createMappedSuperclassDescriptor(
 			MappedSuperclassMapping bootMapping,
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) throws HibernateException;
 

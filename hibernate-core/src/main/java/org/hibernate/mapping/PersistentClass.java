@@ -40,6 +40,7 @@ import org.hibernate.internal.util.collections.JoinedIterator;
 import org.hibernate.internal.util.collections.SingletonIterator;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
 import org.hibernate.metamodel.model.domain.RepresentationMode;
+import org.hibernate.metamodel.model.domain.spi.EntityHierarchy;
 import org.hibernate.metamodel.model.domain.spi.IdentifiableTypeDescriptor;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.sql.Alias;
@@ -199,7 +200,7 @@ public abstract class PersistentClass
 	}
 
 	public void addSubclass(Subclass subclass) throws MappingException {
-		subclass.injectSuperclassMapping( this );
+		subclass.injectSubclassMapping( this );
 	}
 
 	/**
@@ -1120,6 +1121,7 @@ public abstract class PersistentClass
 
 	public void setSuperMappedSuperclass(MappedSuperclass superMappedSuperclass) {
 		this.superMappedSuperclass = superMappedSuperclass;
+		injectSuperclassMapping( this.superMappedSuperclass );
 	}
 
 	// End of @Mappedsuperclass support
@@ -1137,6 +1139,7 @@ public abstract class PersistentClass
 
 	@Override
 	public <X> IdentifiableTypeDescriptor<X> makeRuntimeDescriptor(
+			EntityHierarchy entityHierarchy,
 			IdentifiableTypeDescriptor superTypeDescriptor,
 			RuntimeModelCreationContext creationContext) {
 		return creationContext.getRuntimeModelDescriptorFactory().createEntityDescriptor(

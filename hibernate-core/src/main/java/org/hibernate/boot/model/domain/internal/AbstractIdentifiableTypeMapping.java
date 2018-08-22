@@ -61,7 +61,11 @@ public abstract class AbstractIdentifiableTypeMapping
 		}
 
 		this.superTypeMapping = superTypeMapping;
-		( (AbstractIdentifiableTypeMapping) superTypeMapping ).addSubclass( this );
+	}
+
+	@Override
+	public void injectSubclassMapping(IdentifiableTypeMappingImplementor subclassTypeMapping) {
+		( (AbstractIdentifiableTypeMapping) subclassTypeMapping ).addSubclass( this );
 	}
 
 	private void addSubclass(AbstractIdentifiableTypeMapping subTypeMapping) {

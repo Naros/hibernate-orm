@@ -21,6 +21,8 @@ public interface InheritanceCapable<T> extends ManagedTypeDescriptor<T> {
 
 	InheritanceCapable<? super T> getSuperclassType();
 
+	void setSuperclassType(InheritanceCapable<? super T> superClassType);
+
 	/**
 	 * Get the sub-types for this managed type.  No specific ordering is
 	 * guaranteed.
