@@ -11,7 +11,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.hibernate.NotYetImplementedFor6Exception;
-import org.hibernate.boot.model.domain.IdentifiableTypeMapping;
+import org.hibernate.boot.model.domain.MappedSuperclassMapping;
 import org.hibernate.boot.model.domain.spi.ManagedTypeMappingImplementor;
 import org.hibernate.metamodel.model.creation.spi.RuntimeModelCreationContext;
 import org.hibernate.metamodel.model.domain.NavigableRole;
@@ -37,7 +37,7 @@ public class MappedSuperclassImpl<J>
 
 	@SuppressWarnings("unchecked")
 	public MappedSuperclassImpl(
-			IdentifiableTypeMapping bootMapping,
+			MappedSuperclassMapping bootMapping,
 			IdentifiableTypeDescriptor<? super J> superTypeDescriptor,
 			EntityHierarchy entityHierarchy,
 			RuntimeModelCreationContext creationContext) {

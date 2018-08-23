@@ -37,11 +37,13 @@ public interface MappedSuperclassDescriptor<T>
 	 * 			the mapped-superclass
 	 * 		* {@link IdentifiableTypeDescriptor} is the runtime-model descriptor
 	 * 			of mapped-superclass's super type
+	 * 		* {@link EntityHierarchy} is the entity hierarchy the mapped superclass
+	 * 			belongs to.
 	 * 		* {@link RuntimeModelCreationContext} - access to additional
 	 *         information useful while constructing the descriptor.
 	 */
 	Class[] STANDARD_CONSTRUCTOR_SIG = new Class[] {
-			IdentifiableTypeMapping.class,
+			MappedSuperclassMapping.class,
 			IdentifiableTypeDescriptor.class,
 			EntityHierarchy.class,
 			RuntimeModelCreationContext.class
