@@ -49,6 +49,19 @@ public class SimpleSelectionTest extends SessionFactoryBasedFunctionalTest {
 	}
 
 	@Test
+	public void testLengthPredicate() {
+		sessionFactoryScope().inTransaction(
+				session -> {
+					List<Object> results = session.createQuery(
+							"select s.someString from SimpleEntity s where length(s.someString) > :p1" )
+							.setParameter( "p1", 0 )
+							.list();
+					assertThat( results.size(), is( 2 ) );
+					assertThat( results.get( 0 ), is( "a" ) );
+				} );
+	}
+
+	@Test
 	public void testSelectAnIntegerConstant() {
 		sessionFactoryScope().inTransaction(
 				session -> {
