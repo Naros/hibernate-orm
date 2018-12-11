@@ -46,7 +46,6 @@ import org.hibernate.sql.ast.produce.spi.NavigablePathStack;
 import org.hibernate.sql.ast.produce.spi.RootTableGroupContext;
 import org.hibernate.sql.ast.produce.spi.RootTableGroupProducer;
 import org.hibernate.sql.ast.produce.spi.SqlAliasBaseManager;
-import org.hibernate.sql.ast.produce.spi.SqlAstCreationContext;
 import org.hibernate.sql.ast.produce.spi.SqlAstProducerContext;
 import org.hibernate.sql.ast.produce.spi.SqlAstSelectDescriptor;
 import org.hibernate.sql.ast.produce.spi.SqlExpressionResolver;
@@ -70,6 +69,7 @@ import org.hibernate.sql.ast.tree.spi.predicate.RelationalPredicate;
 import org.hibernate.sql.exec.internal.StandardJdbcParameterImpl;
 import org.hibernate.sql.results.spi.CircularFetchDetector;
 import org.hibernate.sql.results.spi.DomainResult;
+import org.hibernate.sql.results.spi.DomainResultCreationContext;
 import org.hibernate.sql.results.spi.DomainResultCreationState;
 import org.hibernate.sql.results.spi.Fetch;
 import org.hibernate.sql.results.spi.FetchParent;
@@ -80,7 +80,7 @@ import org.jboss.logging.Logger;
  * @author Steve Ebersole
  */
 public class MetamodelSelectBuilderProcess
-		implements SqlAstProducerContext, SqlAstCreationContext, SqlQueryOptions, DomainResultCreationState {
+		implements SqlAstProducerContext, SqlQueryOptions, DomainResultCreationState, DomainResultCreationContext {
 
 	private static final Logger log = Logger.getLogger( MetamodelSelectBuilderProcess.class );
 
@@ -534,17 +534,6 @@ public class MetamodelSelectBuilderProcess
 	public LoadQueryInfluencers getLoadQueryInfluencers() {
 		return loadQueryInfluencers;
 	}
-
-	@Override
-	public SqlExpressionResolver getSqlSelectionResolver() {
-		return sqlExpressionResolver;
-	}
-
-	@Override
-	public boolean shouldCreateShallowEntityResult() {
-		return false;
-	}
-
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// SqlQueryOptions

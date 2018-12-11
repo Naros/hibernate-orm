@@ -7,7 +7,6 @@
 package org.hibernate.sql.ast.produce.spi;
 
 import org.hibernate.LockOptions;
-import org.hibernate.NotYetImplementedFor6Exception;
 import org.hibernate.engine.spi.LoadQueryInfluencers;
 import org.hibernate.internal.util.collections.Stack;
 import org.hibernate.sql.ast.produce.metamodel.spi.SqlAliasBaseGenerator;
@@ -36,19 +35,11 @@ public interface SqlAstCreationContext extends AssemblerCreationContext, DomainR
 
 	SqlAliasBaseGenerator getSqlAliasBaseGenerator();
 
-	default TableSpace getTableSpace() {
-		throw new NotYetImplementedFor6Exception(  );
-	}
+	TableSpace getTableSpace();
 
-	default QuerySpec getCurrentQuerySpec() {
-		throw new NotYetImplementedFor6Exception(  );
-	}
+	QuerySpec getCurrentQuerySpec();
 
-	default Stack<TableGroup> getTableGroupStack() {
-		throw new NotYetImplementedFor6Exception(  );
-	}
+	Stack<TableGroup> getTableGroupStack();
 
-	default Stack<NavigableReference> getNavigableReferenceStack() {
-		throw new NotYetImplementedFor6Exception(  );
-	}
+	Stack<NavigableReference> getNavigableReferenceStack();
 }

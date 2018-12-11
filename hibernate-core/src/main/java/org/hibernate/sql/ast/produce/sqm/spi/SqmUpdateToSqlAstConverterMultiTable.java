@@ -54,7 +54,7 @@ import org.jboss.logging.Logger;
  * @author Steve Ebersole
  */
 public class SqmUpdateToSqlAstConverterMultiTable
-		extends BaseSqmToSqlAstConverter implements SqlAstCreationContext {
+		extends BaseSqmToSqlAstConverter {
 	private static final Logger log = Logger.getLogger( SqmUpdateToSqlAstConverterMultiTable.class );
 
 
