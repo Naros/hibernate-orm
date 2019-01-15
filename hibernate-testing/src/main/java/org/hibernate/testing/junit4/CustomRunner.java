@@ -190,6 +190,7 @@ public class CustomRunner extends BlockJUnit4ClassRunner {
 					getTestClass()
 			);
 			if ( failureExpected != null && !doValidation ) {
+				log.info( "FailureExpected: " + Helper.extractIgnoreMessage( failureExpected, frameworkMethod ) );
 				virtualIgnore = new IgnoreImpl( Helper.extractIgnoreMessage( failureExpected, frameworkMethod ) );
 			}
 			else {
@@ -197,7 +198,7 @@ public class CustomRunner extends BlockJUnit4ClassRunner {
 			}
 
 			testCount++;
-			log.trace( "adding test " + Helper.extractTestName( frameworkMethod ) + " [#" + testCount + "]" );
+			log.info( "adding test " + Helper.extractTestName( frameworkMethod ) + " [#" + testCount + "]" );
 			result.add( new ExtendedFrameworkMethod( frameworkMethod, virtualIgnore, failureExpected ) );
 		}
 		return result;
@@ -315,6 +316,7 @@ public class CustomRunner extends BlockJUnit4ClassRunner {
 	}
 
 	private Ignore buildIgnore(Skip skip) {
+		log.info( "Skipped [" + skip.message() + "]" );
 		return new IgnoreImpl( "@Skip : " + skip.message() );
 	}
 
@@ -323,6 +325,7 @@ public class CustomRunner extends BlockJUnit4ClassRunner {
 	}
 
 	private Ignore buildIgnore(String reason, String comment, String jiraKey) {
+		log.info( "Ignored [" + reason + "]. " + comment + " (" + jiraKey + ")" );
 		return new IgnoreImpl( getIgnoreMessage( reason, comment, jiraKey ) );
 	}
 
@@ -353,6 +356,7 @@ public class CustomRunner extends BlockJUnit4ClassRunner {
 			);
 			ignoreMessage += System.lineSeparator();
 		}
+		log.info( "RequestDialect: " + ignoreMessage );
 		return new IgnoreImpl( ignoreMessage );
 	}
 
