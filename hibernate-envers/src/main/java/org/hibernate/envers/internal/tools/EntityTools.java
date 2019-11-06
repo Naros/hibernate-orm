@@ -8,12 +8,15 @@ package org.hibernate.envers.internal.tools;
 
 import java.util.Objects;
 
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.envers.exception.AuditException;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 /**
  * @author Lukasz Antoniak (lukasz dot antoniak at gmail dot com)
@@ -46,8 +49,8 @@ public abstract class EntityTools {
 
 		final SharedSessionContractImplementor sessionImplementor = proxy.getHibernateLazyInitializer().getSession();
 		final Session tempSession = sessionImplementor == null
-				? sessionFactoryImplementor.openTemporarySession()
-				: sessionImplementor.getFactory().openTemporarySession();
+				? openTemporarySession( sessionFactoryImplementor )
+				: openTemporarySession( sessionImplementor.getFactory() );
 		try {
 			return tempSession.get(
 					proxy.getHibernateLazyInitializer().getEntityName(),
@@ -89,5 +92,26 @@ public abstract class EntityTools {
 	public static Class getEntityClass(SessionImplementor sessionImplementor, String entityName) {
 		final EntityPersister entityPersister = sessionImplementor.getFactory().getMetamodel().entityPersister( entityName );
 		return entityPersister.getMappedClass();
+	}
+
+	/**
+	 * Creates a temporary {@link Session} that resolves all state at call time rather than what may
+	 * have been cached by the {@link org.hibernate.SessionFactory} during construction.  This is important for
+	 * when using {@link org.hibernate.context.spi.CurrentTenantIdentifierResolver}.
+	 *
+	 * @param sessionFactory the session factory
+	 * @return the opened temporary session
+	 * @throws AuditException if the call was unable to create a temporary session
+	 */
+	private static Session openTemporarySession(SessionFactoryImplementor sessionFactory) {
+		try {
+			return sessionFactory.withOptions()
+					.autoClose( false )
+					.connectionHandlingMode( PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_TRANSACTION )
+					.openSession();
+		}
+		catch (Exception e) {
+			throw new AuditException( "Failed to create a temporary session", e );
+		}
 	}
 }
