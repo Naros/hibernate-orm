@@ -24,6 +24,7 @@ import org.hibernate.testing.TestForIssue;
 import static org.hibernate.testing.junit4.ExtraAssertions.assertTyping;
 import static org.hibernate.testing.transaction.TransactionUtil.doInHibernate;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Chris Cranford
@@ -181,6 +182,8 @@ public class AssociationRevisionsOfEntitiesQueryTest extends BaseEnversFunctiona
                         .up()
                         .getResultList();
             } );
+
+            fail( "Test should have thrown IllegalStateException due to selectEntitiesOnly=false" );
         }
         catch ( Exception e ) {
             assertTyping( IllegalStateException.class, e );
