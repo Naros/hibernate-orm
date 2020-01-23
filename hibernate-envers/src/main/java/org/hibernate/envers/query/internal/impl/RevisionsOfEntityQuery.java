@@ -81,7 +81,8 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			String alias) {
 
 		if ( !selectEntitiesOnly ) {
-			throw new IllegalStateException( "Audit association queries only permitted while selecting only entities." );
+			throw new IllegalStateException(
+					"Audit association queries are only permitted when the query is created with selectEntitiesOnly: true." );
 		}
 
 		AbstractAuditAssociationQuery<AuditQueryImplementor> query = associationQueryMap.get( associationName );
@@ -121,7 +122,7 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 		}
 	}
 
-	@SuppressWarnings({"unchecked"})
+	@SuppressWarnings({ "unchecked" })
 	@Override
 	public List list() throws AuditException {
 		AuditEntitiesConfiguration verEntCfg = enversService.getAuditEntitiesConfiguration();
@@ -192,7 +193,7 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			final String modifiedFlagSuffix = enversService.getGlobalConfiguration().getModifiedFlagSuffix();
 			for ( Map.Entry<String, Object> entry : dataMap.entrySet() ) {
 				final String key = entry.getKey();
-				if  ( key.endsWith( modifiedFlagSuffix ) ) {
+				if ( key.endsWith( modifiedFlagSuffix ) ) {
 					if ( entry.getValue() != null && Boolean.parseBoolean( entry.getValue().toString() ) ) {
 						changedPropertyNames.add( key.substring( 0, key.length() - modifiedFlagSuffix.length() ) );
 					}
@@ -221,8 +222,8 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			else {
 				for ( Object row : queryResults ) {
 					final Object[] rowArray = (Object[]) row;
-					final Map versionsEntity = (Map) rowArray[ 0 ];
-					final Object revisionData = rowArray[ 1 ];
+					final Map versionsEntity = (Map) rowArray[0];
+					final Object revisionData = rowArray[1];
 					entities.add( getQueryResultRowValue( versionsEntity, revisionData, getEntityName() ) );
 				}
 			}
@@ -254,7 +255,7 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			);
 		}
 
-		final Set<String> changedPropertyNames =  getChangedPropertyNames( versionsData, revisionType );
+		final Set<String> changedPropertyNames = getChangedPropertyNames( versionsData, revisionType );
 		return new Object[] { entity, revisionData, revisionType, changedPropertyNames };
 	}
 }
