@@ -28,7 +28,8 @@ import org.hibernate.envers.query.AuditAssociationQuery;
  * @author Chris Cranford
  */
 @Incubating
-public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor> extends AbstractAuditAssociationQuery<Q> {
+public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
+		extends AbstractAuditAssociationQuery<Q> {
 
 	public EntitiesAtRevisionAssociationQuery(
 			final EnversService enversService,
@@ -40,15 +41,17 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			final Map<String, String> aliasToEntityNameMap,
 			final String ownerAlias,
 			final String userSuppliedAlias) {
-		super( enversService,
-			   auditReader,
-			   parent,
-			   queryBuilder,
-			   propertyName,
-			   joinType,
-			   aliasToEntityNameMap,
-			   ownerAlias,
-			   userSuppliedAlias );
+		super(
+				enversService,
+				auditReader,
+				parent,
+				queryBuilder,
+				propertyName,
+				joinType,
+				aliasToEntityNameMap,
+				ownerAlias,
+				userSuppliedAlias
+		);
 	}
 
 	@Override
@@ -56,7 +59,8 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			String associationName,
 			JoinType joinType,
 			String alias) {
-		AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> result = associationQueryMap.get(associationName );
+		AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> result = associationQueryMap.get(
+				associationName );
 		if ( result == null ) {
 			result = new EntitiesAtRevisionAssociationQuery<>(
 					enversService,
@@ -97,7 +101,7 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			// filter revision of target entity
 			Parameters parametersToUse = parameters;
 			String revisionPropertyPath = verEntCfg.getRevisionNumberPath();
-			if (joinType == JoinType.LEFT) {
+			if ( joinType == JoinType.LEFT ) {
 				parametersToUse = parameters.addSubParameters( Parameters.OR );
 				parametersToUse.addNullRestriction( revisionPropertyPath, true );
 				parametersToUse = parametersToUse.addSubParameters( Parameters.AND );
@@ -139,7 +143,10 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 		super.addCriterionsToQuery( versionsReader );
 	}
 
-	private void addOwnerReferenceIdentifierToTargetIdentifier(Parameters params, EntityConfiguration entityConfig, String prefix) {
+	private void addOwnerReferenceIdentifierToTargetIdentifier(
+			Parameters params,
+			EntityConfiguration entityConfig,
+			String prefix) {
 		final IdMapper idMapperTarget = entityConfig.getIdMapper();
 		ownerAssociationIdMapper.addIdsEqualToQuery( params, ownerAlias, idMapperTarget, prefix );
 	}

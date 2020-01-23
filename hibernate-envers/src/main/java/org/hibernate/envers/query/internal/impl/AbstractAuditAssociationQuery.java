@@ -43,207 +43,214 @@ import static org.hibernate.envers.query.criteria.internal.CriteriaTools.getRela
  */
 @Incubating
 public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplementor>
-        implements AuditAssociationQuery<Q>, AuditQueryImplementor {
+		implements AuditAssociationQuery<Q>, AuditQueryImplementor {
 
-    protected final EnversService enversService;
-    protected final AuditReaderImplementor auditReader;
-    protected final Q parent;
-    protected final QueryBuilder queryBuilder;
-    protected final JoinType joinType;
-    protected final String entityName;
-    protected final IdMapper ownerAssociationIdMapper;
-    protected final String ownerAlias;
-    protected final String alias;
-    protected final Map<String, String> aliasToEntityNameMap;
-    protected final List<AuditCriterion> criterions = new ArrayList<>();
-    protected final Parameters parameters;
-    protected final List<AbstractAuditAssociationQuery<Q>> associationQueries = new ArrayList<>();
-    protected final Map<String, AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>>> associationQueryMap = new HashMap<>();
+	protected final EnversService enversService;
+	protected final AuditReaderImplementor auditReader;
+	protected final Q parent;
+	protected final QueryBuilder queryBuilder;
+	protected final JoinType joinType;
+	protected final String entityName;
+	protected final IdMapper ownerAssociationIdMapper;
+	protected final String ownerAlias;
+	protected final String alias;
+	protected final Map<String, String> aliasToEntityNameMap;
+	protected final List<AuditCriterion> criterions = new ArrayList<>();
+	protected final Parameters parameters;
+	protected final List<AbstractAuditAssociationQuery<Q>> associationQueries = new ArrayList<>();
+	protected final Map<String, AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>>> associationQueryMap = new HashMap<>();
 
-    public AbstractAuditAssociationQuery(
-            EnversService enversService,
-            AuditReaderImplementor auditReader,
-            Q parent,
-            QueryBuilder queryBuilder,
-            String propertyName,
-            JoinType joinType,
-            Map<String, String> aliasToEntityNameMap,
-            String ownerAlias,
-            String userSuppliedAlias) {
-        this.enversService = enversService;
-        this.auditReader = auditReader;
-        this.parent = parent;
-        this.queryBuilder = queryBuilder;
-        this.joinType = joinType;
+	public AbstractAuditAssociationQuery(
+			EnversService enversService,
+			AuditReaderImplementor auditReader,
+			Q parent,
+			QueryBuilder queryBuilder,
+			String propertyName,
+			JoinType joinType,
+			Map<String, String> aliasToEntityNameMap,
+			String ownerAlias,
+			String userSuppliedAlias) {
+		this.enversService = enversService;
+		this.auditReader = auditReader;
+		this.parent = parent;
+		this.queryBuilder = queryBuilder;
+		this.joinType = joinType;
 
-        final String ownerEntityName = aliasToEntityNameMap.get( ownerAlias );
-        final RelationDescription relationDescription = getRelatedEntity( enversService, ownerEntityName, propertyName );
-        if ( relationDescription == null ) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            Locale.ROOT,
-                            "Property %s of entity %s is not a valid association for queries.",
-                            propertyName,
-                            ownerEntityName
-                    )
-            );
-        }
+		final String ownerEntityName = aliasToEntityNameMap.get( ownerAlias );
+		final RelationDescription relationDescription = getRelatedEntity(
+				enversService,
+				ownerEntityName,
+				propertyName
+		);
+		if ( relationDescription == null ) {
+			throw new IllegalArgumentException(
+					String.format(
+							Locale.ROOT,
+							"Property %s of entity %s is not a valid association for queries.",
+							propertyName,
+							ownerEntityName
+					)
+			);
+		}
 
-        this.entityName = relationDescription.getToEntityName();
-        this.ownerAssociationIdMapper = relationDescription.getIdMapper();
-        this.ownerAlias = ownerAlias;
-        this.alias = StringTools.defaultIfNull( userSuppliedAlias, queryBuilder.generateAlias() );
+		this.entityName = relationDescription.getToEntityName();
+		this.ownerAssociationIdMapper = relationDescription.getIdMapper();
+		this.ownerAlias = ownerAlias;
+		this.alias = StringTools.defaultIfNull( userSuppliedAlias, queryBuilder.generateAlias() );
 
-        aliasToEntityNameMap.put( this.alias, entityName );
-        this.aliasToEntityNameMap = aliasToEntityNameMap;
+		aliasToEntityNameMap.put( this.alias, entityName );
+		this.aliasToEntityNameMap = aliasToEntityNameMap;
 
-        this.parameters = queryBuilder.addParameters( this.alias );
-    }
+		this.parameters = queryBuilder.addParameters( this.alias );
+	}
 
-    @Override
-    public String getAlias() {
-        return alias;
-    }
+	@Override
+	public String getAlias() {
+		return alias;
+	}
 
-    @Override
-    public List getResultList() throws AuditException {
-        return parent.getResultList();
-    }
+	@Override
+	public List getResultList() throws AuditException {
+		return parent.getResultList();
+	}
 
-    @Override
-    public Object getSingleResult() throws AuditException, NonUniqueResultException, NoResultException {
-        return parent.getSingleResult();
-    }
+	@Override
+	public Object getSingleResult() throws AuditException, NonUniqueResultException, NoResultException {
+		return parent.getSingleResult();
+	}
 
-    @Override
-    public AuditAssociationQuery<? extends AuditAssociationQuery<Q>> traverseRelation(
-            String associationName,
-            JoinType joinType) {
-        return traverseRelation( associationName, joinType, null );
-    }
+	@Override
+	public AuditAssociationQuery<? extends AuditAssociationQuery<Q>> traverseRelation(
+			String associationName,
+			JoinType joinType) {
+		return traverseRelation( associationName, joinType, null );
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> add(AuditCriterion criterion) {
-        criterions.add( criterion );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> add(AuditCriterion criterion) {
+		criterions.add( criterion );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> addProjection(AuditProjection projection) {
-        AuditProjection.ProjectionData projectionData = projection.getData( enversService );
+	@Override
+	public AuditAssociationQuery<Q> addProjection(AuditProjection projection) {
+		AuditProjection.ProjectionData projectionData = projection.getData( enversService );
 
-        final String projectionEntityAlias = projectionData.getAlias( alias );
-        final String projectionEntityName = aliasToEntityNameMap.get( projectionEntityAlias );
-        final String propertyName = CriteriaTools.determinePropertyName(
-                enversService,
-                auditReader,
-                projectionEntityName,
-                projectionData.getPropertyName() );
+		final String projectionEntityAlias = projectionData.getAlias( alias );
+		final String projectionEntityName = aliasToEntityNameMap.get( projectionEntityAlias );
+		final String propertyName = CriteriaTools.determinePropertyName(
+				enversService,
+				auditReader,
+				projectionEntityName,
+				projectionData.getPropertyName()
+		);
 
-        queryBuilder.addProjection(
-                projectionData.getFunction(),
-                projectionEntityAlias,
-                propertyName,
-                projectionData.isDistinct() );
+		queryBuilder.addProjection(
+				projectionData.getFunction(),
+				projectionEntityAlias,
+				propertyName,
+				projectionData.isDistinct()
+		);
 
-        registerProjection( projectionEntityName, projection );
-        return this;
-    }
+		registerProjection( projectionEntityName, projection );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> addOrder(AuditOrder order) {
-        AuditOrder.OrderData orderData = order.getData( enversService );
+	@Override
+	public AuditAssociationQuery<Q> addOrder(AuditOrder order) {
+		AuditOrder.OrderData orderData = order.getData( enversService );
 
-        final String orderEntityAlias = orderData.getAlias( alias );
-        final String orderEntityName = aliasToEntityNameMap.get( orderEntityAlias );
-        final String propertyName = CriteriaTools.determinePropertyName(
-                enversService,
-                auditReader,
-                orderEntityName,
-                orderData.getPropertyName() );
+		final String orderEntityAlias = orderData.getAlias( alias );
+		final String orderEntityName = aliasToEntityNameMap.get( orderEntityAlias );
+		final String propertyName = CriteriaTools.determinePropertyName(
+				enversService,
+				auditReader,
+				orderEntityName,
+				orderData.getPropertyName()
+		);
 
-        queryBuilder.addOrder( orderEntityAlias, propertyName, orderData.isAscending() );
-        return this;
-    }
+		queryBuilder.addOrder( orderEntityAlias, propertyName, orderData.isAscending() );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setMaxResults(int maxResults) {
-        parent.setMaxResults( maxResults );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setMaxResults(int maxResults) {
+		parent.setMaxResults( maxResults );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setFirstResult(int firstResult) {
-        parent.setFirstResult( firstResult );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setFirstResult(int firstResult) {
+		parent.setFirstResult( firstResult );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setCacheable(boolean cacheable) {
-        parent.setCacheable( cacheable );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setCacheable(boolean cacheable) {
+		parent.setCacheable( cacheable );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setCacheRegion(String cacheRegion) {
-        parent.setCacheRegion( cacheRegion );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setCacheRegion(String cacheRegion) {
+		parent.setCacheRegion( cacheRegion );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setComment(String comment) {
-        parent.setComment( comment );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setComment(String comment) {
+		parent.setComment( comment );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setFlushMode(FlushMode flushMode) {
-        parent.setFlushMode( flushMode );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setFlushMode(FlushMode flushMode) {
+		parent.setFlushMode( flushMode );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setCacheMode(CacheMode cacheMode) {
-        parent.setCacheMode( cacheMode );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setCacheMode(CacheMode cacheMode) {
+		parent.setCacheMode( cacheMode );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setTimeout(int timeout) {
-        parent.setTimeout( timeout) ;
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setTimeout(int timeout) {
+		parent.setTimeout( timeout );
+		return this;
+	}
 
-    @Override
-    public AuditAssociationQuery<Q> setLockMode(LockMode lockMode) {
-        parent.setLockMode( lockMode );
-        return this;
-    }
+	@Override
+	public AuditAssociationQuery<Q> setLockMode(LockMode lockMode) {
+		parent.setLockMode( lockMode );
+		return this;
+	}
 
-    @Override
-    public Q up() {
-        return parent;
-    }
+	@Override
+	public Q up() {
+		return parent;
+	}
 
-    @Override
-    public void registerProjection(String entityName, AuditProjection projection) {
-        parent.registerProjection( entityName, projection );
-    }
+	@Override
+	public void registerProjection(String entityName, AuditProjection projection) {
+		parent.registerProjection( entityName, projection );
+	}
 
-    protected void addCriterionsToQuery(AuditReaderImplementor versionsReader) {
-        for ( AuditCriterion criterion : criterions ) {
-            criterion.addToQuery(
-                    enversService,
-                    versionsReader,
-                    aliasToEntityNameMap,
-                    alias,
-                    queryBuilder,
-                    parameters
-            );
-        }
+	protected void addCriterionsToQuery(AuditReaderImplementor versionsReader) {
+		for ( AuditCriterion criterion : criterions ) {
+			criterion.addToQuery(
+					enversService,
+					versionsReader,
+					aliasToEntityNameMap,
+					alias,
+					queryBuilder,
+					parameters
+			);
+		}
 
-        for ( AbstractAuditAssociationQuery<Q> subQuery : associationQueries ) {
-            subQuery.addCriterionsToQuery( versionsReader );
-        }
-    }
+		for ( AbstractAuditAssociationQuery<Q> subQuery : associationQueries ) {
+			subQuery.addCriterionsToQuery( versionsReader );
+		}
+	}
 }
