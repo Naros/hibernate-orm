@@ -81,7 +81,7 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			String alias) {
 
 		if ( !selectEntitiesOnly ) {
-			throw new IllegalStateException( "Audit association queries permitted only while selecting entities." );
+			throw new IllegalStateException( "Audit association queries are only permitted when the query is created with selectEntitiesOnly: true." );
 		}
 
 		return associationQueryMap.computeIfAbsent(
