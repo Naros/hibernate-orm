@@ -41,14 +41,14 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			final String ownerAlias,
 			final String userSuppliedAlias) {
 		super( enversService,
-			   auditReader,
-			   parent,
-			   queryBuilder,
-			   propertyName,
-			   joinType,
-			   aliasToEntityNameMap,
-			   ownerAlias,
-			   userSuppliedAlias );
+			auditReader,
+			parent,
+			queryBuilder,
+			propertyName,
+			joinType,
+			aliasToEntityNameMap,
+			ownerAlias,
+			userSuppliedAlias );
 	}
 
 	@Override
@@ -56,24 +56,25 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			String associationName,
 			JoinType joinType,
 			String alias) {
-		AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> result = associationQueryMap.get(associationName );
-		if ( result == null ) {
-			result = new EntitiesAtRevisionAssociationQuery<>(
-					enversService,
-					auditReader,
-					this,
-					queryBuilder,
-					associationName,
-					joinType,
-					aliasToEntityNameMap,
-					this.alias,
-					alias
-			);
+		return associationQueryMap.computeIfAbsent(
+				associationName,
+				name -> {
+					AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> query = new EntitiesAtRevisionAssociationQuery<>(
+							enversService,
+							auditReader,
+							this,
+							queryBuilder,
+							associationName,
+							joinType,
+							aliasToEntityNameMap,
+							this.alias,
+							alias
+					);
 
-			associationQueries.add( (EntitiesAtRevisionAssociationQuery<Q>) result );
-			associationQueryMap.put( associationName, result );
-		}
-		return result;
+					associationQueries.add( query );
+					return query;
+				}
+		);
 	}
 
 	protected void addCriterionsToQuery(AuditReaderImplementor versionsReader) {
@@ -86,7 +87,7 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			// owner.reference_id = target.originalId.id
 			AuditEntitiesConfiguration verEntCfg = enversService.getAuditEntitiesConfiguration();
 			final String originalIdPropertyName = verEntCfg.getOriginalIdPropName();
-			final String prefix = alias.concat( "." ).concat( originalIdPropertyName );
+			final String prefix = alias + "." + originalIdPropertyName;
 
 			addOwnerReferenceIdentifierToTargetIdentifier(
 					joinConditionParameters,
@@ -97,7 +98,7 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			// filter revision of target entity
 			Parameters parametersToUse = parameters;
 			String revisionPropertyPath = verEntCfg.getRevisionNumberPath();
-			if (joinType == JoinType.LEFT) {
+			if ( joinType == JoinType.LEFT ) {
 				parametersToUse = parameters.addSubParameters( Parameters.OR );
 				parametersToUse.addNullRestriction( revisionPropertyPath, true );
 				parametersToUse = parametersToUse.addSubParameters( Parameters.AND );

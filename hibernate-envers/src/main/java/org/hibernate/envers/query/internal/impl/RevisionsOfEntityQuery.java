@@ -81,27 +81,26 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 			String alias) {
 
 		if ( !selectEntitiesOnly ) {
-			throw new IllegalStateException( "Audit association queries only permitted while selecting only entities." );
+			throw new IllegalStateException( "Audit association queries permitted only while selecting entities." );
 		}
 
-		AbstractAuditAssociationQuery<AuditQueryImplementor> query = associationQueryMap.get( associationName );
-		if ( query == null ) {
-			query = new RevisionsOfEntityAssociationQuery<>(
-					enversService,
-					versionsReader,
-					this,
-					qb,
-					associationName,
-					joinType,
-					aliasToEntityNameMap,
-					REFERENCED_ENTITY_ALIAS,
-					alias
-			);
+		return associationQueryMap.computeIfAbsent(
+				associationName,
+				name -> {
+					AbstractAuditAssociationQuery<AuditQueryImplementor> query = new RevisionsOfEntityAssociationQuery<>(
+							enversService,
+							versionsReader,
+							this,
+							qb,
+							name,
+							joinType,
+							aliasToEntityNameMap,
+							REFERENCED_ENTITY_ALIAS,
+							alias);
 
-			addAssociationQuery( associationName, query );
-		}
-
-		return query;
+					addAssociationQuery( name, query );
+					return query;
+				} );
 	}
 
 	private Number getRevisionNumber(Map versionsEntity) {

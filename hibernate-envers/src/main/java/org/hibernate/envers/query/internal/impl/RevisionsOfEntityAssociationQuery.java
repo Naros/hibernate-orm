@@ -28,82 +28,82 @@ import org.hibernate.envers.query.AuditAssociationQuery;
 @Incubating
 public class RevisionsOfEntityAssociationQuery<Q extends AuditQueryImplementor> extends AbstractAuditAssociationQuery<Q> {
 
-    public RevisionsOfEntityAssociationQuery(
-            EnversService enversService,
-            AuditReaderImplementor auditReader,
-            Q parent,
-            QueryBuilder queryBuilder,
-            String propertyName,
-            JoinType joinType,
-            Map<String, String> aliasToEntityNameMap,
-            String ownerAlias,
-            String userSuppliedAlias) {
-        super( enversService,
-               auditReader,
-               parent,
-               queryBuilder,
-               propertyName,
-               joinType,
-               aliasToEntityNameMap,
-               ownerAlias,
-               userSuppliedAlias );
-    }
+	public RevisionsOfEntityAssociationQuery(
+			EnversService enversService,
+			AuditReaderImplementor auditReader,
+			Q parent,
+			QueryBuilder queryBuilder,
+			String propertyName,
+			JoinType joinType,
+			Map<String, String> aliasToEntityNameMap,
+			String ownerAlias,
+			String userSuppliedAlias) {
+		super( enversService,
+			auditReader,
+			parent,
+			queryBuilder,
+			propertyName,
+			joinType,
+			aliasToEntityNameMap,
+			ownerAlias,
+			userSuppliedAlias );
+	}
 
-    @Override
-    public AuditAssociationQuery<? extends AuditAssociationQuery<Q>> traverseRelation(
-            String associationName,
-            JoinType joinType,
-            String alias) {
-        AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> result = associationQueryMap.get( associationName );
-        if ( result == null ) {
-            result = new RevisionsOfEntityAssociationQuery<>(
-                    enversService,
-                    auditReader,
-                    this,
-                    queryBuilder,
-                    associationName,
-                    joinType,
-                    aliasToEntityNameMap,
-                    this.alias,
-                    alias );
+	@Override
+	public AuditAssociationQuery<? extends AuditAssociationQuery<Q>> traverseRelation(
+			String associationName,
+			JoinType joinType,
+			String alias) {
+		return associationQueryMap.computeIfAbsent(
+				associationName,
+				name -> {
+					AbstractAuditAssociationQuery<AbstractAuditAssociationQuery<Q>> query = new RevisionsOfEntityAssociationQuery<>(
+							enversService,
+							auditReader,
+							this,
+							queryBuilder,
+							name,
+							joinType,
+							aliasToEntityNameMap,
+							this.alias,
+							alias );
 
-            associationQueries.add( (RevisionsOfEntityAssociationQuery<Q>) result );
-            associationQueryMap.put( associationName, result );
-        }
+					associationQueries.add( query );
+					return query;
+				}
+		);
+	}
 
-        return result;
-    }
+	@Override
+	protected void addCriterionsToQuery(AuditReaderImplementor versionsReader) {
+		if ( enversService.getEntitiesConfigurations().isVersioned( entityName ) ) {
+			String auditEntityName = enversService.getAuditEntitiesConfiguration().getAuditEntityName( entityName );
+			Parameters joinConditionParameters = queryBuilder.addJoin( joinType, auditEntityName, alias, false );
 
-    @Override
-    protected void addCriterionsToQuery(AuditReaderImplementor versionsReader) {
-        if ( enversService.getEntitiesConfigurations().isVersioned( entityName ) ) {
-            String auditEntityName = enversService.getAuditEntitiesConfiguration().getAuditEntityName( entityName );
-            Parameters joinConditionParameters = queryBuilder.addJoin( joinType, auditEntityName, alias, false );
+			// owner.reference_id = target.originalId.id
+			AuditEntitiesConfiguration verEntCfg = enversService.getAuditEntitiesConfiguration();
+			final String prefix = alias + "." + verEntCfg.getOriginalIdPropName();
+			addOwnerReferenceIdentifierToTargetIdentifier(
+					joinConditionParameters,
+					enversService.getEntitiesConfigurations().get( entityName ),
+					prefix
+			);
+		}
+		else {
+			Parameters joinConditionParameters = queryBuilder.addJoin( joinType, entityName, alias, false );
+			// owner.reference_id = target.id
+			addOwnerReferenceIdentifierToTargetIdentifier(
+					joinConditionParameters,
+					enversService.getEntitiesConfigurations().getNotVersionEntityConfiguration( entityName ),
+					alias
+			);
+		}
 
-            // owner.reference_id = target.originalId.id
-            AuditEntitiesConfiguration verEntCfg = enversService.getAuditEntitiesConfiguration();
-            final String prefix = alias.concat( "." ).concat( verEntCfg.getOriginalIdPropName() );
-            addOwnerReferenceIdentifierToTargetIdentifier(
-                    joinConditionParameters,
-                    enversService.getEntitiesConfigurations().get( entityName ),
-                    prefix
-            );
-        }
-        else {
-            Parameters joinConditionParameters = queryBuilder.addJoin( joinType, entityName, alias, false );
-            // owner.reference_id = target.id
-            addOwnerReferenceIdentifierToTargetIdentifier(
-                    joinConditionParameters,
-                    enversService.getEntitiesConfigurations().getNotVersionEntityConfiguration( entityName ),
-                    alias
-            );
-        }
+		super.addCriterionsToQuery( versionsReader );
+	}
 
-        super.addCriterionsToQuery( versionsReader );
-    }
-
-    private void addOwnerReferenceIdentifierToTargetIdentifier(Parameters params, EntityConfiguration entityConfig, String prefix) {
-        final IdMapper idMapperTarget = entityConfig.getIdMapper();
-        ownerAssociationIdMapper.addIdsEqualToQuery( params, ownerAlias, idMapperTarget, prefix );
-    }
+	private void addOwnerReferenceIdentifierToTargetIdentifier(Parameters params, EntityConfiguration entityConfig, String prefix) {
+		final IdMapper idMapperTarget = entityConfig.getIdMapper();
+		ownerAssociationIdMapper.addIdsEqualToQuery( params, ownerAlias, idMapperTarget, prefix );
+	}
 }
