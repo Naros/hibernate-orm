@@ -8,11 +8,9 @@ package org.hibernate.envers.query.criteria.internal;
 
 import java.util.Locale;
 
-import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.exception.AuditException;
 import org.hibernate.envers.internal.entities.RelationDescription;
 import org.hibernate.envers.internal.entities.RelationType;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
@@ -35,25 +33,14 @@ public class RelatedAuditEqualityExpression extends AbstractAtomicExpression {
 
 	@Override
 	protected void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
 			String entityName,
 			String alias,
 			String componentPrefix,
 			QueryBuilder qb,
 			Parameters parameters) {
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				versionsReader,
-				entityName,
-				propertyNameGetter
-		);
+		String propertyName = qb.resolvePropertyName( entityName, propertyNameGetter );
 
-		RelationDescription relatedEntity = CriteriaTools.getRelatedEntity(
-				enversService,
-				entityName,
-				componentPrefix.concat( propertyName )
-		);
+		RelationDescription relatedEntity = qb.getRelationDescription( entityName, componentPrefix.concat( propertyName ) );
 
 		if ( relatedEntity == null ) {
 			throw new AuditException(

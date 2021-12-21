@@ -6,8 +6,6 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
@@ -27,21 +25,14 @@ public class InAuditExpression extends AbstractAtomicExpression {
 
 	@Override
 	protected void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
 			String entityName,
 			String alias,
 			String componentPrefix,
 			QueryBuilder qb,
 			Parameters parameters) {
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				versionsReader,
-				entityName,
-				propertyNameGetter
-		);
+		String propertyName = qb.resolvePropertyName( entityName, propertyNameGetter );
 		String prefixedPropertyName = componentPrefix.concat( propertyName );
-		CriteriaTools.checkPropertyNotARelation( enversService, entityName, prefixedPropertyName );
+		checkPropertyNotRelation( qb.getEnversService(), entityName, prefixedPropertyName );
 		parameters.addWhereWithParams( alias, prefixedPropertyName, "in (", values, ")" );
 	}
 }

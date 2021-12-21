@@ -29,7 +29,6 @@ import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.AuditAssociationQuery;
 import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.envers.query.criteria.AuditCriterion;
-import org.hibernate.envers.query.criteria.internal.CriteriaTools;
 import org.hibernate.envers.query.order.AuditOrder;
 import org.hibernate.envers.query.projection.AuditProjection;
 import org.hibernate.envers.tools.Pair;
@@ -50,8 +49,6 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 	protected String entityClassName;
 	protected String versionsEntityName;
 	protected QueryBuilder qb;
-	protected final Map<String, String> aliasToEntityNameMap = new HashMap<>();
-	protected final Map<String, String> aliasToComponentPropertyNameMap = new HashMap<>();
 
 	protected boolean hasOrder;
 
@@ -87,9 +84,9 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 		if ( !enversService.getEntitiesConfigurations().isVersioned( entityName ) ) {
 			throw new NotAuditedException( entityName, "Entity [" + entityName + "] is not versioned" );
 		}
-		aliasToEntityNameMap.put( REFERENCED_ENTITY_ALIAS, entityName );
 
 		qb = new QueryBuilder( versionsEntityName, REFERENCED_ENTITY_ALIAS, versionsReader.getSessionImplementor().getFactory() );
+		qb.registerEntityAlias( entityName, REFERENCED_ENTITY_ALIAS );
 	}
 
 	@Override
@@ -118,11 +115,10 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 	public Object getSingleResult() throws AuditException, NonUniqueResultException, NoResultException {
 		List result = list();
 
-		if ( result == null || result.size() == 0 ) {
+		if ( result == null || result.isEmpty() ) {
 			throw new NoResultException();
 		}
-
-		if ( result.size() > 1 ) {
+		else if ( result.size() > 1 ) {
 			throw new NonUniqueResultException();
 		}
 
@@ -137,17 +133,9 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 	// Projection and order
 
 	public AuditQuery addProjection(AuditProjection projection) {
-		String projectionEntityAlias = projection.getAlias( REFERENCED_ENTITY_ALIAS );
-		String projectionEntityName = aliasToEntityNameMap.get( projectionEntityAlias );
+		String projectionEntityName = qb.getEntityNameByAlias( projection.getAlias( REFERENCED_ENTITY_ALIAS ) );
 		registerProjection( projectionEntityName, projection );
-		projection.addProjectionToQuery(
-				enversService,
-				versionsReader,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				REFERENCED_ENTITY_ALIAS,
-				qb
-		);
+		projection.addProjectionToQuery( REFERENCED_ENTITY_ALIAS, qb );
 		return this;
 	}
 
@@ -162,27 +150,7 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 
 	public AuditQuery addOrder(AuditOrder order) {
 		hasOrder = true;
-		AuditOrder.OrderData orderData = order.getData( enversService.getConfig() );
-		String orderEntityAlias = orderData.getAlias( REFERENCED_ENTITY_ALIAS );
-		String orderEntityName = aliasToEntityNameMap.get( orderEntityAlias );
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				versionsReader,
-				orderEntityName,
-				orderData.getPropertyName()
-		);
-		String componentPrefix = CriteriaTools.determineComponentPropertyPrefix(
-				enversService,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				orderEntityAlias
-		);
-		qb.addOrder(
-				orderEntityAlias,
-				componentPrefix.concat( propertyName ),
-				orderData.isAscending(),
-				orderData.getNullPrecedence()
-		);
+		order.addOrderToQuery( REFERENCED_ENTITY_ALIAS, qb );
 		return this;
 	}
 
@@ -322,7 +290,6 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 					final Pair<String, AuditProjection> projection = projections.get( 0 );
 					result.add(
 							projection.getSecond().convertQueryResult(
-									enversService,
 									entityInstantiator,
 									projection.getFirst(),
 									revision,
@@ -337,7 +304,6 @@ public abstract class AbstractAuditQuery implements AuditQueryImplementor {
 					for ( int i = 0; i < qresults.length; i++ ) {
 						final Pair<String, AuditProjection> projection = projections.get( i );
 						tresults[i] = projection.getSecond().convertQueryResult(
-								enversService,
 								entityInstantiator,
 								projection.getFirst(),
 								revision,

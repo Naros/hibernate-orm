@@ -36,8 +36,6 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 			QueryBuilder queryBuilder,
 			String propertyName,
 			JoinType joinType,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
 			String ownerAlias,
 			String userSuppliedAlias,
 			AuditCriterion onClauseCriterion) {
@@ -48,8 +46,6 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 				queryBuilder,
 				propertyName,
 				joinType,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
 				ownerAlias,
 				userSuppliedAlias,
 				onClauseCriterion
@@ -69,8 +65,6 @@ public class EntitiesAtRevisionAssociationQuery<Q extends AuditQueryImplementor>
 				queryBuilder,
 				associationName,
 				joinType,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
 				this.alias,
 				alias,
 				onClauseCriterion

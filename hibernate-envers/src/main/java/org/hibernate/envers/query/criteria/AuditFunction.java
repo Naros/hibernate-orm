@@ -7,28 +7,25 @@
 package org.hibernate.envers.query.criteria;
 
 import java.util.List;
-import java.util.Map;
 
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.entities.EntityInstantiator;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.criteria.internal.FunctionFunctionAuditExpression;
 import org.hibernate.envers.query.criteria.internal.PropertyFunctionAuditExpression;
 import org.hibernate.envers.query.criteria.internal.SimpleFunctionAuditExpression;
-import org.hibernate.envers.query.projection.AuditProjection;
+import org.hibernate.envers.query.projection.AbstractAuditProjection;
 
 /**
  * Create restrictions or projections using a function.
  * 
  * @author Felix Feisst (feisst dot felix at gmail dot com)
  */
-public class AuditFunction implements AuditProjection {
+public class AuditFunction extends AbstractAuditProjection {
 
 	private final String function;
 	private final List<Object> arguments;
 
 	public AuditFunction(String function, List<Object> arguments) {
+		super( null );
 		this.function = function;
 		this.arguments = arguments;
 	}
@@ -236,25 +233,8 @@ public class AuditFunction implements AuditProjection {
 	}
 
 	@Override
-	public void addProjectionToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder queryBuilder) {
-		queryBuilder.addProjection(
-				enversService.getConfig(),
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				this
-		);
-	}
-
-	@Override
-	public Object convertQueryResult(EnversService enversService, EntityInstantiator entityInstantiator,
-			String entityName, Number revision, Object value) {
-		return value;
+	public void addProjectionToQuery(String baseAlias, QueryBuilder queryBuilder) {
+		queryBuilder.addProjection( queryBuilder.getEnversService().getConfig(), this );
 	}
 
 	@Override

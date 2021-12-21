@@ -34,7 +34,6 @@ import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.AuditAssociationQuery;
 import org.hibernate.envers.query.criteria.AuditCriterion;
-import org.hibernate.envers.query.criteria.internal.CriteriaTools;
 import org.hibernate.envers.query.order.AuditOrder;
 import org.hibernate.envers.query.projection.AuditProjection;
 
@@ -59,8 +58,6 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 	protected final String ownerAlias;
 	protected final String ownerEntityName;
 	protected final String alias;
-	protected final Map<String, String> aliasToEntityNameMap;
-	protected final Map<String, String> aliasToComponentPropertyNameMap;
 	protected final List<AuditCriterion> criterions = new ArrayList<>();
 	protected final AuditCriterion onClauseCriterion;
 	protected final Parameters parameters;
@@ -76,8 +73,6 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 			final QueryBuilder queryBuilder,
 			final String propertyName,
 			final JoinType joinType,
-			final Map<String, String> aliasToEntityNameMap,
-			final Map<String, String> aliasToComponentPropertyNameMap,
 			final String ownerAlias,
 			final String userSuppliedAlias,
 			final AuditCriterion onClauseCriterion) {
@@ -87,25 +82,15 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 		this.queryBuilder = queryBuilder;
 		this.joinType = joinType;
 
-		ownerEntityName = aliasToEntityNameMap.get( ownerAlias );
+		ownerEntityName = queryBuilder.getEntityNameByAlias( ownerAlias );
 		this.ownerAlias = ownerAlias;
 		this.alias = userSuppliedAlias == null ? queryBuilder.generateAlias() : userSuppliedAlias;
 
-		String componentPrefix = CriteriaTools.determineComponentPropertyPrefix(
-				enversService,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				ownerAlias
-		);
+		String componentPrefix = queryBuilder.resolveComponentPropertyPrefix( ownerAlias );
 		String prefixedPropertyName = componentPrefix.concat( propertyName );
 
-		relationDescription = CriteriaTools.getRelatedEntity(
-				enversService,
-				ownerEntityName,
-				prefixedPropertyName
-		);
-
-		componentDescription = CriteriaTools.getComponent( enversService, ownerEntityName, prefixedPropertyName );
+		relationDescription = queryBuilder.getRelationDescription( ownerEntityName, prefixedPropertyName );
+		componentDescription = queryBuilder.getComponentDescription( ownerEntityName, prefixedPropertyName );
 
 		if ( relationDescription == null && componentDescription == null ) {
 			throw new IllegalArgumentException(
@@ -122,12 +107,10 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 			this.entityName = relationDescription.getToEntityName();
 		}
 		else {
-			aliasToComponentPropertyNameMap.put( alias, componentDescription.getPropertyName() );
+			queryBuilder.registerComponentPropertyAlias( componentDescription.getPropertyName(), alias );
 			this.entityName = ownerEntityName;
 		}
-		aliasToEntityNameMap.put( this.alias, entityName );
-		this.aliasToEntityNameMap = aliasToEntityNameMap;
-		this.aliasToComponentPropertyNameMap = aliasToComponentPropertyNameMap;
+		queryBuilder.registerEntityAlias( entityName, this.alias );
 		parameters = queryBuilder.addParameters( this.alias );
 		this.onClauseCriterion = onClauseCriterion;
 	}
@@ -200,42 +183,15 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 	@Override
 	public AbstractAuditAssociationQuery<Q> addProjection(AuditProjection projection) {
 		String projectionEntityAlias = projection.getAlias( alias );
-		String projectionEntityName = aliasToEntityNameMap.get( projectionEntityAlias );
+		String projectionEntityName = queryBuilder.getEntityNameByAlias( projectionEntityAlias );
 		registerProjection( projectionEntityName, projection );
-		projection.addProjectionToQuery(
-				enversService,
-				auditReader,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				alias,
-				queryBuilder
-		);
+		projection.addProjectionToQuery( alias, queryBuilder );
 		return this;
 	}
 
 	@Override
 	public AbstractAuditAssociationQuery<Q> addOrder(AuditOrder order) {
-		AuditOrder.OrderData orderData = order.getData( enversService.getConfig() );
-		String orderEntityAlias = orderData.getAlias( alias );
-		String orderEntityName = aliasToEntityNameMap.get( orderEntityAlias );
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				auditReader,
-				orderEntityName,
-				orderData.getPropertyName()
-		);
-		String componentPrefix = CriteriaTools.determineComponentPropertyPrefix(
-				enversService,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				orderEntityAlias
-		);
-		queryBuilder.addOrder(
-				orderEntityAlias,
-				componentPrefix.concat( propertyName ),
-				orderData.isAscending(),
-				orderData.getNullPrecedence()
-		);
+		order.addOrderToQuery( alias, queryBuilder );
 		return this;
 	}
 
@@ -297,7 +253,7 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 		return parent;
 	}
 
-	protected void addCriterionToQuery(AuditReaderImplementor versionsReader) {
+	protected void addCriterionToQuery() {
 		Parameters onClauseParameters;
 		if ( relationDescription != null ) {
 			onClauseParameters = createEntityJoin( enversService.getConfig() );
@@ -307,31 +263,15 @@ public abstract class AbstractAuditAssociationQuery<Q extends AuditQueryImplemen
 		}
 
 		if ( onClauseCriterion != null ) {
-			onClauseCriterion.addToQuery(
-					enversService,
-					versionsReader,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
-					alias,
-					queryBuilder,
-					onClauseParameters
-			);
+			onClauseCriterion.addToQuery( alias, queryBuilder, onClauseParameters );
 		}
 
 		for ( AuditCriterion criterion : criterions ) {
-			criterion.addToQuery(
-					enversService,
-					versionsReader,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
-					alias,
-					queryBuilder,
-					parameters
-			);
+			criterion.addToQuery( alias, queryBuilder, parameters );
 		}
 
 		for ( AbstractAuditAssociationQuery<Q> subQuery : associationQueries ) {
-			subQuery.addCriterionToQuery( versionsReader );
+			subQuery.addCriterionToQuery();
 		}
 	}
 

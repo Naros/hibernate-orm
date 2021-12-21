@@ -6,10 +6,6 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import java.util.Map;
-
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.criteria.AuditCriterion;
@@ -33,22 +29,8 @@ public class SimpleFunctionAuditExpression implements AuditCriterion {
 	}
 
 	@Override
-	public void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder qb,
-			Parameters parameters) {
-		parameters.addWhereWithFunction(
-				enversService.getConfig(),
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				function,
-				op,
-				value
-		);
+	public void addToQuery(String baseAlias, QueryBuilder qb, Parameters parameters) {
+		parameters.addWhereWithFunction( qb.getEnversService().getConfig(), qb, function, op, value );
 	}
 
 }

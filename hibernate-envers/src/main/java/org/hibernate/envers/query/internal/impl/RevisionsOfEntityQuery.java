@@ -95,8 +95,6 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 					qb,
 					associationName,
 					joinType,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
 					REFERENCED_ENTITY_ALIAS,
 					alias,
 					null
@@ -145,19 +143,11 @@ public class RevisionsOfEntityQuery extends AbstractAuditQuery {
 
 		// all specified conditions, transformed
 		for ( AuditCriterion criterion : criterions ) {
-			criterion.addToQuery(
-					enversService,
-					versionsReader,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
-					QueryConstants.REFERENCED_ENTITY_ALIAS,
-					qb,
-					qb.getRootParameters()
-			);
+			criterion.addToQuery( QueryConstants.REFERENCED_ENTITY_ALIAS, qb, qb.getRootParameters() );
 		}
 
 		for ( AbstractAuditAssociationQuery<?> associationQuery : associationQueries ) {
-			associationQuery.addCriterionToQuery( versionsReader );
+			associationQuery.addCriterionToQuery();
 		}
 
 		if ( !hasProjection() && !hasOrder ) {

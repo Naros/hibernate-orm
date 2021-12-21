@@ -6,11 +6,7 @@
  */
 package org.hibernate.envers.query.projection;
 
-import java.util.Map;
-
-import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.internal.entities.EntityInstantiator;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 
 /**
@@ -22,19 +18,10 @@ public interface AuditProjection {
 	/**
 	 * Adds an audit projection to the specified query.
 	 *
-	 * @param enversService the Envers service
-	 * @param auditReader the audit reader implementor
-	 * @param aliasToEntityNameMap the entity name alias map
 	 * @param baseAlias the base alias, if one is specified; may be {@literal null}
 	 * @param queryBuilder the query builder
 	 */
-	void addProjectionToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder queryBuilder);
+	void addProjectionToQuery(String baseAlias, QueryBuilder queryBuilder);
 
 	/**
 	 * Get the alias associated with the audit projection.
@@ -45,19 +32,12 @@ public interface AuditProjection {
 	String getAlias(String baseAlias);
 
 	/**
-	 * @param enversService the Envers service
 	 * @param entityInstantiator the entity instantiator
 	 * @param entityName the name of the entity for which the projection has been added
 	 * @param revision the revision
 	 * @param value the value to convert
 	 * @return the converted value
 	 */
-	Object convertQueryResult(
-			final EnversService enversService,
-			final EntityInstantiator entityInstantiator,
-			final String entityName,
-			final Number revision,
-			final Object value
-	);
+	Object convertQueryResult(EntityInstantiator entityInstantiator, String entityName, Number revision, Object value);
 
 }

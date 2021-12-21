@@ -114,19 +114,11 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 
 		// all specified conditions
 		for ( AuditCriterion criterion : criterions ) {
-			criterion.addToQuery(
-					enversService,
-					versionsReader,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
-					QueryConstants.REFERENCED_ENTITY_ALIAS,
-					qb,
-					qb.getRootParameters()
-			);
+			criterion.addToQuery( QueryConstants.REFERENCED_ENTITY_ALIAS, qb, qb.getRootParameters() );
 		}
 
 		for ( AbstractAuditAssociationQuery<?> associationQuery : associationQueries ) {
-			associationQuery.addCriterionToQuery( versionsReader );
+			associationQuery.addCriterionToQuery();
 		}
 
 		Query query = buildQuery();
@@ -154,8 +146,6 @@ public class EntitiesAtRevisionQuery extends AbstractAuditQuery {
 					qb,
 					associationName,
 					joinType,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
 					REFERENCED_ENTITY_ALIAS,
 					alias,
 					onClauseCriterion

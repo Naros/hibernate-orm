@@ -6,13 +6,8 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import java.util.Map;
-
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
-import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.hibernate.envers.query.criteria.AuditFunction;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
 
@@ -22,7 +17,7 @@ import org.hibernate.envers.query.internal.property.PropertyNameGetter;
  *
  * @author Felix Feisst (feisst dot felix at gmail dot com)
  */
-public class FunctionPropertyAuditExpression implements AuditCriterion {
+public class FunctionPropertyAuditExpression extends AbstractExpression {
 
 	private String alias;
 	private PropertyNameGetter propertyNameGetter;
@@ -41,34 +36,17 @@ public class FunctionPropertyAuditExpression implements AuditCriterion {
 	}
 
 	@Override
-	public void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder queryBuilder,
-			Parameters parameters) {
+	public void addToQuery(String baseAlias, QueryBuilder qb, Parameters parameters) {
 		String effectiveAlias = alias == null ? baseAlias : alias;
-		String entityName = aliasToEntityNameMap.get( effectiveAlias );
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				auditReader,
-				entityName,
-				propertyNameGetter
-		);
-		String propertyNamePrefix = CriteriaTools.determineComponentPropertyPrefix(
-				enversService,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				effectiveAlias
-		);
+		String entityName = qb.getEntityNameByAlias( effectiveAlias );
+		String propertyName = qb.resolvePropertyName( entityName, propertyNameGetter );
+		String propertyNamePrefix = qb.resolveComponentPropertyPrefix( effectiveAlias );
+
 		String prefixedPropertyName = propertyNamePrefix.concat( propertyName );
-		CriteriaTools.checkPropertyNotARelation( enversService, entityName, prefixedPropertyName );
+		checkPropertyNotRelation( qb.getEnversService(), entityName, prefixedPropertyName );
 		parameters.addWhereWithFunction(
-				enversService.getConfig(),
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb.getEnversService().getConfig(),
+				qb,
 				effectiveAlias,
 				prefixedPropertyName,
 				op,

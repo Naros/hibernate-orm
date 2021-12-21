@@ -7,14 +7,9 @@
 package org.hibernate.envers.query.criteria;
 
 import java.util.Collection;
-import java.util.Map;
 
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.entities.EntityInstantiator;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.criteria.internal.BetweenAuditExpression;
-import org.hibernate.envers.query.criteria.internal.CriteriaTools;
 import org.hibernate.envers.query.criteria.internal.FunctionPropertyAuditExpression;
 import org.hibernate.envers.query.criteria.internal.IlikeAuditExpression;
 import org.hibernate.envers.query.criteria.internal.InAuditExpression;
@@ -26,6 +21,7 @@ import org.hibernate.envers.query.internal.property.ModifiedFlagPropertyName;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
 import org.hibernate.envers.query.order.AuditOrder;
 import org.hibernate.envers.query.order.internal.PropertyAuditOrder;
+import org.hibernate.envers.query.projection.AbstractAuditProjection;
 import org.hibernate.envers.query.projection.AuditProjection;
 import org.hibernate.envers.query.projection.internal.PropertyAuditProjection;
 
@@ -37,18 +33,13 @@ import org.hibernate.envers.query.projection.internal.PropertyAuditProjection;
  * @author Chris Cranford
  */
 @SuppressWarnings({"JavaDoc"})
-public class AuditProperty<T> implements AuditProjection {
-	private final String alias;
+public class AuditProperty<T> extends AbstractAuditProjection {
+
 	private final PropertyNameGetter propertyNameGetter;
 
 	public AuditProperty(String alias, PropertyNameGetter propertyNameGetter) {
-		this.alias = alias;
+		super( alias );
 		this.propertyNameGetter = propertyNameGetter;
-	}
-
-	@Override
-	public String getAlias(String baseAlias) {
-		return alias == null ? baseAlias : alias;
 	}
 
 	public PropertyNameGetter getPropertyNameGetter() {
@@ -56,109 +47,109 @@ public class AuditProperty<T> implements AuditProjection {
 	}
 
 	public AuditCriterion hasChanged() {
-		return new SimpleAuditExpression( alias, new ModifiedFlagPropertyName( propertyNameGetter ), true, "=" );
+		return new SimpleAuditExpression( getAlias(), new ModifiedFlagPropertyName( propertyNameGetter ), true, "=" );
 	}
 
 	public AuditCriterion hasNotChanged() {
-		return new SimpleAuditExpression( alias, new ModifiedFlagPropertyName( propertyNameGetter ), false, "=" );
+		return new SimpleAuditExpression( getAlias(), new ModifiedFlagPropertyName( propertyNameGetter ), false, "=" );
 	}
 
 	/**
 	 * Apply an "equal" constraint
 	 */
 	public AuditCriterion eq(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, "=" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, "=" );
 	}
 
 	/**
 	 * Apply a "not equal" constraint
 	 */
 	public AuditCriterion ne(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, "<>" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, "<>" );
 	}
 
 	/**
 	 * Apply a "like" constraint
 	 */
 	public AuditCriterion like(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, " like " );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, " like " );
 	}
 
 	/**
 	 * Apply a "like" constraint
 	 */
 	public AuditCriterion like(String value, MatchMode matchMode) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, matchMode.toMatchString( value ), " like " );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, matchMode.toMatchString( value ), " like " );
 	}
 
     /**
      *  Apply an "ilike" constraint
      */
 	public AuditCriterion ilike(T value) {
-		return new IlikeAuditExpression( alias, propertyNameGetter, value.toString() );
+		return new IlikeAuditExpression( getAlias(), propertyNameGetter, value.toString() );
 	}
 
 	/**
 	 * Apply on "ilike" constraint
 	 */
 	public AuditCriterion ilike(String value, MatchMode matchMode) {
-		return new IlikeAuditExpression( alias, propertyNameGetter, matchMode.toMatchString( value ) );
+		return new IlikeAuditExpression( getAlias(), propertyNameGetter, matchMode.toMatchString( value ) );
 	}
 
 	/**
 	 * Apply a "greater than" constraint
 	 */
 	public AuditCriterion gt(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, ">" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, ">" );
 	}
 
 	/**
 	 * Apply a "less than" constraint
 	 */
 	public AuditCriterion lt(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, "<" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, "<" );
 	}
 
 	/**
 	 * Apply a "less than or equal" constraint
 	 */
 	public AuditCriterion le(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, "<=" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, "<=" );
 	}
 
 	/**
 	 * Apply a "greater than or equal" constraint
 	 */
 	public AuditCriterion ge(T value) {
-		return new SimpleAuditExpression( alias, propertyNameGetter, value, ">=" );
+		return new SimpleAuditExpression( getAlias(), propertyNameGetter, value, ">=" );
 	}
 
 	/**
 	 * Apply a "between" constraint
 	 */
 	public AuditCriterion between(T lo, T hi) {
-		return new BetweenAuditExpression( alias, propertyNameGetter, lo, hi );
+		return new BetweenAuditExpression( getAlias(), propertyNameGetter, lo, hi );
 	}
 
 	/**
 	 * Apply an "in" constraint
 	 */
 	public AuditCriterion in(T[] values) {
-		return new InAuditExpression( alias, propertyNameGetter, values );
+		return new InAuditExpression( getAlias(), propertyNameGetter, values );
 	}
 
 	/**
 	 * Apply an "in" constraint
 	 */
 	public AuditCriterion in(Collection values) {
-		return new InAuditExpression( alias, propertyNameGetter, values.toArray() );
+		return new InAuditExpression( getAlias(), propertyNameGetter, values.toArray() );
 	}
 
 	/**
 	 * Apply an "is null" constraint
 	 */
 	public AuditCriterion isNull() {
-		return new NullAuditExpression( alias, propertyNameGetter );
+		return new NullAuditExpression( getAlias(), propertyNameGetter );
 	}
 
 	/**
@@ -171,7 +162,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return eqProperty( alias, otherPropertyName );
+		return eqProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -180,7 +171,7 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion eqProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, "=" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, "=" );
 	}
 
 	/**
@@ -193,7 +184,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return neProperty( alias, otherPropertyName );
+		return neProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -202,7 +193,7 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion neProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, "<>" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, "<>" );
 	}
 
 	/**
@@ -215,7 +206,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return ltProperty( alias, otherPropertyName );
+		return ltProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -224,7 +215,7 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion ltProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, "<" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, "<" );
 	}
 
 	/**
@@ -237,7 +228,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return leProperty( alias, otherPropertyName );
+		return leProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -246,7 +237,7 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion leProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, "<=" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, "<=" );
 	}
 
 	/**
@@ -259,7 +250,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return gtProperty( alias, otherPropertyName );
+		return gtProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -268,7 +259,7 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion gtProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, ">" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, ">" );
 	}
 
 	/**
@@ -281,7 +272,7 @@ public class AuditProperty<T> implements AuditProjection {
 		 * it is assumed that the otherProp is on the same entity as prop and therefore we have to use
 		 * the same alias.
 		 */
-		return geProperty( alias, otherPropertyName );
+		return geProperty( getAlias(), otherPropertyName );
 	}
 
 	/**
@@ -290,56 +281,56 @@ public class AuditProperty<T> implements AuditProjection {
 	 * @param otherAlias the alias of the entity which owns the other property.
 	 */
 	public AuditCriterion geProperty(String otherAlias, String otherPropertyName) {
-		return new PropertyAuditExpression( alias, propertyNameGetter, otherAlias, otherPropertyName, ">=" );
+		return new PropertyAuditExpression( getAlias(), propertyNameGetter, otherAlias, otherPropertyName, ">=" );
 	}
 
 	/**
 	 * Apply an "equal" constraint to a function
 	 */
 	public AuditCriterion eqFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, "=" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, "=" );
 	}
 
 	/**
 	 * Apply a "not equal" constraint to a function
 	 */
 	public AuditCriterion neFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, "<>" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, "<>" );
 	}
 
 	/**
 	 * Apply a "less than" constraint to a function
 	 */
 	public AuditCriterion ltFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, "<" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, "<" );
 	}
 
 	/**
 	 * Apply a "less than or equal" constraint to a function
 	 */
 	public AuditCriterion leFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, "<=" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, "<=" );
 	}
 
 	/**
 	 * Apply a "greater than" constraint to a function
 	 */
 	public AuditCriterion gtFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, ">" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, ">" );
 	}
 
 	/**
 	 * Apply a "greater than or equal" constraint to a function
 	 */
 	public AuditCriterion geFunction(AuditFunction otherFunction) {
-		return new FunctionPropertyAuditExpression( alias, propertyNameGetter, otherFunction, ">=" );
+		return new FunctionPropertyAuditExpression( getAlias(), propertyNameGetter, otherFunction, ">=" );
 	}
 
 	/**
 	 * Apply an "is not null" constraint to the another property
 	 */
 	public AuditCriterion isNotNull() {
-		return new NotNullAuditExpression( alias, propertyNameGetter );
+		return new NotNullAuditExpression( getAlias(), propertyNameGetter );
 	}
 
 	/**
@@ -347,7 +338,8 @@ public class AuditProperty<T> implements AuditProjection {
 	 * property
 	 */
 	public AggregatedAuditExpression maximize() {
-		return new AggregatedAuditExpression( alias, propertyNameGetter, AggregatedAuditExpression.AggregatedMode.MAX );
+		// todo: return an interface, deprecate this method
+		return new AggregatedAuditExpression( getAlias(), propertyNameGetter, AggregatedAuditExpression.AggregatedMode.MAX );
 	}
 
 	/**
@@ -355,7 +347,8 @@ public class AuditProperty<T> implements AuditProjection {
 	 * property
 	 */
 	public AggregatedAuditExpression minimize() {
-		return new AggregatedAuditExpression( alias, propertyNameGetter, AggregatedAuditExpression.AggregatedMode.MIN );
+		// todo: return an interface, deprecate this method
+		return new AggregatedAuditExpression( getAlias(), propertyNameGetter, AggregatedAuditExpression.AggregatedMode.MIN );
 	}
 
 	// Projections
@@ -364,74 +357,53 @@ public class AuditProperty<T> implements AuditProjection {
 	 * Projection on the maximum value
 	 */
 	public AuditProjection max() {
-		return new PropertyAuditProjection( alias, propertyNameGetter, "max", false );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, "max", false );
 	}
 
 	/**
 	 * Projection on the minimum value
 	 */
 	public AuditProjection min() {
-		return new PropertyAuditProjection( alias, propertyNameGetter, "min", false );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, "min", false );
 	}
 
 	/**
 	 * Projection counting the values
 	 */
 	public AuditProjection count() {
-		return new PropertyAuditProjection( alias, propertyNameGetter, "count", false );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, "count", false );
 	}
 
 	/**
 	 * Projection counting distinct values
 	 */
 	public AuditProjection countDistinct() {
-		return new PropertyAuditProjection( alias, propertyNameGetter, "count", true );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, "count", true );
 	}
 
 	/**
 	 * Projection on distinct values
 	 */
 	public AuditProjection distinct() {
-		return new PropertyAuditProjection( alias, propertyNameGetter, null, true );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, null, true );
 	}
 
 	/**
 	 * Projection using a custom function
 	 */
 	public AuditProjection function(String functionName) {
-		return new PropertyAuditProjection( alias, propertyNameGetter, functionName, false );
+		return new PropertyAuditProjection( getAlias(), propertyNameGetter, functionName, false );
 	}
 
 	// Projection on this property
 
 	@Override
-	public void addProjectionToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder queryBuilder) {
+	public void addProjectionToQuery(String baseAlias, QueryBuilder queryBuilder) {
 		String projectionEntityAlias = getAlias( baseAlias );
-		String projectionEntityName = aliasToEntityNameMap.get( projectionEntityAlias );
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				auditReader,
-				projectionEntityName,
-				propertyNameGetter
-		);
-		String propertyNamePrefix = CriteriaTools.determineComponentPropertyPrefix(
-				enversService,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
-				projectionEntityAlias
-		);
-		queryBuilder.addProjection(
-				null,
-				projectionEntityAlias,
-				propertyNamePrefix.concat( propertyName ),
-				false
-		);
+		String projectionEntityName = queryBuilder.getEntityNameByAlias( projectionEntityAlias );
+		String propertyName = queryBuilder.resolvePropertyName( projectionEntityName, propertyNameGetter );
+		String propertyNamePrefix = queryBuilder.resolveComponentPropertyPrefix( projectionEntityAlias );
+		queryBuilder.addProjection( null, projectionEntityAlias, propertyNamePrefix.concat( propertyName ), false );
 	}
 
 	// Order
@@ -440,24 +412,14 @@ public class AuditProperty<T> implements AuditProjection {
 	 * Sort the results by the property in ascending order
 	 */
 	public AuditOrder asc() {
-		return new PropertyAuditOrder( alias, propertyNameGetter, true );
+		return new PropertyAuditOrder( getAlias(), propertyNameGetter, true );
 	}
 
 	/**
 	 * Sort the results by the property in descending order
 	 */
 	public AuditOrder desc() {
-		return new PropertyAuditOrder( alias, propertyNameGetter, false );
+		return new PropertyAuditOrder( getAlias(), propertyNameGetter, false );
 	}
-	
-	@Override
-	public Object convertQueryResult(
-			EnversService enversService,
-			EntityInstantiator entityInstantiator,
-			String entityName,
-			Number revision,
-			Object value) {
-		return value;
-	}
-	
+
 }

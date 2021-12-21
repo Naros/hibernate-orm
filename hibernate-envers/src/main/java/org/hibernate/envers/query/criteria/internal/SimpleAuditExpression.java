@@ -8,13 +8,10 @@ package org.hibernate.envers.query.criteria.internal;
 
 import java.util.Locale;
 
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.envers.exception.AuditException;
-import org.hibernate.envers.internal.entities.ComponentDescription;
 import org.hibernate.envers.internal.entities.RelationDescription;
 import org.hibernate.envers.internal.entities.RelationType;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
@@ -40,30 +37,21 @@ public class SimpleAuditExpression extends AbstractAtomicExpression {
 
 	@Override
 	protected void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
 			String entityName,
 			String alias,
 			String componentPrefix,
 			QueryBuilder qb,
 			Parameters parameters) {
-		String propertyName = CriteriaTools.determinePropertyName(
-				enversService,
-				versionsReader,
-				entityName,
-				propertyNameGetter
-		);
-
+		String propertyName = qb.resolvePropertyName( entityName, propertyNameGetter );
 		String prefixedPropertyName = componentPrefix.concat( propertyName );
-		RelationDescription relatedEntity = CriteriaTools.getRelatedEntity( enversService, entityName, prefixedPropertyName );
+		RelationDescription relatedEntity = qb.getRelationDescription( entityName, prefixedPropertyName );
 
 		if ( relatedEntity == null ) {
 			// HHH-9178 - Add support to component type equality.
 			// This basically will allow = and <> operators to perform component-based equality checks.
 			// Any other operator for a component type will not be supported.
 			// Non-component types will continue to behave normally.
-			final SessionImplementor session = versionsReader.getSessionImplementor();
-			final Type type = getPropertyType( session, entityName, propertyName );
+			final Type type = getPropertyType( qb.getSessionFactory(), entityName, propertyName );
 			if ( type != null && type.isComponentType() ) {
 				if ( !"=".equals( op ) && !"<>".equals( op ) ) {
 					throw new AuditException(
@@ -76,7 +64,7 @@ public class SimpleAuditExpression extends AbstractAtomicExpression {
 				}
 				final ComponentType componentType = (ComponentType) type;
 				for ( int i = 0; i < componentType.getPropertyNames().length; i++ ) {
-					final Object componentValue = componentType.getPropertyValue( value, i, session );
+					final Object componentValue = componentType.getPropertyValue( value, i, null );
 					parameters.addWhereWithParam(
 							alias,
 							prefixedPropertyName + "_" + componentType.getPropertyNames()[ i ],
@@ -118,15 +106,15 @@ public class SimpleAuditExpression extends AbstractAtomicExpression {
 	/**
 	 * Get the property type of a given property in the specified entity.
 	 *
-	 * @param session      the session
-	 * @param entityName   the entity name
+	 * @param sessionFactory the session factory
+	 * @param entityName the entity name
 	 * @param propertyName the property name
 	 * @return the property type of the property or {@code null} if the property name isn't found.
 	 */
-	private Type getPropertyType(SessionImplementor session, String entityName, String propertyName) {
+	private Type getPropertyType(SessionFactoryImplementor sessionFactory, String entityName, String propertyName) {
 		// rather than rely on QueryException from calling getPropertyType(), this allows a non-failure way
 		// to determine whether to return null or lookup the value safely.
-		final EntityPersister persister = session.getSessionFactory().getMetamodel().entityPersister( entityName );
+		final EntityPersister persister = sessionFactory.getMetamodel().entityPersister( entityName );
 		for ( String name : persister.getPropertyNames() ) {
 			if ( name.equals( propertyName ) ) {
 				return persister.getPropertyType( propertyName );

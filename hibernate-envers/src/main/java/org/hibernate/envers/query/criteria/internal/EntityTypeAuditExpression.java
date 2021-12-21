@@ -6,10 +6,6 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import java.util.Map;
-
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.criteria.AuditCriterion;
@@ -30,14 +26,7 @@ public class EntityTypeAuditExpression implements AuditCriterion {
 	}
 
 	@Override
-	public void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder qb,
-			Parameters parameters) {
+	public void addToQuery(String baseAlias, QueryBuilder qb, Parameters parameters) {
 		// todo: add contextual detail about query generation
 		//
 		// Take an example situation where a non-audited entity extends an audited-entity and uses the
@@ -54,8 +43,8 @@ public class EntityTypeAuditExpression implements AuditCriterion {
 		//
 		String effectiveAlias = alias == null ? baseAlias : alias;
 		String effectiveEntityName = entityName;
-		if ( enversService.getEntitiesConfigurations().isVersioned( effectiveEntityName ) ) {
-			effectiveEntityName = enversService.getConfig().getAuditEntityName( effectiveEntityName );
+		if ( qb.getEnversService().getEntitiesConfigurations().isVersioned( effectiveEntityName ) ) {
+			effectiveEntityName = qb.getEnversService().getConfig().getAuditEntityName( effectiveEntityName );
 		}
 		parameters.addEntityTypeRestriction( effectiveAlias, effectiveEntityName );
 	}

@@ -6,8 +6,6 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 
@@ -29,15 +27,13 @@ public class IdentifierEqAuditExpression extends AbstractAtomicExpression {
 
 	@Override
 	protected void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
 			String entityName,
 			String alias,
 			String componentPrefix,
 			QueryBuilder qb,
 			Parameters parameters) {
-		String prefix = enversService.getConfig().getOriginalIdPropertyName();
-		enversService.getEntitiesConfigurations().get( entityName )
+		String prefix = qb.getEnversService().getConfig().getOriginalIdPropertyName();
+		qb.getEnversService().getEntitiesConfigurations().get( entityName )
 				.getIdMapper()
 				.addIdEqualsToQuery( parameters, id, alias, prefix, equals );
 	}

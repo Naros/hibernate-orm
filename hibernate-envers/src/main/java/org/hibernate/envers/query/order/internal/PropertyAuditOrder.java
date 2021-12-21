@@ -6,7 +6,7 @@
  */
 package org.hibernate.envers.query.order.internal;
 
-import org.hibernate.envers.configuration.Configuration;
+import org.hibernate.envers.internal.tools.query.QueryBuilder;
 import org.hibernate.envers.query.internal.property.PropertyNameGetter;
 import org.hibernate.envers.query.order.AuditOrder;
 import org.hibernate.envers.query.order.NullPrecedence;
@@ -34,7 +34,12 @@ public class PropertyAuditOrder implements AuditOrder {
 	}
 
 	@Override
-	public OrderData getData(Configuration configuration) {
-		return new OrderData( alias, propertyNameGetter.get( configuration ), asc, nullPrecedence );
+	public void addOrderToQuery(String baseAlias, QueryBuilder queryBuilder) {
+		String effectiveAlias = alias == null ? baseAlias : alias;
+		String orderEntityName = queryBuilder.getEntityNameByAlias( effectiveAlias );
+		String propertyName = queryBuilder.resolvePropertyName( orderEntityName, propertyNameGetter );
+		String componentPrefix = queryBuilder.resolveComponentPropertyPrefix( effectiveAlias );
+		queryBuilder.addOrder( effectiveAlias, componentPrefix.concat( propertyName ), asc, nullPrecedence );
 	}
+
 }

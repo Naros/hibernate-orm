@@ -8,10 +8,7 @@ package org.hibernate.envers.query.criteria;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
 
@@ -32,30 +29,15 @@ public class AuditConjunction implements AuditCriterion, ExtendableCriterion {
 	}
 
 	@Override
-	public void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor versionsReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String alias,
-			QueryBuilder qb,
-			Parameters parameters) {
+	public void addToQuery(String alias, QueryBuilder qb, Parameters parameters) {
 		Parameters andParameters = parameters.addSubParameters( Parameters.AND );
 
-		if ( criterions.size() == 0 ) {
+		if ( criterions.isEmpty() ) {
 			andParameters.addWhere( "1", false, "=", "1", false );
 		}
 		else {
 			for ( AuditCriterion criterion : criterions ) {
-				criterion.addToQuery(
-						enversService,
-						versionsReader,
-						aliasToEntityNameMap,
-						aliasToComponentPropertyNameMap,
-						alias,
-						qb,
-						andParameters
-				);
+				criterion.addToQuery( alias, qb, andParameters );
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 package org.hibernate.envers.internal.tools.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,11 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.configuration.Configuration;
+import org.hibernate.envers.exception.AuditException;
 import org.hibernate.envers.function.OrderByFragmentFunction;
+import org.hibernate.envers.internal.entities.ComponentDescription;
+import org.hibernate.envers.internal.entities.RelationDescription;
+import org.hibernate.envers.internal.entities.RelationType;
 import org.hibernate.envers.internal.entities.RevisionTypeType;
 import org.hibernate.envers.internal.entities.mapper.id.QueryParameterData;
 import org.hibernate.envers.internal.tools.MutableInteger;
@@ -29,12 +34,15 @@ import org.hibernate.envers.internal.tools.StringTools;
 import org.hibernate.envers.query.criteria.AuditFunction;
 import org.hibernate.envers.query.criteria.AuditId;
 import org.hibernate.envers.query.criteria.AuditProperty;
-import org.hibernate.envers.query.criteria.internal.CriteriaTools;
+import org.hibernate.envers.query.internal.property.PropertyNameGetter;
 import org.hibernate.envers.query.order.NullPrecedence;
 import org.hibernate.envers.tools.Pair;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.query.Query;
 import org.hibernate.query.internal.QueryLiteralHelper;
 import org.hibernate.type.BasicType;
+import org.hibernate.type.EmbeddedComponentType;
+import org.hibernate.type.Type;
 
 /**
  * A class for incrementally building a HQL query.
@@ -78,6 +86,10 @@ public class QueryBuilder {
 
 	private final List<Pair<String, String>> orderFragments;
 
+	private final Map<String, String> aliasToEntityNames;
+	private final Map<String, String> aliasToComponentPropertyNames;
+	private final EnversService enversService;
+
 	private final SessionFactoryImplementor sessionFactory;
 
 	private final BasicType<?> revisionType;
@@ -97,11 +109,33 @@ public class QueryBuilder {
 			MutableInteger aliasCounter,
 			MutableInteger paramCounter,
 			SessionFactoryImplementor sessionFactory) {
+		this(
+				entityName,
+				alias,
+				aliasCounter,
+				paramCounter,
+				new HashMap<>(),
+				new HashMap<>(),
+				sessionFactory
+		);
+	}
+
+	private QueryBuilder(
+			String entityName,
+			String alias,
+			MutableInteger aliasCounter,
+			MutableInteger paramCounter,
+			Map<String, String> aliasToEntityNames,
+			Map<String, String> aliasToComponentPropertyNames,
+			SessionFactoryImplementor sessionFactory) {
 		this.entityName = entityName;
 		this.alias = alias;
 		this.aliasCounter = aliasCounter;
 		this.paramCounter = paramCounter;
 		this.sessionFactory = sessionFactory;
+		this.aliasToEntityNames = aliasToEntityNames;
+		this.aliasToComponentPropertyNames = aliasToComponentPropertyNames;
+		this.enversService = sessionFactory.getServiceRegistry().getService( EnversService.class );
 
 		this.revisionType = sessionFactory.getTypeConfiguration()
 				.getBasicTypeRegistry()
@@ -127,6 +161,8 @@ public class QueryBuilder {
 		this.revisionType = other.revisionType;
 		this.aliasCounter = other.aliasCounter.deepCopy();
 		this.paramCounter = other.paramCounter.deepCopy();
+		this.enversService = other.enversService;
+
 		for (final Parameters params : other.parameters) {
 			this.parameters.add( params.deepCopy() );
 		}
@@ -136,10 +172,20 @@ public class QueryBuilder {
 		projections = new ArrayList<>( other.projections );
 		projectionQueryParamValues = new HashMap<>( other.projectionQueryParamValues );
 		orderFragments = new ArrayList<>( other.orderFragments );
+		aliasToEntityNames = new HashMap<>( other.aliasToEntityNames );
+		aliasToComponentPropertyNames = new HashMap<>( other.aliasToComponentPropertyNames );
 	}
 
 	public QueryBuilder deepCopy() {
 		return new QueryBuilder( this );
+	}
+
+	public SessionFactoryImplementor getSessionFactory() {
+		return sessionFactory;
+	}
+
+	public EnversService getEnversService() {
+		return enversService;
 	}
 
 	/**
@@ -147,6 +193,22 @@ public class QueryBuilder {
 	 */
 	public String getAlias() {
 		return alias;
+	}
+
+	public void registerEntityAlias(String entityName, String alias) {
+		aliasToEntityNames.put( alias, entityName );
+	}
+
+	public String getEntityNameByAlias(String alias) {
+		return aliasToEntityNames.get( alias );
+	}
+
+	public void registerComponentPropertyAlias(String propertyName, String alias) {
+		aliasToComponentPropertyNames.put( alias, propertyName );
+	}
+
+	public String getComponentPropertyNameByAlias(String alias) {
+		return aliasToComponentPropertyNames.get( alias );
 	}
 
 	/**
@@ -186,7 +248,15 @@ public class QueryBuilder {
 	 *         be later used as a value of a parameter.
 	 */
 	public QueryBuilder newSubQueryBuilder(String entityName, String alias) {
-		return new QueryBuilder( entityName, alias, aliasCounter, paramCounter, sessionFactory );
+		return new QueryBuilder(
+				entityName,
+				alias,
+				aliasCounter,
+				paramCounter,
+				aliasToEntityNames,
+				aliasToComponentPropertyNames,
+				sessionFactory
+		);
 	}
 
 	public Parameters getRootParameters() {
@@ -222,14 +292,11 @@ public class QueryBuilder {
 
 	public void addProjection(
 			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
 			AuditFunction function) {
 		final StringBuilder expression = new StringBuilder();
 		appendFunctionArgument(
 				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				this,
 				paramCounter,
 				projectionQueryParamValues,
 				alias,
@@ -241,8 +308,7 @@ public class QueryBuilder {
 
 	protected static void appendFunctionArgument(
 			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
+			QueryBuilder qb,
 			MutableInteger paramCounter,
 			Map<String, Object> queryParamValues,
 			String alias,
@@ -258,8 +324,7 @@ public class QueryBuilder {
 				}
 				appendFunctionArgument(
 						configuration,
-						aliasToEntityNameMap,
-						aliasToComponentPropertyNameMap,
+						qb,
 						paramCounter,
 						queryParamValues,
 						alias,
@@ -274,7 +339,7 @@ public class QueryBuilder {
 			AuditId<?> id = (AuditId<?>) argument;
 			String prefix = configuration.getOriginalIdPropertyName();
 			String idAlias = id.getAlias( alias );
-			String entityName = aliasToEntityNameMap.get( idAlias );
+			String entityName = qb.getEntityNameByAlias( idAlias );
 			/*
 			 * Resolve the name of the id property by reusing the IdMapper.mapToQueryParametersFromId() method. Null is
 			 * passed as value because only the name of the property is of interest. TODO: is there a better way to
@@ -299,12 +364,7 @@ public class QueryBuilder {
 			if ( propertyAlias != null ) {
 				expression.append( propertyAlias ).append( '.' );
 			}
-			String propertyPrefix = CriteriaTools.determineComponentPropertyPrefix(
-					configuration.getEnversService(),
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap,
-					propertyAlias
-			);
+			String propertyPrefix = qb.resolveComponentPropertyPrefix( propertyAlias );
 			String propertyName = property.getPropertyNameGetter().get( configuration );
 			expression.append( propertyPrefix.concat( propertyName ) );
 		}
@@ -419,6 +479,98 @@ public class QueryBuilder {
 			}
 		}
 		return query;
+	}
+
+	public String resolvePropertyName(String entityName, PropertyNameGetter getter) {
+		final String propertyName = getter.get( getEnversService().getConfig() );
+		return resolvePropertyName( entityName, propertyName );
+	}
+
+	public String resolvePropertyName(String entityName, String propertyName) {
+		final String originalId = enversService.getConfig().getOriginalIdPropertyName();
+		if ( AuditId.IDENTIFIER_PLACEHOLDER.equals( propertyName ) ) {
+			final EntityPersister persister = sessionFactory.getMetamodel().entityPersister( entityName );
+			final String identifierPropertyName = persister.getIdentifierPropertyName();
+			propertyName = originalId + "." + identifierPropertyName;
+		}
+		else {
+			final List<String> identifierPropertyNames = getIdentifierPropertyNames( entityName );
+			if ( identifierPropertyNames.contains( propertyName ) ) {
+				propertyName = originalId + "." + propertyName;
+			}
+			else if ( propertyName != null ) {
+				// if property starts with an identifier prefix ( e.g. embedded ids ), substitute with the
+				// originalId property beacuse Envers performs replacement on this automatically during mapping.
+				for ( String identifierPropertyName : identifierPropertyNames ) {
+					if ( propertyName.startsWith( identifierPropertyName + "." ) ) {
+						propertyName = originalId + propertyName.substring( identifierPropertyName.length() );
+						break;
+					}
+				}
+			}
+		}
+		return propertyName;
+	}
+
+	private List<String> getIdentifierPropertyNames(String entityName) {
+		final EntityPersister persister = sessionFactory.getMetamodel().entityPersister( entityName );
+		final String propertyName = persister.getIdentifierPropertyName();
+		if ( propertyName != null ) {
+			// Simple identifier
+			return List.of( propertyName );
+		}
+
+		final Type identifierType = persister.getIdentifierType();
+		if ( identifierType instanceof EmbeddedComponentType ) {
+			// Multiple identifiers
+			final EmbeddedComponentType embeddedComponentType = (EmbeddedComponentType) identifierType;
+			return List.of( embeddedComponentType.getPropertyNames() );
+		}
+
+		return Collections.emptyList();
+	}
+
+	public String resolveComponentPropertyPrefix(String alias) {
+		final String owningComponentPropertyName = getComponentPropertyNameByAlias( alias );
+		if ( owningComponentPropertyName != null ) {
+
+			final String entityName = getEntityNameByAlias( alias );
+			final ComponentDescription descriptor = getComponentDescription( entityName, owningComponentPropertyName );
+			if ( descriptor.getType() == ComponentDescription.ComponentType.ONE ) {
+				return descriptor.getPropertyName().concat( "_" );
+			}
+		}
+		return "";
+	}
+
+	public ComponentDescription getComponentDescription(String entityName, String propertyName) {
+		return enversService.getEntitiesConfigurations().getComponentDescription( entityName, propertyName );
+	}
+
+	public RelationDescription getRelationDescription(String entityName, String propertyName) {
+		final RelationDescription description = enversService.getEntitiesConfigurations()
+				.getRelationDescription( entityName, propertyName );
+
+		if ( description == null ) {
+			return null;
+		}
+
+		final RelationType type = description.getRelationType();
+		if ( type == RelationType.TO_ONE
+				|| type == RelationType.TO_MANY_MIDDLE
+				|| type == RelationType.TO_MANY_NOT_OWNING
+				|| type == RelationType.TO_MANY_MIDDLE_NOT_OWNING ) {
+			return description;
+		}
+
+		throw new AuditException(
+				String.format(
+						Locale.ENGLISH,
+						"This type of relation [%s.%s] isn't supported and can't be used in queries.",
+						entityName,
+						propertyName
+				)
+		);
 	}
 
 	private abstract static class JoinParameter {

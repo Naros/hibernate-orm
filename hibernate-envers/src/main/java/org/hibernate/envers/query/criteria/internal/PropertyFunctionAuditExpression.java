@@ -6,13 +6,8 @@
  */
 package org.hibernate.envers.query.criteria.internal;
 
-import java.util.Map;
-
-import org.hibernate.envers.boot.internal.EnversService;
-import org.hibernate.envers.internal.reader.AuditReaderImplementor;
 import org.hibernate.envers.internal.tools.query.Parameters;
 import org.hibernate.envers.internal.tools.query.QueryBuilder;
-import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.hibernate.envers.query.criteria.AuditFunction;
 
 /**
@@ -20,7 +15,7 @@ import org.hibernate.envers.query.criteria.AuditFunction;
  *
  * @author Felix Feisst (feisst dot felix at gmail dot com)
  */
-public class PropertyFunctionAuditExpression implements AuditCriterion {
+public class PropertyFunctionAuditExpression extends AbstractExpression {
 
 	private AuditFunction function;
 	private String otherAlias;
@@ -39,36 +34,24 @@ public class PropertyFunctionAuditExpression implements AuditCriterion {
 	}
 
 	@Override
-	public void addToQuery(
-			EnversService enversService,
-			AuditReaderImplementor auditReader,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
-			String baseAlias,
-			QueryBuilder queryBuilder,
-			Parameters parameters) {
+	public void addToQuery(String baseAlias, QueryBuilder qb, Parameters parameters) {
 		String effectiveOtherAlias = otherAlias == null ? baseAlias : otherAlias;
-		String otherEntityName = aliasToEntityNameMap.get( effectiveOtherAlias );
+		String otherEntityName = qb.getEntityNameByAlias( effectiveOtherAlias );
 		/*
 		 * Check that the other property name is not a relation. However, we can only do this for audited entities. If
 		 * the other property belongs to a non-audited entity, we have to skip this check.
 		 */
-		if ( enversService.getEntitiesConfigurations().isVersioned( otherEntityName ) ) {
-			String otherPropertyNamePrefix = CriteriaTools.determineComponentPropertyPrefix(
-					enversService,
-					aliasToEntityNameMap,
-					aliasToComponentPropertyNameMap, effectiveOtherAlias
-			);
-			CriteriaTools.checkPropertyNotARelation(
-					enversService,
+		if ( qb.getEnversService().getEntitiesConfigurations().isVersioned( otherEntityName ) ) {
+			String otherPropertyNamePrefix = qb.resolveComponentPropertyPrefix( effectiveOtherAlias );
+			checkPropertyNotRelation(
+					qb.getEnversService(),
 					otherEntityName,
 					otherPropertyNamePrefix.concat( otherPropertyName )
 			);
 		}
 		parameters.addWhereWithFunction(
-				enversService.getConfig(),
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb.getEnversService().getConfig(),
+				qb,
 				function,
 				op,
 				effectiveOtherAlias,

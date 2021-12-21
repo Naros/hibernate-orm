@@ -33,6 +33,10 @@ public class EntityInstantiator {
 		this.versionsReader = versionsReader;
 	}
 
+	public boolean isVersioned(String entityName) {
+		return enversService.getEntitiesConfigurations().isVersioned( entityName );
+	}
+
 	/**
 	 * Creates an entity instance based on an entry from the versions table.
 	 *

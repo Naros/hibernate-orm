@@ -6,14 +6,13 @@
  */
 package org.hibernate.envers.query.order;
 
-import org.hibernate.envers.configuration.Configuration;
+import org.hibernate.envers.internal.tools.query.QueryBuilder;
 
 /**
  * @author Adam Warski (adam at warski dot org)
  * @author Chris Cranford
  */
 public interface AuditOrder {
-
 	/**
 	 * Specifies the null order precedence for the order-by column specification.
 	 *
@@ -23,40 +22,10 @@ public interface AuditOrder {
 	AuditOrder nulls(NullPrecedence nullPrecedence);
 
 	/**
-	 * @param configuration the configuration
-	 * @return the order data.
+	 * Add this order criteria to the specified query.
+	 *
+	 * @param baseAlias the alias, may be {@literal null}
+	 * @param queryBuilder the query builder, must not be {@literal null}
 	 */
-	OrderData getData(Configuration configuration);
-
-	class OrderData {
-
-		private final String alias;
-		private final String propertyName;
-		private final boolean ascending;
-		private final NullPrecedence nullPrecedence;
-
-		public OrderData(String alias, String propertyName, boolean ascending, NullPrecedence nullPrecedence) {
-			this.alias = alias;
-			this.propertyName = propertyName;
-			this.ascending = ascending;
-			this.nullPrecedence = nullPrecedence;
-		}
-
-		public String getAlias(String baseAlias) {
-			return alias == null ? baseAlias : alias;
-		}
-
-		public String getPropertyName() {
-			return propertyName;
-		}
-
-		public boolean isAscending() {
-			return ascending;
-		}
-
-		public NullPrecedence getNullPrecedence() {
-			return nullPrecedence;
-		}
-	}
-
+	void addOrderToQuery(String baseAlias, QueryBuilder queryBuilder);
 }

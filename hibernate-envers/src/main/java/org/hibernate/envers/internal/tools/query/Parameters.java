@@ -317,16 +317,14 @@ public class Parameters {
 	 * Add where clause with a function call on the left and a scalar value on the right.
 	 *
 	 * @param configuration the configuration.
-	 * @param aliasToEntityNameMap alias to entity name map, never {@literal null}
-	 * @param aliasToComponentPropertyNameMap alias to component property name map, never {@literal null}
+	 * @param qb the query builder
 	 * @param function the function.
 	 * @param op the operator.
 	 * @param value the scalar value.
 	 */
 	public void addWhereWithFunction(
 			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
+			QueryBuilder qb,
 			AuditFunction function,
 			String op,
 			Object value) {
@@ -334,8 +332,7 @@ public class Parameters {
 
 		QueryBuilder.appendFunctionArgument(
 				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb,
 				queryParamCounter,
 				localQueryParamValues,
 				alias,
@@ -356,8 +353,7 @@ public class Parameters {
 	 * Add a where clause with a function call on the left and an optionally aliased property on the right.
 	 *
 	 * @param configuration the configuration.
-	 * @param aliasToEntityNameMap alias to entity name map, never {@literal null}
-	 * @param aliasToComponentPropertyNameMap alias to component property name map, never {@literal null}
+	 * @param qb the query builder
 	 * @param function the function.
 	 * @param op the operator.
 	 * @param aliasRight the optional alias of the right property, may be {@literal null}
@@ -365,8 +361,7 @@ public class Parameters {
 	 */
 	public void addWhereWithFunction(
 			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
+			QueryBuilder qb,
 			AuditFunction function,
 			String op,
 			String aliasRight,
@@ -375,8 +370,7 @@ public class Parameters {
 
 		QueryBuilder.appendFunctionArgument(
 				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb,
 				queryParamCounter,
 				localQueryParamValues,
 				alias,
@@ -398,8 +392,7 @@ public class Parameters {
 	 * Adds a where clause with a left (optionally aliased) property and a function call on the right side.
 	 *
 	 * @param configuration the configuration.
-	 * @param aliasToEntityNameMap alias to entity name map, never {@literal null}
-	 * @param aliasToComponentPropertyNameMap alias to component property name map, never {@literal null}
+	 * @param qb the query builder
 	 * @param aliasLeft the optional alias of the left property, may be {@literal null}
 	 * @param left the property.
 	 * @param op the operator.
@@ -407,8 +400,7 @@ public class Parameters {
 	 */
 	public void addWhereWithFunction(
 			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
+			QueryBuilder qb,
 			String aliasLeft,
 			String left,
 			String op,
@@ -424,8 +416,7 @@ public class Parameters {
 
 		QueryBuilder.appendFunctionArgument(
 				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb,
 				queryParamCounter,
 				localQueryParamValues,
 				alias,
@@ -439,26 +430,21 @@ public class Parameters {
 	/**
 	 * Adds a where clause with a function call on both the left and right of the predicate.
 	 *
-	 * @param configuration the configuration.
-	 * @param aliasToEntityNameMap alias to entity name map, never {@literal null}
-	 * @param aliasToComponentPropertyNameMap alias to component property name map, never {@literal null}
+	 * @param qb the query builder
 	 * @param left the left-side function.
 	 * @param op the operator.
 	 * @param right the right-side function.
 	 */
 	public void addWhereWithFunction(
-			Configuration configuration,
-			Map<String, String> aliasToEntityNameMap,
-			Map<String, String> aliasToComponentPropertyNameMap,
+			QueryBuilder qb,
 			AuditFunction left,
 			String op,
 			AuditFunction right) {
 		final StringBuilder expression = new StringBuilder();
 
 		QueryBuilder.appendFunctionArgument(
-				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb.getEnversService().getConfig(),
+				qb,
 				queryParamCounter,
 				localQueryParamValues,
 				alias,
@@ -469,9 +455,8 @@ public class Parameters {
 		expression.append( ' ' ).append( op ).append( ' ' );
 
 		QueryBuilder.appendFunctionArgument(
-				configuration,
-				aliasToEntityNameMap,
-				aliasToComponentPropertyNameMap,
+				qb.getEnversService().getConfig(),
+				qb,
 				queryParamCounter,
 				localQueryParamValues,
 				alias,
@@ -498,7 +483,7 @@ public class Parameters {
 	}
 
 	boolean isEmpty() {
-		return expressions.size() == 0 && subParameters.size() == 0 && negatedParameters.size() == 0;
+		return expressions.isEmpty() && subParameters.isEmpty() && negatedParameters.isEmpty();
 	}
 
 	void build(StringBuilder sb, Map<String, Object> queryParamValues) {
